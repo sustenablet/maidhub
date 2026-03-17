@@ -1,18 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Users,
-  CalendarDays,
-  FileText,
-  Receipt,
-} from "lucide-react";
+import { Users, CalendarDays, FileText, Receipt } from "lucide-react";
+import { RevenueChart } from "@/components/dashboard/revenue-chart";
+import { ServiceDonut } from "@/components/dashboard/service-donut";
+import { UpcomingJobsTable } from "@/components/dashboard/upcoming-jobs-table";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -20,120 +10,220 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { count: clientCount } = await supabase
-    .from("clients")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user!.id);
+  const [clientsRes, jobsRes, estimatesRes, invoicesRes] =
+    await Promise.allSettled([
+      supabase
+        .from("clients")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user!.id),
+      supabase
+        .from("jobs")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user!.id)
+        .eq("status", "scheduled"),
+      supabase
+        .from("estimates")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user!.id)
+        .in("status", ["draft", "sent"]),
+      supabase
+        .from("invoices")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user!.id)
+        .eq("status", "unpaid"),
+    ]);
 
-  const { count: jobCount } = await supabase
-    .from("jobs")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user!.id)
-    .eq("status", "scheduled");
-
-  const { count: estimateCount } = await supabase
-    .from("estimates")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user!.id)
-    .in("status", ["draft", "sent"]);
-
-  const { count: invoiceCount } = await supabase
-    .from("invoices")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user!.id)
-    .eq("status", "unpaid");
+  const clientCount =
+    clientsRes.status === "fulfilled" ? (clientsRes.value.count ?? 0) : 0;
+  const jobCount =
+    jobsRes.status === "fulfilled" ? (jobsRes.value.count ?? 0) : 0;
+  const estimateCount =
+    estimatesRes.status === "fulfilled" ? (estimatesRes.value.count ?? 0) : 0;
+  const invoiceCount =
+    invoicesRes.status === "fulfilled" ? (invoicesRes.value.count ?? 0) : 0;
 
   const stats = [
     {
       title: "Clients",
-      value: clientCount ?? 0,
+      value: clientCount,
       icon: Users,
-      description: "Total active clients",
+      iconClass: "bg-blue-50 text-blue-500",
+      desc: "Total active clients",
     },
     {
       title: "Upcoming Jobs",
-      value: jobCount ?? 0,
+      value: jobCount,
       icon: CalendarDays,
-      description: "Scheduled jobs",
+      iconClass: "bg-teal-50 text-teal-500",
+      desc: "Scheduled",
     },
     {
       title: "Open Estimates",
-      value: estimateCount ?? 0,
+      value: estimateCount,
       icon: FileText,
-      description: "Draft or sent",
+      iconClass: "bg-purple-50 text-purple-500",
+      desc: "Draft or sent",
     },
     {
       title: "Unpaid Invoices",
-      value: invoiceCount ?? 0,
+      value: invoiceCount,
       icon: Receipt,
-      description: "Awaiting payment",
+      iconClass: "bg-red-50 text-red-500",
+      desc: "Awaiting payment",
     },
   ];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back. Here&apos;s an overview of your business.
-        </p>
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1
+          className="text-2xl font-bold text-[#1A2332]"
+          style={{ fontFamily: "'Fraunces', serif" }}
+        >
+          Dashboard
+        </h1>
+        <button
+          className="px-4 py-2 text-sm font-semibold text-[#1A2332] bg-white rounded-xl border border-gray-200 hover:bg-gray-50 shadow-sm transition-colors"
+          style={{ fontFamily: "'Syne', sans-serif" }}
+        >
+          Custom Widget
+        </button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">
-                {stat.description}
-              </p>
-            </CardContent>
-          </Card>
+          <div
+            key={stat.title}
+            className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100/80"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div
+                className={`h-10 w-10 rounded-xl ${stat.iconClass} flex items-center justify-center`}
+              >
+                <stat.icon className="h-5 w-5" />
+              </div>
+              <button className="text-gray-200 hover:text-gray-400 transition-colors mt-0.5">
+                <svg
+                  className="h-4 w-4"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <circle cx="8" cy="3.5" r="1.25" />
+                  <circle cx="8" cy="8" r="1.25" />
+                  <circle cx="8" cy="12.5" r="1.25" />
+                </svg>
+              </button>
+            </div>
+            <div
+              className="text-3xl font-bold text-[#1A2332] mb-1 tabular-nums"
+              style={{ fontFamily: "'Fraunces', serif" }}
+            >
+              {stat.value}
+            </div>
+            <div
+              className="text-xs text-gray-400 font-medium"
+              style={{ fontFamily: "'Syne', sans-serif" }}
+            >
+              {stat.title}
+            </div>
+          </div>
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <CardTitle>Getting Started</CardTitle>
-            <Badge variant="secondary">Phase 1</Badge>
+      {/* Charts row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Revenue chart */}
+        <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100/80">
+          <div className="flex items-center justify-between mb-2">
+            <h2
+              className="text-sm font-semibold text-[#1A2332]"
+              style={{ fontFamily: "'Syne', sans-serif" }}
+            >
+              Revenue Statistics
+            </h2>
+            <div className="flex items-center gap-2">
+              <select
+                className="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer"
+                style={{ fontFamily: "'Syne', sans-serif" }}
+              >
+                <option>Monthly</option>
+                <option>Weekly</option>
+              </select>
+              <button className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
+                <svg
+                  className="h-3.5 w-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
-          <CardDescription>
-            Your foundation is set up. Future phases will add client management,
-            scheduling, estimates, invoicing, and notifications here.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-              Authentication is live
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-              Database schema deployed
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-              Subscription gating active
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-yellow-500" />
-              Client management (Phase 2)
-            </li>
-            <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-yellow-500" />
-              Job scheduling (Phase 3)
-            </li>
-          </ul>
-        </CardContent>
-      </Card>
+          <div className="flex items-baseline gap-2.5 mb-5">
+            <span
+              className="text-2xl font-bold text-[#1A2332]"
+              style={{ fontFamily: "'Fraunces', serif" }}
+            >
+              $9,355.00
+            </span>
+            <span
+              className="text-xs font-semibold text-red-500"
+              style={{ fontFamily: "'Syne', sans-serif" }}
+            >
+              ↓ 3.5%
+            </span>
+            <span
+              className="text-xs text-gray-400"
+              style={{ fontFamily: "'Syne', sans-serif" }}
+            >
+              Last updated: Mar 17, 2026
+            </span>
+          </div>
+          <RevenueChart />
+        </div>
+
+        {/* Service donut */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100/80">
+          <div className="flex items-center justify-between mb-4">
+            <h2
+              className="text-sm font-semibold text-[#1A2332]"
+              style={{ fontFamily: "'Syne', sans-serif" }}
+            >
+              Service Category
+            </h2>
+            <button className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
+              <svg
+                className="h-3.5 w-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+            </button>
+          </div>
+          <ServiceDonut />
+        </div>
+      </div>
+
+      {/* Jobs table */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100/80">
+        <UpcomingJobsTable />
+      </div>
     </div>
   );
 }
