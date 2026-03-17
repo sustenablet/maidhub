@@ -18,3 +18,4 @@ app/out/
 # Supabase
 supabase/.temp/
 app/supabase/.temp/
+.vercel

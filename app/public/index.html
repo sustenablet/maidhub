@@ -641,25 +641,28 @@
     .f-legal a { font-size: 12.5px; color: rgba(255,255,255,.22); text-decoration: none; transition: color .2s; }
     .f-legal a:hover { color: rgba(255,255,255,.5); }
 
-    /* ─── REVEAL CASCADE (slide-up + scale on load) ────────────── */
-    @keyframes revealIn {
-      0% {
+    /* ─── FOCUS-IN CASCADE (blur-to-sharp on load) ─────────────── */
+    @keyframes focusIn {
+      from {
         opacity: 0;
-        transform: translateY(40px) scale(0.96);
+        filter: blur(10px);
+        transform: translateY(28px) scale(0.97);
       }
-      100% {
+      to {
         opacity: 1;
+        filter: blur(0);
         transform: translateY(0) scale(1);
       }
     }
     .reveal {
       opacity: 0;
-      animation: revealIn 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: focusIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      will-change: opacity, filter, transform;
     }
-    .d1 { animation-delay: .15s; }
-    .d2 { animation-delay: .28s; }
-    .d3 { animation-delay: .41s; }
-    .d4 { animation-delay: .54s; }
+    .d1 { animation-delay: .1s; }
+    .d2 { animation-delay: .2s; }
+    .d3 { animation-delay: .3s; }
+    .d4 { animation-delay: .4s; }
 
     @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes floatY {
@@ -1474,10 +1477,10 @@
       nav.classList.toggle('scrolled', window.scrollY > 40);
     }, { passive: true });
 
-    // Reveal cascade: stagger .reveal elements on page load
+    // Focus-in cascade: stagger .reveal elements on page load
     document.querySelectorAll('.reveal').forEach((el, i) => {
       const d = el.classList.contains('d1') ? 1 : el.classList.contains('d2') ? 2 : el.classList.contains('d3') ? 3 : el.classList.contains('d4') ? 4 : 0;
-      el.style.animationDelay = (d ? 0.18 * d : 0.2 + i * 0.1) + 's';
+      el.style.animationDelay = (d ? 0.1 * d : 0.08 + i * 0.05) + 's';
     });
 
     // Feature tab switching
