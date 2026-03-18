@@ -75,9 +75,9 @@ const STATUS_COLORS: Record<
     text: "text-blue-800",
   },
   cancelled: {
-    bg: "bg-gray-100",
+    bg: "bg-[#2A2A2A]",
     border: "border-gray-300",
-    text: "text-gray-500",
+    text: "text-[#888888]",
   },
 };
 
@@ -676,7 +676,7 @@ export default function SchedulePage() {
           setSelectedJob(job);
           setDetailOpen(true);
         }}
-        className={`absolute left-0.5 right-0.5 ${colors.bg} ${colors.border} ${colors.text} border-l-[3px] rounded-lg px-1.5 py-1 overflow-hidden cursor-pointer hover:shadow-md transition-shadow text-left`}
+        className={`absolute left-0.5 right-0.5 ${colors.bg} ${colors.border} ${colors.text} border-l-[3px] rounded-[6px] px-1.5 py-1 overflow-hidden cursor-pointer hover:shadow-md transition-shadow text-left`}
         style={{
           top: `${top}px`,
           height: `${height}px`,
@@ -719,7 +719,7 @@ export default function SchedulePage() {
           label: "Start Job",
           status: "in_progress",
           color:
-            "bg-amber-500 hover:bg-amber-600 text-white",
+            "bg-[#FF9F0A]/100 hover:bg-amber-600 text-white",
         });
         break;
       case "in_progress":
@@ -727,7 +727,7 @@ export default function SchedulePage() {
           label: "Complete",
           status: "completed",
           color:
-            "bg-green-500 hover:bg-green-600 text-white",
+            "bg-[#34C759]/100 hover:bg-green-600 text-white",
         });
         break;
       case "completed":
@@ -735,7 +735,7 @@ export default function SchedulePage() {
           label: "Create Invoice",
           status: "invoiced",
           color:
-            "bg-blue-500 hover:bg-blue-600 text-white",
+            "bg-[#0071E3]/100 hover:bg-blue-600 text-white",
         });
         break;
     }
@@ -745,7 +745,7 @@ export default function SchedulePage() {
         label: "Cancel",
         status: "cancelled",
         color:
-          "bg-white hover:bg-gray-50 text-gray-600 border border-gray-200",
+          "bg-white hover:bg-white/[0.03] text-[#888888] border border-[#2C2C2C]",
       });
     }
 
@@ -762,7 +762,7 @@ export default function SchedulePage() {
                 : handleStatusChange(job, btn.status)
             }
             disabled={updatingStatus}
-            className={`px-4 py-2 text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 ${btn.color}`}
+            className={`px-4 py-2 text-sm font-semibold rounded-[6px] transition-colors disabled:opacity-50 ${btn.color}`}
           >
             {btn.label}
           </button>
@@ -779,12 +779,12 @@ export default function SchedulePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1
-            className="text-[21px] font-semibold text-[#18181B] font-display tracking-[-0.02em]"
+            className="text-[21px] font-semibold text-[#D4D4D4] tracking-[-0.02em]"
           >
             Schedule
           </h1>
           <p
-            className="text-sm text-gray-400 mt-1"
+            className="text-sm text-[#888888] mt-1"
           >
             Manage your cleaning appointments
           </p>
@@ -792,14 +792,14 @@ export default function SchedulePage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => { setRecurringOpen(true); fetchRecurringRules(); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#18181B]/[0.06] hover:bg-[#18181B]/[0.1] text-[#18181B] text-sm font-semibold rounded-xl transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] text-[#D4D4D4] text-sm font-semibold rounded-[6px] transition-colors"
           >
             <Repeat className="h-4 w-4" />
             Recurring
           </button>
           <button
             onClick={openNewJobForm}
-            className="flex items-center gap-2 px-4 py-2 bg-[#18181B] hover:bg-[#18181B]/88 text-white text-[13px] font-semibold rounded-lg shadow-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED] text-white text-[13px] font-semibold rounded-[6px] shadow-sm transition-colors"
           >
             <Plus className="h-4 w-4" />
             New Job
@@ -808,39 +808,39 @@ export default function SchedulePage() {
       </div>
 
       {/* Week navigation */}
-      <div className="bg-white rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-[#E2DED8] px-4 py-3 flex items-center justify-between">
+      <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setWeekOffset((o) => o - 1)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+            className="p-1.5 rounded-[6px] hover:bg-[#2A2A2A] text-[#888888] transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             onClick={() => setWeekOffset((o) => o + 1)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+            className="p-1.5 rounded-[6px] hover:bg-[#2A2A2A] text-[#888888] transition-colors"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
           <span
-            className="text-sm font-semibold text-[#18181B] ml-1"
+            className="text-sm font-semibold text-[#D4D4D4] ml-1"
           >
             {formatWeekLabel(weekStart)}
           </span>
         </div>
         <button
           onClick={() => setWeekOffset(0)}
-          className="px-3 py-1.5 text-xs font-semibold text-[#18181B]/70 bg-[#18181B]/[0.05] hover:bg-[#18181B]/[0.08] rounded-lg transition-colors"
+          className="px-3 py-1.5 text-xs font-semibold text-[#D4D4D4] bg-white/[0.05] hover:bg-white/[0.08] rounded-[6px] transition-colors"
         >
           Today
         </button>
       </div>
 
       {/* Calendar grid */}
-      <div className="bg-white rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-[#E2DED8] overflow-hidden">
+      <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] overflow-hidden">
         {loading ? (
           <div
-            className="flex items-center justify-center py-32 text-gray-400 text-sm"
+            className="flex items-center justify-center py-32 text-[#888888] text-sm"
           >
             Loading...
           </div>
@@ -849,7 +849,7 @@ export default function SchedulePage() {
             <div style={{ minWidth: "640px" }}>
               {/* Day headers */}
               <div
-                className="grid border-b border-gray-100"
+                className="grid border-b border-[#252525]"
                 style={{
                   gridTemplateColumns: "52px repeat(7, 1fr)",
                 }}
@@ -860,11 +860,11 @@ export default function SchedulePage() {
                   return (
                     <div
                       key={i}
-                      className="flex flex-col items-center justify-center h-14 border-l border-gray-100"
+                      className="flex flex-col items-center justify-center h-14 border-l border-[#252525]"
                     >
                       <span
                         className={`text-[10px] font-bold uppercase tracking-wider ${
-                          isToday ? "text-teal-600" : "text-gray-400"
+                          isToday ? "text-teal-600" : "text-[#888888]"
                         }`}
                       >
                         {DAY_NAMES[i]}
@@ -873,7 +873,7 @@ export default function SchedulePage() {
                         className={`text-sm font-bold mt-0.5 leading-none ${
                           isToday
                             ? "bg-[#18181B] text-white w-7 h-7 rounded-full flex items-center justify-center"
-                            : "text-[#18181B]"
+                            : "text-[#D4D4D4]"
                         }`}
                       >
                         {day.getDate()}
@@ -888,20 +888,20 @@ export default function SchedulePage() {
                 {/* Empty state overlay */}
                 {jobs.length === 0 && (
                   <div
-                    className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 backdrop-blur-[1px]"
+                    className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#141414]/80 backdrop-blur-[1px]"
                   >
-                    <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center mb-3">
-                      <Calendar className="h-6 w-6 text-gray-400" />
+                    <div className="w-12 h-12 rounded-[6px] bg-[#2A2A2A] flex items-center justify-center mb-3">
+                      <Calendar className="h-6 w-6 text-[#888888]" />
                     </div>
-                    <p className="text-sm font-semibold text-[#18181B]">
+                    <p className="text-sm font-semibold text-[#D4D4D4]">
                       No jobs this week
                     </p>
-                    <p className="text-xs text-gray-400 mt-1 mb-4">
+                    <p className="text-xs text-[#888888] mt-1 mb-4">
                       Schedule a job to see it appear here
                     </p>
                     <button
                       onClick={openNewJobForm}
-                      className="flex items-center gap-2 px-4 py-2 bg-[#18181B] hover:bg-[#18181B]/90 text-white text-sm font-semibold rounded-xl transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED]/90 text-white text-sm font-semibold rounded-[6px] transition-colors"
                     >
                       <Plus className="h-4 w-4" />
                       New Job
@@ -921,7 +921,7 @@ export default function SchedulePage() {
                     {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                       <div
                         key={i}
-                        className="absolute right-2 text-[10px] text-gray-400 font-medium leading-none"
+                        className="absolute right-2 text-[10px] text-[#888888] font-medium leading-none"
                         style={{
                           top: `${i * HOUR_HEIGHT - 5}px`,
                         }}
@@ -936,7 +936,7 @@ export default function SchedulePage() {
                   {weekDays.map((_, dayIndex) => (
                     <div
                       key={dayIndex}
-                      className="relative border-l border-gray-100"
+                      className="relative border-l border-[#252525]"
                     >
                       {/* Horizontal hour lines */}
                       {Array.from({ length: TOTAL_HOURS }, (_, i) => (
@@ -951,7 +951,7 @@ export default function SchedulePage() {
                       {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                         <div
                           key={`hover-${i}`}
-                          className="absolute left-0 right-0 hover:bg-gray-50/50 transition-colors"
+                          className="absolute left-0 right-0 hover:bg-white/[0.02] transition-colors"
                           style={{
                             top: `${i * HOUR_HEIGHT}px`,
                             height: `${HOUR_HEIGHT}px`,
@@ -991,7 +991,7 @@ export default function SchedulePage() {
             {/* Status badge */}
             <div>
               <span
-                className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold ${
+                className={`inline-flex items-center px-2.5 py-1 rounded-[6px] text-xs font-semibold ${
                   STATUS_COLORS[selectedJob.status].bg
                 } ${STATUS_COLORS[selectedJob.status].text}`}
               >
@@ -1002,7 +1002,7 @@ export default function SchedulePage() {
             </div>
 
             {selectedJob.status === "invoiced" && (
-              <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 rounded-lg mt-2">
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-[#0071E3]/10 rounded-[6px] mt-2">
                 <Receipt className="h-3.5 w-3.5 text-blue-500" strokeWidth={1.8} />
                 <span className="text-xs text-blue-600 font-medium">
                   Invoice has been created for this job
@@ -1013,15 +1013,15 @@ export default function SchedulePage() {
             {/* Info rows */}
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <User className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
+                <User className="h-4 w-4 text-[#888888] mt-0.5 shrink-0" />
                 <div>
                   <p
-                    className="text-xs text-gray-400 font-medium"
+                    className="text-xs text-[#888888] font-medium"
                   >
                     Client
                   </p>
                   <p
-                    className="text-sm font-semibold text-[#18181B]"
+                    className="text-sm font-semibold text-[#D4D4D4]"
                   >
                     {selectedJob.clients
                       ? `${selectedJob.clients.first_name} ${selectedJob.clients.last_name}`
@@ -1031,15 +1031,15 @@ export default function SchedulePage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <Calendar className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
+                <Calendar className="h-4 w-4 text-[#888888] mt-0.5 shrink-0" />
                 <div>
                   <p
-                    className="text-xs text-gray-400 font-medium"
+                    className="text-xs text-[#888888] font-medium"
                   >
                     Date & Time
                   </p>
                   <p
-                    className="text-sm font-semibold text-[#18181B]"
+                    className="text-sm font-semibold text-[#D4D4D4]"
                   >
                     {new Date(
                       selectedJob.scheduled_date + "T00:00:00"
@@ -1052,7 +1052,7 @@ export default function SchedulePage() {
                   </p>
                   {selectedJob.start_time && (
                     <p
-                      className="text-sm text-gray-500"
+                      className="text-sm text-[#888888]"
                     >
                       {formatTimeRange(
                         selectedJob.start_time,
@@ -1068,15 +1068,15 @@ export default function SchedulePage() {
 
               {selectedJob.addresses && (
                 <div className="flex items-start gap-3">
-                  <MapPin className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
+                  <MapPin className="h-4 w-4 text-[#888888] mt-0.5 shrink-0" />
                   <div>
                     <p
-                      className="text-xs text-gray-400 font-medium"
+                      className="text-xs text-[#888888] font-medium"
                     >
                       Address
                     </p>
                     <p
-                      className="text-sm text-[#18181B]"
+                      className="text-sm text-[#D4D4D4]"
                     >
                       {formatAddress(selectedJob.addresses)}
                     </p>
@@ -1086,15 +1086,15 @@ export default function SchedulePage() {
 
               {selectedJob.price != null && (
                 <div className="flex items-start gap-3">
-                  <DollarSign className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
+                  <DollarSign className="h-4 w-4 text-[#888888] mt-0.5 shrink-0" />
                   <div>
                     <p
-                      className="text-xs text-gray-400 font-medium"
+                      className="text-xs text-[#888888] font-medium"
                     >
                       Price
                     </p>
                     <p
-                      className="text-sm font-bold text-[#18181B] font-display"
+                      className="text-sm font-bold text-[#D4D4D4]"
                     >
                       ${Number(selectedJob.price).toFixed(2)}
                     </p>
@@ -1104,15 +1104,15 @@ export default function SchedulePage() {
 
               {selectedJob.notes && (
                 <div className="flex items-start gap-3">
-                  <FileText className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
+                  <FileText className="h-4 w-4 text-[#888888] mt-0.5 shrink-0" />
                   <div>
                     <p
-                      className="text-xs text-gray-400 font-medium"
+                      className="text-xs text-[#888888] font-medium"
                     >
                       Notes
                     </p>
                     <p
-                      className="text-sm text-gray-600 whitespace-pre-wrap"
+                      className="text-sm text-[#888888] whitespace-pre-wrap"
                     >
                       {selectedJob.notes}
                     </p>
@@ -1122,24 +1122,24 @@ export default function SchedulePage() {
             </div>
 
             {/* Divider */}
-            <div className="border-t border-gray-100" />
+            <div className="border-t border-[#252525]" />
 
             {/* Edit + Delete + Status actions */}
             <div className="flex flex-wrap gap-2">
               {selectedJob.status !== "invoiced" && selectedJob.status !== "cancelled" && (
                 <button
                   onClick={() => openEditForm(selectedJob)}
-                  className="px-4 py-2 text-sm font-semibold rounded-xl transition-colors bg-[#18181B]/[0.06] text-[#18181B] hover:bg-[#18181B]/[0.1]"
+                  className="px-4 py-2 text-sm font-semibold rounded-[6px] transition-colors bg-white/[0.06] text-[#D4D4D4] hover:bg-white/[0.1]"
                 >
                   Edit Job
                 </button>
               )}
               <button
                 onClick={() => handleDeleteJob(selectedJob)}
-                className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl transition-colors ${
+                className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-[6px] transition-colors ${
                   deleteConfirm
-                    ? "bg-red-500 text-white hover:bg-red-600"
-                    : "text-red-400 hover:bg-red-50 hover:text-red-500"
+                    ? "bg-red-500/100 text-white hover:bg-red-600"
+                    : "text-red-400 hover:bg-red-500/[0.06]0/10 hover:text-red-500"
                 }`}
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -1290,7 +1290,7 @@ export default function SchedulePage() {
         <div className="px-6 py-5 space-y-4">
           <button
             onClick={() => { setRecurringFormOpen(true); resetRecurringForm(); }}
-            className="flex items-center gap-2 w-full px-4 py-3 bg-[#18181B]/[0.04] hover:bg-[#18181B]/[0.07] text-[#18181B] text-sm font-semibold rounded-xl transition-colors border border-dashed border-[#18181B]/15"
+            className="flex items-center gap-2 w-full px-4 py-3 bg-white/[0.04] hover:bg-white/[0.07] text-[#D4D4D4] text-sm font-semibold rounded-[6px] transition-colors border border-dashed border-[#18181B]/15"
           >
             <Plus className="h-4 w-4" />
             New Recurring Rule
@@ -1299,10 +1299,10 @@ export default function SchedulePage() {
           {recurringRules.length === 0 ? (
             <div className="py-12 text-center">
               <Repeat className="h-8 w-8 text-gray-200 mx-auto mb-3" />
-              <p className="text-sm font-semibold text-[#18181B]/50">
+              <p className="text-sm font-semibold text-[#888888]">
                 No recurring rules
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-[#888888] mt-1">
                 Create a rule to auto-generate jobs
               </p>
             </div>
@@ -1319,18 +1319,18 @@ export default function SchedulePage() {
                 return (
                   <div
                     key={rule.id}
-                    className={`p-4 rounded-xl border transition-colors ${
+                    className={`p-4 rounded-[6px] border transition-colors ${
                       rule.is_active
-                        ? "bg-white border-[#18181B]/[0.08]"
-                        : "bg-gray-50 border-gray-100 opacity-60"
+                        ? "bg-white border-[#2C2C2C]"
+                        : "bg-gray-50 border-[#252525] opacity-60"
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-[13px] font-semibold text-[#18181B]">
+                        <p className="text-[13px] font-semibold text-[#D4D4D4]">
                           {clientName}
                         </p>
-                        <p className="text-[11px] text-[#18181B]/40 mt-0.5">
+                        <p className="text-[11px] text-[#888888] mt-0.5">
                           {freqLabel} &middot; {rule.service_type || "Cleaning"} &middot; {rule.price != null ? `$${rule.price}` : "No price"}
                         </p>
                       </div>
@@ -1338,8 +1338,8 @@ export default function SchedulePage() {
                         onClick={() => toggleRuleActive(rule)}
                         className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-colors ${
                           rule.is_active
-                            ? "bg-green-50 text-green-600"
-                            : "bg-gray-100 text-gray-400"
+                            ? "bg-[#34C759]/10 text-green-600"
+                            : "bg-[#2A2A2A] text-[#888888]"
                         }`}
                       >
                         {rule.is_active ? "Active" : "Paused"}
@@ -1349,7 +1349,7 @@ export default function SchedulePage() {
                       <button
                         onClick={() => generateJobs(rule)}
                         disabled={!rule.is_active || recGenerating === rule.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-[#18181B] text-white rounded-lg hover:bg-[#18181B]/90 disabled:opacity-40 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-[#18181B] text-white rounded-[6px] hover:bg-[#18181B]/90 disabled:opacity-40 transition-colors"
                       >
                         {recGenerating === rule.id ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
@@ -1360,7 +1360,7 @@ export default function SchedulePage() {
                       </button>
                       <button
                         onClick={() => deleteRule(rule.id)}
-                        className="p-1.5 text-gray-300 hover:text-red-400 transition-colors"
+                        className="p-1.5 text-[#555555] hover:text-red-400 transition-colors"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>

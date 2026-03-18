@@ -22,7 +22,7 @@ export function RevenueChart({ data }: { data: RevenueDataPoint[] }) {
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[180px] text-xs text-gray-400">
+      <div className="flex items-center justify-center h-[180px] text-xs text-[#555555]">
         No revenue data yet
       </div>
     );
@@ -53,7 +53,7 @@ export function RevenueChart({ data }: { data: RevenueDataPoint[] }) {
         viewBox={`0 0 ${totalW} ${CHART_H}`}
         preserveAspectRatio="xMidYMid meet"
         className="overflow-visible"
-        style={{ fontFamily: "var(--font-body)" }}
+        style={{ fontFamily: "var(--font-sans)" }}
       >
         {/* Y-axis grid lines + labels */}
         {yTicks.map((val, i) => {
@@ -65,7 +65,7 @@ export function RevenueChart({ data }: { data: RevenueDataPoint[] }) {
                 y1={y}
                 x2={totalW - 8}
                 y2={y}
-                stroke="#ECEAE6"
+                stroke="#2C2C2C"
                 strokeWidth="1"
               />
               <text
@@ -73,7 +73,7 @@ export function RevenueChart({ data }: { data: RevenueDataPoint[] }) {
                 y={y + 4}
                 textAnchor="end"
                 fontSize="9"
-                fill="#C4C4C4"
+                fill="#444444"
               >
                 ${(val / 1000).toFixed(0)}K
               </text>
@@ -87,10 +87,10 @@ export function RevenueChart({ data }: { data: RevenueDataPoint[] }) {
           y1={avgY}
           x2={totalW - 8}
           y2={avgY}
-          stroke="#18181B"
-          strokeWidth="1.5"
+          stroke="#D4D4D4"
+          strokeWidth="1"
           strokeDasharray="5,4"
-          opacity="0.2"
+          opacity="0.15"
         />
         {/* Avg label pill */}
         <rect
@@ -98,18 +98,17 @@ export function RevenueChart({ data }: { data: RevenueDataPoint[] }) {
           y={avgY - 11}
           width={28}
           height={14}
-          rx={4}
-          fill="#18181B"
-          opacity="0.18"
+          rx={3}
+          fill="#D4D4D4"
+          opacity="0.1"
         />
         <text
           x={PADDING_LEFT + 14}
           y={avgY + 1}
           textAnchor="middle"
           fontSize="8"
-          fill="#18181B"
+          fill="#888888"
           fontWeight="700"
-          opacity="0.7"
         >
           Avg
         </text>
@@ -134,8 +133,8 @@ export function RevenueChart({ data }: { data: RevenueDataPoint[] }) {
                 y={PADDING_TOP}
                 width={BAR_W}
                 height={plotH}
-                rx={8}
-                fill="#EEECEA"
+                rx={4}
+                fill="#252525"
               />
               {/* Actual bar */}
               <rect
@@ -143,8 +142,9 @@ export function RevenueChart({ data }: { data: RevenueDataPoint[] }) {
                 y={bTop}
                 width={BAR_W}
                 height={bH}
-                rx={8}
-                fill={isHov ? "#2A7C6F" : "#C8E6E2"}
+                rx={4}
+                fill={isHov ? "#0077ED" : "#0071E3"}
+                opacity={isHov ? 1 : 0.75}
                 style={{
                   transformBox: "fill-box",
                   transformOrigin: "bottom",
@@ -158,7 +158,7 @@ export function RevenueChart({ data }: { data: RevenueDataPoint[] }) {
                 y={CHART_H - 6}
                 textAnchor="middle"
                 fontSize="10"
-                fill={isHov ? "#2A7C6F" : "#B8B4AE"}
+                fill={isHov ? "#D4D4D4" : "#555555"}
                 fontWeight={isHov ? "700" : "500"}
               >
                 {d.month}
@@ -172,22 +172,23 @@ export function RevenueChart({ data }: { data: RevenueDataPoint[] }) {
                     y={bTop - 32}
                     width={68}
                     height={24}
-                    rx={8}
-                    fill="#18181B"
+                    rx={4}
+                    fill="#252525"
+                    stroke="#2C2C2C"
+                    strokeWidth="1"
                   />
                   {/* Tooltip tail */}
                   <polygon
                     points={`${x + BAR_W / 2 - 5},${bTop - 8} ${x + BAR_W / 2 + 5},${bTop - 8} ${x + BAR_W / 2},${bTop - 2}`}
-                    fill="#18181B"
+                    fill="#252525"
                   />
                   <text
                     x={x + BAR_W / 2}
                     y={bTop - 16}
                     textAnchor="middle"
                     fontSize="11"
-                    fill="white"
+                    fill="#D4D4D4"
                     fontWeight="700"
-                    style={{ fontFamily: "var(--font-display)" }}
                   >
                     ${d.amount.toLocaleString()}
                   </text>

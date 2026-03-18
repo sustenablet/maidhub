@@ -27,11 +27,11 @@ import { SERVICE_TYPES } from "@/lib/types";
 import { toast } from "sonner";
 
 const AVATAR_COLORS = [
-  "bg-teal-100 text-teal-700",
-  "bg-purple-100 text-purple-700",
-  "bg-amber-100 text-amber-700",
-  "bg-blue-100 text-blue-700",
-  "bg-rose-100 text-rose-700",
+  "bg-[#0071E3]/10 text-[#0071E3]",
+  "bg-purple-500/10 text-purple-400",
+  "bg-[#FF9F0A]/10 text-[#FF9F0A]",
+  "bg-[#0071E3]/10 text-[#0071E3]",
+  "bg-rose-500/10 text-rose-400",
 ];
 
 function getInitials(first: string, last: string) {
@@ -233,9 +233,7 @@ export default function ClientsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p
-          className="text-sm text-gray-400 animate-pulse"
-        >
+        <p className="text-sm text-[#888888] animate-pulse">
           Loading...
         </p>
       </div>
@@ -247,16 +245,16 @@ export default function ClientsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[21px] font-semibold text-[#18181B] font-display tracking-[-0.02em]">
+          <h1 className="text-[21px] font-semibold text-[#D4D4D4] tracking-[-0.02em]">
             Clients
           </h1>
-          <p className="text-[12.5px] text-[#18181B]/38 mt-0.5">
+          <p className="text-[12.5px] text-[#888888] mt-0.5">
             Manage your client relationships
           </p>
         </div>
         <button
           onClick={openPanel}
-          className="flex items-center gap-2 px-4 py-2 bg-[#18181B] hover:bg-[#18181B]/88 text-white text-[13px] font-semibold rounded-lg shadow-sm transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white text-[13px] font-semibold rounded-[6px] shadow-sm transition-colors"
         >
           <Plus className="h-3.5 w-3.5" />
           Add Client
@@ -264,44 +262,44 @@ export default function ClientsPage() {
       </div>
 
       {/* Table card */}
-      <div className="bg-white rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.05)] border border-[#E2DED8]">
+      <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C]">
         {/* Toolbar */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#ECEAE6]">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#252525]">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#18181B]/25" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#444444]" />
             <input
               type="text"
               placeholder="Search clients..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-3 py-1.5 text-[12.5px] bg-[#F6F4F1] border border-[#E2DED8] rounded-md focus:outline-none focus:ring-2 focus:ring-[#18181B]/[0.06] focus:border-[#18181B]/20 w-52 transition-all placeholder:text-[#18181B]/30"
+              className="pl-9 pr-3 py-1.5 text-[12.5px] bg-[#252525] border border-[#2C2C2C] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 w-52 transition-all placeholder:text-[#444444] text-[#D4D4D4]"
             />
           </div>
           <div className="relative">
             <button
               onClick={() => setFilterOpen(!filterOpen)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium rounded-md transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium rounded-[6px] transition-colors ${
                 statusFilter !== "all"
-                  ? "text-[#18181B] bg-[#18181B]/[0.07] border border-[#18181B]/15"
-                  : "text-[#18181B]/50 bg-[#F6F4F1] border border-[#E2DED8] hover:bg-[#ECEAE6]"
+                  ? "text-[#D4D4D4] bg-white/[0.07] border border-white/15"
+                  : "text-[#888888] bg-[#252525] border border-[#2C2C2C] hover:bg-[#2C2C2C]"
               }`}
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
               Filter
               {statusFilter !== "all" && (
-                <span className="h-1.5 w-1.5 rounded-full bg-[#2A7C6F]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#0071E3]" />
               )}
             </button>
             {filterOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setFilterOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.06)] border border-[#E2DED8] py-1 z-50">
+                <div className="absolute right-0 top-full mt-1 w-36 bg-[#1E1E1E] rounded-[6px] shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-[#2C2C2C] py-1 z-50">
                   {(["all", "active", "archived"] as const).map((opt) => (
                     <button
                       key={opt}
                       onClick={() => { setStatusFilter(opt); setFilterOpen(false); }}
                       className={`w-full text-left px-3 py-2 text-[12px] font-medium transition-colors ${
-                        statusFilter === opt ? "text-[#18181B] bg-[#18181B]/[0.04]" : "text-[#18181B]/55 hover:bg-[#F6F4F1]"
+                        statusFilter === opt ? "text-[#D4D4D4] bg-white/[0.05]" : "text-[#888888] hover:bg-white/[0.02]"
                       }`}
                     >
                       {opt === "all" ? "All Clients" : opt.charAt(0).toUpperCase() + opt.slice(1)}
@@ -315,18 +313,18 @@ export default function ClientsPage() {
 
         {isEmpty ? (
           <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-            <div className="h-12 w-12 rounded-xl bg-[#E4F3F0] flex items-center justify-center mb-3">
-              <UserRound className="h-6 w-6 text-[#2A7C6F]" strokeWidth={1.5} />
+            <div className="h-12 w-12 rounded-[6px] bg-[#0071E3]/[0.12] flex items-center justify-center mb-3">
+              <UserRound className="h-6 w-6 text-[#0071E3]" strokeWidth={1.5} />
             </div>
-            <h3 className="text-[14px] font-semibold text-[#18181B] mb-1.5 font-display">
+            <h3 className="text-[14px] font-semibold text-[#D4D4D4] mb-1.5">
               No clients yet
             </h3>
-            <p className="text-[12px] text-[#18181B]/40 mb-5 max-w-xs leading-relaxed">
+            <p className="text-[12px] text-[#888888] mb-5 max-w-xs leading-relaxed">
               Keep track of your clients, their contact info, and job history all in one place.
             </p>
             <button
               onClick={openPanel}
-              className="flex items-center gap-2 px-4 py-2 bg-[#18181B] hover:bg-[#18181B]/88 text-white text-[13px] font-semibold rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white text-[13px] font-semibold rounded-[6px] transition-colors"
             >
               <Plus className="h-3.5 w-3.5" />
               Add Client
@@ -334,10 +332,10 @@ export default function ClientsPage() {
           </div>
         ) : noResults ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-[13px] font-semibold text-[#18181B]">
+            <p className="text-[13px] font-semibold text-[#D4D4D4]">
               No results for &ldquo;{search}&rdquo;
             </p>
-            <p className="text-[12px] text-[#18181B]/38 mt-1">
+            <p className="text-[12px] text-[#888888] mt-1">
               Try a different name, email, or phone number
             </p>
           </div>
@@ -345,42 +343,42 @@ export default function ClientsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#ECEAE6]">
-                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#18181B]/35 uppercase tracking-[0.06em]">
+                <tr className="border-b border-[#252525]">
+                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#555555] uppercase tracking-[0.06em]">
                     Name
                   </th>
-                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#18181B]/35 uppercase tracking-[0.06em] hidden md:table-cell">
+                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#555555] uppercase tracking-[0.06em] hidden md:table-cell">
                     Email
                   </th>
-                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#18181B]/35 uppercase tracking-[0.06em] hidden md:table-cell">
+                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#555555] uppercase tracking-[0.06em] hidden md:table-cell">
                     Phone
                   </th>
-                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#18181B]/35 uppercase tracking-[0.06em] hidden lg:table-cell">
+                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#555555] uppercase tracking-[0.06em] hidden lg:table-cell">
                     Address
                   </th>
-                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#18181B]/35 uppercase tracking-[0.06em] hidden xl:table-cell">
+                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#555555] uppercase tracking-[0.06em] hidden xl:table-cell">
                     Jobs
                   </th>
-                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#18181B]/35 uppercase tracking-[0.06em]">
+                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#555555] uppercase tracking-[0.06em]">
                     Status
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F4F2EF]">
+              <tbody className="divide-y divide-[#252525]">
                 {filtered.map((client, index) => {
                   const initials = getInitials(client.first_name, client.last_name);
                   const color = getAvatarColor(index);
                   const primaryAddress = client.addresses[0];
                   const statusBadge =
                     client.status === "active"
-                      ? "bg-green-50 text-green-700 ring-1 ring-inset ring-green-200"
-                      : "bg-[#F6F4F1] text-[#18181B]/50 ring-1 ring-inset ring-[#E2DED8]";
+                      ? "bg-[#34C759]/10 text-[#34C759] ring-1 ring-inset ring-[#34C759]/20"
+                      : "bg-[#252525] text-[#888888] ring-1 ring-inset ring-[#2C2C2C]";
 
                   return (
                     <tr
                       key={client.id}
                       onClick={() => router.push(`/dashboard/clients/${client.id}`)}
-                      className="hover:bg-[#F9F8F6] transition-colors cursor-pointer"
+                      className="hover:bg-white/[0.02] transition-colors cursor-pointer"
                     >
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
@@ -388,10 +386,10 @@ export default function ClientsPage() {
                             {initials}
                           </div>
                           <div>
-                            <p className="text-[13px] font-semibold text-[#18181B]">
+                            <p className="text-[13px] font-semibold text-[#D4D4D4]">
                               {client.first_name} {client.last_name}
                             </p>
-                            <p className="text-[11px] text-[#18181B]/38 md:hidden">
+                            <p className="text-[11px] text-[#888888] md:hidden">
                               {client.email}
                             </p>
                           </div>
@@ -399,25 +397,25 @@ export default function ClientsPage() {
                       </td>
                       <td className="px-5 py-3.5 hidden md:table-cell">
                         <div className="flex items-center gap-1.5">
-                          <Mail className="h-3 w-3 text-[#18181B]/20 shrink-0" />
-                          <span className="text-[12px] text-[#18181B]/55">
+                          <Mail className="h-3 w-3 text-[#444444] shrink-0" />
+                          <span className="text-[12px] text-[#888888]">
                             {client.email || "\u2014"}
                           </span>
                         </div>
                       </td>
                       <td className="px-5 py-3.5 hidden md:table-cell">
                         <div className="flex items-center gap-1.5">
-                          <Phone className="h-3 w-3 text-[#18181B]/20 shrink-0" />
-                          <span className="text-[12px] text-[#18181B]/55">
+                          <Phone className="h-3 w-3 text-[#444444] shrink-0" />
+                          <span className="text-[12px] text-[#888888]">
                             {client.phone || "\u2014"}
                           </span>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 text-[12px] text-[#18181B]/50 hidden lg:table-cell">
+                      <td className="px-5 py-3.5 text-[12px] text-[#888888] hidden lg:table-cell">
                         {formatAddress(primaryAddress) || "\u2014"}
                       </td>
                       <td className="px-5 py-3.5 hidden xl:table-cell">
-                        <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-[#18181B]/[0.06] text-[#18181B] text-[10px] font-bold">
+                        <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-white/[0.06] text-[#D4D4D4] text-[10px] font-bold">
                           {client.jobs_count}
                         </span>
                       </td>

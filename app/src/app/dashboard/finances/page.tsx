@@ -85,6 +85,8 @@ export default async function FinancesPage() {
   const openEstimates = openEstimatesRes.status === "fulfilled" ? (openEstimatesRes.value.data ?? []) : [];
   const monthInvoices = monthInvoicesRes.status === "fulfilled" ? (monthInvoicesRes.value.data ?? []) : [];
 
+  void allEstimates;
+
   const totalRevenue = paidInvoices.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
   const totalOutstanding = unpaidInvoices.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
   const totalOverdue = overdueInvoices.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
@@ -101,9 +103,9 @@ export default async function FinancesPage() {
   const overdueCount = overdueInvoices.length;
 
   const statusConfig: Record<string, { className: string; label: string }> = {
-    paid: { className: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200", label: "Paid" },
-    unpaid: { className: "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200", label: "Unpaid" },
-    void: { className: "bg-gray-100 text-gray-500 ring-1 ring-inset ring-gray-200", label: "Void" },
+    paid: { className: "bg-[#34C759]/10 text-[#34C759] ring-1 ring-inset ring-[#34C759]/20", label: "Paid" },
+    unpaid: { className: "bg-[#FF9F0A]/10 text-[#FF9F0A] ring-1 ring-inset ring-[#FF9F0A]/20", label: "Unpaid" },
+    void: { className: "bg-[#252525] text-[#888888] ring-1 ring-inset ring-[#2C2C2C]", label: "Void" },
   };
 
   return (
@@ -111,24 +113,24 @@ export default async function FinancesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[21px] font-semibold text-[#18181B] font-display tracking-[-0.02em]">
+          <h1 className="text-[21px] font-semibold text-[#D4D4D4] tracking-[-0.02em]">
             Finances
           </h1>
-          <p className="text-[13px] text-[#18181B]/40 mt-0.5">
+          <p className="text-[13px] text-[#888888] mt-0.5">
             Overview of your revenue, invoices, and estimates
           </p>
         </div>
         <div className="hidden sm:flex items-center gap-2">
           <Link
             href="/dashboard/invoices"
-            className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold text-[#18181B]/55 bg-white border border-[#18181B]/[0.08] rounded-lg hover:bg-[#18181B]/[0.02] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold text-[#888888] bg-[#1E1E1E] border border-[#2C2C2C] rounded-[6px] hover:bg-[#252525] transition-colors"
           >
             <Receipt className="h-3.5 w-3.5" strokeWidth={1.8} />
             Invoices
           </Link>
           <Link
             href="/dashboard/estimates"
-            className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold text-[#18181B]/55 bg-white border border-[#18181B]/[0.08] rounded-lg hover:bg-[#18181B]/[0.02] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold text-[#888888] bg-[#1E1E1E] border border-[#2C2C2C] rounded-[6px] hover:bg-[#252525] transition-colors"
           >
             <FileText className="h-3.5 w-3.5" strokeWidth={1.8} />
             Estimates
@@ -168,14 +170,14 @@ export default async function FinancesPage() {
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Left: Recent transactions */}
-        <div className="lg:col-span-2 bg-white rounded-lg border border-[#E2DED8] shadow-[0_1px_3px_rgba(0,0,0,0.05)] overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#18181B]/[0.05]">
-            <h2 className="text-[14px] font-bold text-[#18181B]">
+        <div className="lg:col-span-2 bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] shadow-[0_1px_3px_rgba(0,0,0,0.4)] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#252525]">
+            <h2 className="text-[14px] font-bold text-[#D4D4D4]">
               Recent Transactions
             </h2>
             <Link
               href="/dashboard/invoices"
-              className="flex items-center gap-1 text-[12px] font-semibold text-[#18181B]/40 hover:text-[#18181B] transition-colors"
+              className="flex items-center gap-1 text-[12px] font-semibold text-[#555555] hover:text-[#D4D4D4] transition-colors"
             >
               View All
               <ArrowRight className="h-3 w-3" strokeWidth={2} />
@@ -184,25 +186,25 @@ export default async function FinancesPage() {
 
           {recentInvoices.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-              <div className="h-12 w-12 rounded-xl bg-[#18181B]/[0.04] flex items-center justify-center mb-3">
-                <Receipt className="h-6 w-6 text-[#18181B]/20" strokeWidth={1.5} />
+              <div className="h-12 w-12 rounded-[6px] bg-white/[0.04] flex items-center justify-center mb-3">
+                <Receipt className="h-6 w-6 text-[#444444]" strokeWidth={1.5} />
               </div>
-              <p className="text-[13px] font-semibold text-[#18181B]/60">
+              <p className="text-[13px] font-semibold text-[#888888]">
                 No transactions yet
               </p>
-              <p className="text-[12px] text-[#18181B]/30 mt-1 max-w-xs">
+              <p className="text-[12px] text-[#555555] mt-1 max-w-xs">
                 Create your first invoice to start tracking revenue
               </p>
               <Link
                 href="/dashboard/invoices"
-                className="mt-4 flex items-center gap-1.5 px-4 py-2 text-[12px] font-semibold bg-[#18181B] text-white rounded-lg hover:bg-[#18181B]/90 transition-colors"
+                className="mt-4 flex items-center gap-1.5 px-4 py-2 text-[12px] font-semibold bg-[#0071E3] text-white rounded-[6px] hover:bg-[#0071E3]/90 transition-colors"
               >
                 Create Invoice
                 <ArrowUpRight className="h-3 w-3" strokeWidth={2} />
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-[#18181B]/[0.04]">
+            <div className="divide-y divide-[#252525]">
               {recentInvoices.map((inv: {
                 id: string;
                 total: number | null;
@@ -218,22 +220,22 @@ export default async function FinancesPage() {
                 const config = statusConfig[inv.status] || statusConfig.unpaid;
 
                 return (
-                  <div key={inv.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#18181B]/[0.01] transition-colors">
-                    <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${
-                      inv.status === "paid" ? "bg-emerald-50" : inv.status === "unpaid" ? "bg-amber-50" : "bg-gray-50"
+                  <div key={inv.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-white/[0.02] transition-colors">
+                    <div className={`h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 ${
+                      inv.status === "paid" ? "bg-[#34C759]/10" : inv.status === "unpaid" ? "bg-[#FF9F0A]/10" : "bg-[#252525]"
                     }`}>
                       {inv.status === "paid" ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500" strokeWidth={1.8} />
+                        <CheckCircle2 className="h-4 w-4 text-[#34C759]" strokeWidth={1.8} />
                       ) : (
-                        <Clock className="h-4 w-4 text-amber-500" strokeWidth={1.8} />
+                        <Clock className="h-4 w-4 text-[#FF9F0A]" strokeWidth={1.8} />
                       )}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-[#18181B] truncate">
+                      <p className="text-[13px] font-semibold text-[#D4D4D4] truncate">
                         {clientName}
                       </p>
-                      <p className="text-[11px] text-[#18181B]/30">
+                      <p className="text-[11px] text-[#555555]">
                         {timeAgo(inv.created_at)}
                         {inv.due_date && inv.status === "unpaid" && (
                           <> &middot; Due {formatDate(inv.due_date)}</>
@@ -241,7 +243,7 @@ export default async function FinancesPage() {
                       </p>
                     </div>
 
-                    <span className="text-[14px] font-bold text-[#18181B] tabular-nums shrink-0 font-display">
+                    <span className="text-[14px] font-bold text-[#D4D4D4] tabular-nums shrink-0">
                       {inv.total != null ? formatCurrency(Number(inv.total)) : "-"}
                     </span>
 
@@ -260,8 +262,8 @@ export default async function FinancesPage() {
         {/* Right: Summary panel */}
         <div className="space-y-4">
           {/* Payment Status */}
-          <div className="bg-white rounded-lg border border-[#E2DED8] shadow-[0_1px_3px_rgba(0,0,0,0.05)] p-5">
-            <h3 className="text-[13px] font-bold text-[#18181B] mb-4">
+          <div className="bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] shadow-[0_1px_3px_rgba(0,0,0,0.4)] p-5">
+            <h3 className="text-[13px] font-bold text-[#D4D4D4] mb-4">
               Invoice Status
             </h3>
             <div className="space-y-3">
@@ -269,13 +271,13 @@ export default async function FinancesPage() {
                 label="Paid"
                 count={paidCount}
                 total={invoiceCount}
-                color="bg-emerald-500"
+                color="bg-[#34C759]"
               />
               <StatusRow
                 label="Unpaid"
                 count={unpaidCount - overdueCount}
                 total={invoiceCount}
-                color="bg-amber-400"
+                color="bg-[#FF9F0A]"
               />
               <StatusRow
                 label="Overdue"
@@ -286,7 +288,7 @@ export default async function FinancesPage() {
             </div>
 
             {invoiceCount === 0 && (
-              <p className="text-[12px] text-[#18181B]/25 text-center py-4">
+              <p className="text-[12px] text-[#444444] text-center py-4">
                 No invoices yet
               </p>
             )}
@@ -294,19 +296,19 @@ export default async function FinancesPage() {
 
           {/* Overdue alert */}
           {overdueCount > 0 && (
-            <div className="bg-red-50 rounded-xl border border-red-100 p-4">
+            <div className="bg-red-500/100/[0.06] rounded-[6px] border border-red-500/20 p-4">
               <div className="flex items-start gap-3">
                 <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" strokeWidth={1.8} />
                 <div>
-                  <p className="text-[13px] font-semibold text-red-600">
+                  <p className="text-[13px] font-semibold text-red-400">
                     {overdueCount} overdue invoice{overdueCount !== 1 ? "s" : ""}
                   </p>
-                  <p className="text-[12px] text-red-400 mt-0.5">
+                  <p className="text-[12px] text-red-400/70 mt-0.5">
                     {formatCurrency(totalOverdue)} outstanding past due date
                   </p>
                   <Link
                     href="/dashboard/invoices"
-                    className="inline-flex items-center gap-1 text-[12px] font-semibold text-red-500 hover:text-red-600 mt-2 transition-colors"
+                    className="inline-flex items-center gap-1 text-[12px] font-semibold text-red-400 hover:text-red-300 mt-2 transition-colors"
                   >
                     Review invoices
                     <ArrowRight className="h-3 w-3" strokeWidth={2} />
@@ -317,24 +319,24 @@ export default async function FinancesPage() {
           )}
 
           {/* Open Estimates */}
-          <div className="bg-white rounded-lg border border-[#E2DED8] shadow-[0_1px_3px_rgba(0,0,0,0.05)] p-5">
+          <div className="bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] shadow-[0_1px_3px_rgba(0,0,0,0.4)] p-5">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[13px] font-bold text-[#18181B]">
+              <h3 className="text-[13px] font-bold text-[#D4D4D4]">
                 Open Estimates
               </h3>
               <Link
                 href="/dashboard/estimates"
-                className="text-[11px] font-semibold text-[#18181B]/35 hover:text-[#18181B] transition-colors"
+                className="text-[11px] font-semibold text-[#555555] hover:text-[#D4D4D4] transition-colors"
               >
                 View All
               </Link>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-[24px] font-normal text-[#18181B] tabular-nums font-display">
+              <span className="text-[24px] font-normal text-[#D4D4D4] tabular-nums">
                 {formatCurrency(totalEstimatesValue)}
               </span>
             </div>
-            <p className="text-[12px] text-[#18181B]/30 mt-1">
+            <p className="text-[12px] text-[#555555] mt-1">
               {openEstimates.length} estimate{openEstimates.length !== 1 ? "s" : ""} pending response
             </p>
           </div>
@@ -343,32 +345,32 @@ export default async function FinancesPage() {
           <div className="space-y-2">
             <Link
               href="/dashboard/invoices"
-              className="flex items-center justify-between p-3.5 bg-white rounded-lg border border-[#E2DED8] hover:border-[#18181B]/[0.14] hover:shadow-[0_2px_6px_rgba(0,0,0,0.08)] transition-all group"
+              className="flex items-center justify-between p-3.5 bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] hover:border-[#2C2C2C] hover:bg-[#252525] hover:shadow-[0_2px_6px_rgba(0,0,0,0.4)] transition-all group"
             >
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-[#18181B]/[0.04] flex items-center justify-center">
-                  <Receipt className="h-4 w-4 text-[#18181B]/50" strokeWidth={1.8} />
+                <div className="h-8 w-8 rounded-[6px] bg-white/[0.04] flex items-center justify-center">
+                  <Receipt className="h-4 w-4 text-[#888888]" strokeWidth={1.8} />
                 </div>
-                <span className="text-[13px] font-semibold text-[#18181B]/70">
+                <span className="text-[13px] font-semibold text-[#888888]">
                   Create Invoice
                 </span>
               </div>
-              <ArrowRight className="h-3.5 w-3.5 text-[#18181B]/20 group-hover:text-[#18181B]/50 transition-colors" strokeWidth={1.8} />
+              <ArrowRight className="h-3.5 w-3.5 text-[#444444] group-hover:text-[#888888] transition-colors" strokeWidth={1.8} />
             </Link>
 
             <Link
               href="/dashboard/estimates"
-              className="flex items-center justify-between p-3.5 bg-white rounded-lg border border-[#E2DED8] hover:border-[#18181B]/[0.14] hover:shadow-[0_2px_6px_rgba(0,0,0,0.08)] transition-all group"
+              className="flex items-center justify-between p-3.5 bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] hover:bg-[#252525] hover:shadow-[0_2px_6px_rgba(0,0,0,0.4)] transition-all group"
             >
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-[#18181B]/[0.04] flex items-center justify-center">
-                  <FileText className="h-4 w-4 text-[#18181B]/50" strokeWidth={1.8} />
+                <div className="h-8 w-8 rounded-[6px] bg-white/[0.04] flex items-center justify-center">
+                  <FileText className="h-4 w-4 text-[#888888]" strokeWidth={1.8} />
                 </div>
-                <span className="text-[13px] font-semibold text-[#18181B]/70">
+                <span className="text-[13px] font-semibold text-[#888888]">
                   New Estimate
                 </span>
               </div>
-              <ArrowRight className="h-3.5 w-3.5 text-[#18181B]/20 group-hover:text-[#18181B]/50 transition-colors" strokeWidth={1.8} />
+              <ArrowRight className="h-3.5 w-3.5 text-[#444444] group-hover:text-[#888888] transition-colors" strokeWidth={1.8} />
             </Link>
           </div>
         </div>
@@ -393,26 +395,26 @@ function StatCard({
   alert?: boolean;
 }) {
   return (
-    <div className="bg-white rounded-lg border border-[#E2DED8] shadow-[0_1px_3px_rgba(0,0,0,0.05)] p-4">
+    <div className="bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] shadow-[0_1px_3px_rgba(0,0,0,0.4)] p-4">
       <div className="flex items-center justify-between mb-3">
-        <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${
-          alert ? "bg-red-50" : "bg-[#18181B]/[0.04]"
+        <div className={`h-8 w-8 rounded-[6px] flex items-center justify-center ${
+          alert ? "bg-red-500/100/10" : "bg-white/[0.04]"
         }`}>
-          <Icon className={`h-4 w-4 ${alert ? "text-red-400" : "text-[#18181B]/40"}`} strokeWidth={1.8} />
+          <Icon className={`h-4 w-4 ${alert ? "text-red-400" : "text-[#888888]"}`} strokeWidth={1.8} />
         </div>
         {alert && (
           <AlertCircle className="h-3.5 w-3.5 text-red-400" strokeWidth={1.8} />
         )}
       </div>
-      <p className="text-[20px] font-normal text-[#18181B] tabular-nums font-display">
+      <p className="text-[20px] font-normal text-[#D4D4D4] tabular-nums">
         {value}
       </p>
       <div className="flex items-center justify-between mt-1">
-        <p className="text-[11px] text-[#18181B]/35 font-medium">
+        <p className="text-[11px] text-[#555555] font-medium">
           {label}
         </p>
         {detail && (
-          <p className="text-[10px] text-[#18181B]/25">
+          <p className="text-[10px] text-[#444444]">
             {detail}
           </p>
         )}
@@ -436,14 +438,14 @@ function StatusRow({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-[12px] text-[#18181B]/55 font-medium">
+        <span className="text-[12px] text-[#888888] font-medium">
           {label}
         </span>
-        <span className="text-[12px] text-[#18181B]/35 tabular-nums">
+        <span className="text-[12px] text-[#555555] tabular-nums">
           {count}
         </span>
       </div>
-      <div className="h-1.5 bg-[#18181B]/[0.06] rounded-full overflow-hidden">
+      <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full ${color} transition-all duration-500`}
           style={{ width: `${pct}%` }}

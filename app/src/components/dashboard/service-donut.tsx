@@ -41,7 +41,7 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
 
   if (services.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[180px] text-xs text-gray-400">
+      <div className="flex items-center justify-center h-[180px] text-xs text-[#555555]">
         No service data yet
       </div>
     );
@@ -65,7 +65,7 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
           className="overflow-visible"
         >
           {/* Gap ring */}
-          <circle cx={cx} cy={cy} r={R + 4} fill="none" stroke="white" strokeWidth="3" />
+          <circle cx={cx} cy={cy} r={R + 4} fill="none" stroke="#1E1E1E" strokeWidth="3" />
 
           {segments.map((seg) => {
             const isHov = hovered === seg.index;
@@ -91,8 +91,8 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
             y={cy - 9}
             textAnchor="middle"
             fontSize="8.5"
-            fill="#9CA3AF"
-            style={{ fontFamily: "var(--font-body)" }}
+            fill="#555555"
+            style={{ fontFamily: "var(--font-sans)" }}
           >
             Revenue Total
           </text>
@@ -102,8 +102,8 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
             textAnchor="middle"
             fontSize="15"
             fontWeight="700"
-            fill="#1B1F23"
-            style={{ fontFamily: "var(--font-display)" }}
+            fill="#D4D4D4"
+            style={{ fontFamily: "var(--font-sans)" }}
           >
             ${(total / 1000).toFixed(1)}K
           </text>
@@ -117,7 +117,7 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
                 textAnchor="middle"
                 fontSize="8"
                 fill={services[hovered].color}
-                style={{ fontFamily: "var(--font-body)" }}
+                style={{ fontFamily: "var(--font-sans)" }}
               >
                 {services[hovered].label}
               </text>
@@ -127,8 +127,8 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
                 textAnchor="middle"
                 fontSize="14"
                 fontWeight="700"
-                fill="#1B1F23"
-                style={{ fontFamily: "var(--font-display)" }}
+                fill="#D4D4D4"
+                style={{ fontFamily: "var(--font-sans)" }}
               >
                 ${services[hovered].amount.toLocaleString()}
               </text>
@@ -151,9 +151,9 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
               style={{ backgroundColor: s.color, opacity: hovered === i ? 1 : 0.8 }}
             />
             <span
-              className="text-[11px] text-gray-500 leading-tight"
+              className="text-[11px] text-[#555555] leading-tight"
               style={{
-                color: hovered === i ? "#1B1F23" : undefined,
+                color: hovered === i ? "#D4D4D4" : undefined,
               }}
             >
               {s.label}

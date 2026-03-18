@@ -43,7 +43,7 @@ export function SlidePanel({
     <>
       {/* Overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-[#18181B]/25 backdrop-blur-[2px] transition-opacity duration-300 ${
+        className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px] transition-opacity duration-300 ${
           open
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -53,25 +53,25 @@ export function SlidePanel({
 
       {/* Panel */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 ${width} bg-white shadow-[0_20px_60px_rgba(0,0,0,0.12),0_4px_16px_rgba(0,0,0,0.06)] transform transition-transform duration-300 ease-out flex flex-col border-l border-[#E2DED8] ${
+        className={`fixed inset-y-0 right-0 z-50 ${width} bg-[#1A1A1A] shadow-[0_20px_60px_rgba(0,0,0,0.6),0_4px_16px_rgba(0,0,0,0.4)] transform transition-transform duration-300 ease-out flex flex-col border-l border-[#2C2C2C] ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-4.5 border-b border-[#ECEAE6] shrink-0">
+        <div className="flex items-start justify-between px-6 py-4 border-b border-[#2C2C2C] shrink-0">
           <div>
-            <h2 className="text-[16px] font-semibold text-[#18181B] font-display tracking-[-0.01em]">
+            <h2 className="text-[16px] font-bold text-[#D4D4D4] tracking-[-0.02em]">
               {title}
             </h2>
             {subtitle && (
-              <p className="text-[12px] text-[#18181B]/38 mt-0.5">
+              <p className="text-[12px] text-[#888888] mt-0.5">
                 {subtitle}
               </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-[#18181B]/[0.05] text-[#18181B]/35 hover:text-[#18181B]/60 transition-colors -mr-1.5 mt-0.5"
+            className="p-1.5 rounded-md hover:bg-white/[0.06] text-[#555555] hover:text-[#888888] transition-colors -mr-1.5 mt-0.5"
           >
             <X className="h-4 w-4" />
           </button>
@@ -95,7 +95,7 @@ export function FormSection({
 }) {
   return (
     <div className="space-y-3">
-      <p className="text-[10px] font-bold tracking-[0.1em] text-[#18181B]/30 uppercase">
+      <p className="text-[10px] font-bold tracking-[0.1em] text-[#555555] uppercase">
         {label}
       </p>
       {children}
@@ -114,7 +114,7 @@ export function FormField({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[12px] font-semibold text-[#18181B]/65">
+      <label className="text-[12px] font-semibold text-[#888888]">
         {label}
         {required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
@@ -129,7 +129,7 @@ export function FormInput({
   return (
     <input
       {...props}
-      className={`w-full px-3 py-2 text-[13px] bg-[#F6F4F1] border border-[#E2DED8] rounded-md focus:outline-none focus:ring-2 focus:ring-[#18181B]/[0.06] focus:border-[#18181B]/20 transition-all placeholder:text-[#18181B]/25 ${props.className || ""}`}
+      className={`w-full px-3 py-2 text-[13px] bg-[#252525] border border-[#2C2C2C] rounded-[4px] text-[#D4D4D4] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[#444444] ${props.className || ""}`}
       style={props.style}
     />
   );
@@ -141,7 +141,7 @@ export function FormTextarea({
   return (
     <textarea
       {...props}
-      className={`w-full px-3 py-2 text-[13px] bg-[#F6F4F1] border border-[#E2DED8] rounded-md focus:outline-none focus:ring-2 focus:ring-[#18181B]/[0.06] focus:border-[#18181B]/20 transition-all placeholder:text-[#18181B]/25 resize-none ${props.className || ""}`}
+      className={`w-full px-3 py-2 text-[13px] bg-[#252525] border border-[#2C2C2C] rounded-[4px] text-[#D4D4D4] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[#444444] resize-none ${props.className || ""}`}
       style={props.style}
     />
   );
@@ -154,7 +154,7 @@ export function FormSelect({
   return (
     <select
       {...props}
-      className={`w-full px-3 py-2 text-[13px] bg-[#F6F4F1] border border-[#E2DED8] rounded-md focus:outline-none focus:ring-2 focus:ring-[#18181B]/[0.06] focus:border-[#18181B]/20 transition-all ${props.className || ""}`}
+      className={`w-full px-3 py-2 text-[13px] bg-[#252525] border border-[#2C2C2C] rounded-[4px] text-[#D4D4D4] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all ${props.className || ""}`}
       style={props.style}
     >
       {children}
@@ -168,7 +168,7 @@ export function FormActions({
   children: React.ReactNode;
 }) {
   return (
-    <div className="sticky bottom-0 bg-white border-t border-[#ECEAE6] px-6 py-4 flex items-center justify-end gap-2.5">
+    <div className="sticky bottom-0 bg-[#1A1A1A] border-t border-[#2C2C2C] px-6 py-4 flex items-center justify-end gap-2.5">
       {children}
     </div>
   );
@@ -183,7 +183,7 @@ export function PrimaryButton({
     <button
       {...props}
       disabled={loading || props.disabled}
-      className={`px-5 py-2 bg-[#18181B] hover:bg-[#18181B]/88 text-white text-[13px] font-semibold rounded-lg shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${props.className || ""}`}
+      className={`px-5 py-2 bg-[#0071E3] hover:bg-[#0077ED] text-white text-[13px] font-semibold rounded-[4px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${props.className || ""}`}
       style={props.style}
     >
       {loading ? (
@@ -220,7 +220,7 @@ export function SecondaryButton({
   return (
     <button
       {...props}
-      className={`px-5 py-2 text-[13px] font-semibold text-[#18181B]/55 bg-white border border-[#E2DED8] rounded-lg hover:bg-[#F6F4F1] transition-colors ${props.className || ""}`}
+      className={`px-5 py-2 text-[13px] font-semibold text-[#888888] bg-transparent border border-[#2C2C2C] rounded-[4px] hover:bg-white/[0.04] hover:text-[#D4D4D4] transition-colors ${props.className || ""}`}
       style={props.style}
     >
       {children}
