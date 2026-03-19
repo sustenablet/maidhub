@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -18,6 +18,8 @@ import {
   ChevronDown,
   ArrowUpRight,
   Wallet,
+  Briefcase,
+  Check,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
@@ -26,6 +28,15 @@ interface Profile {
   business_name: string | null;
   subscription_status: string;
   trial_start_date: string;
+}
+
+interface NotifItem {
+  id: string;
+  label: string;
+  detail: string;
+  time: string;
+  color: string;
+  iconType: "job" | "invoice";
 }
 
 const homeNav = [
@@ -64,7 +75,23 @@ function getBreadcrumb(pathname: string) {
   const segments = pathname.split("/").filter(Boolean);
   if (segments.length === 1) return "Dashboard";
   const last = segments[segments.length - 1];
+  if (last.match(/^[0-9a-f-]{36}$/)) {
+    const parent = segments[segments.length - 2];
+    return parent.charAt(0).toUpperCase() + parent.slice(1, -1) + " Detail";
+  }
   return last.charAt(0).toUpperCase() + last.slice(1);
+}
+
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days === 1) return "Yesterday";
+  return `${days}d ago`;
 }
 
 function NavItem({
@@ -94,7 +121,7 @@ function NavItem({
           : "text-[#888888] hover:bg-white/[0.05] hover:text-[#D4D4D4]"
       }`}
     >
-      <Icon className={`h-[15px] w-[15px] shrink-0`} strokeWidth={isActive ? 2 : 1.6} />
+      <Icon className="h-[15px] w-[15px] shrink-0" strokeWidth={isActive ? 2 : 1.6} />
       <span className="flex-1">{label}</span>
       {badge !== undefined && badge > 0 && (
         <span className="flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#0071E3] px-1 text-[9px] font-bold text-white tabular-nums">
@@ -105,13 +132,7 @@ function NavItem({
   );
 }
 
-function NavSection({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function NavSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
       <p className="px-3 mb-1.5 text-[10px] font-semibold tracking-[0.1em] text-[#555555] uppercase">
@@ -131,25 +152,17 @@ function SidebarContent({
   notifCount: number;
   onNavClick?: () => void;
 }) {
-  const daysLeft = profile?.trial_start_date
-    ? getTrialDaysLeft(profile.trial_start_date)
-    : 14;
-  const isTrial =
-    !profile?.subscription_status ||
-    profile?.subscription_status === "trialing";
+  const daysLeft = profile?.trial_start_date ? getTrialDaysLeft(profile.trial_start_date) : 14;
+  const isTrial = !profile?.subscription_status || profile?.subscription_status === "trialing";
 
   return (
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 py-[18px]">
         <div className="flex h-[28px] w-[28px] items-center justify-center rounded-[4px] bg-[#0071E3]">
-          <span className="text-white font-bold text-[13px] leading-none tracking-tight">
-            M
-          </span>
+          <span className="text-white font-bold text-[13px] leading-none tracking-tight">M</span>
         </div>
-        <span className="text-[#D4D4D4] font-bold text-[15px] tracking-[-0.03em]">
-          MaidHub
-        </span>
+        <span className="text-[#D4D4D4] font-bold text-[15px] tracking-[-0.03em]">MaidHub</span>
       </div>
 
       {/* Nav */}
@@ -159,13 +172,11 @@ function SidebarContent({
             <NavItem key={item.href} {...item} onClick={onNavClick} />
           ))}
         </NavSection>
-
         <NavSection label="Finances">
           {financeNav.map((item) => (
             <NavItem key={item.href} {...item} onClick={onNavClick} />
           ))}
         </NavSection>
-
         <NavSection label="Account">
           {activityNav.map((item) => (
             <NavItem
@@ -182,13 +193,14 @@ function SidebarContent({
       {isTrial && (
         <div className="mx-3 mb-4 rounded-[4px] bg-[#1E1E1E] border border-[#2C2C2C] p-3.5">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-semibold text-[#555555] uppercase tracking-[0.08em]">
-              Free Trial
-            </p>
+            <p className="text-[10px] font-semibold text-[#555555] uppercase tracking-[0.08em]">Free Trial</p>
             <span className="text-[11px] font-medium text-[#888888] tabular-nums">{daysLeft}d left</span>
           </div>
           <div className="w-full h-[3px] rounded-full bg-white/[0.06] mb-3">
-            <div className="h-[3px] rounded-full bg-[#0071E3] transition-all" style={{ width: `${Math.min(100, ((30 - daysLeft) / 30) * 100)}%` }} />
+            <div
+              className="h-[3px] rounded-full bg-[#0071E3] transition-all"
+              style={{ width: `${Math.min(100, ((30 - daysLeft) / 30) * 100)}%` }}
+            />
           </div>
           <Link
             href="/dashboard/upgrade"
@@ -214,62 +226,107 @@ export function DashboardShell({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [notifCount, setNotifCount] = useState(0);
+  const [notifications, setNotifications] = useState<NotifItem[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createClient();
   const pathname = usePathname();
 
   const displayName = profile?.display_name || user.email?.split("@")[0] || "User";
-  const businessName = profile?.business_name || "My Business";
   const initials = getInitials(profile?.display_name, user.email || "U");
   const breadcrumb = getBreadcrumb(pathname);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close mobile drawer on route change
   useEffect(() => {
     setMobileOpen(false);
+    setNotifOpen(false);
   }, [pathname]);
 
-  // Fetch recent activity count (last 24h)
-  useEffect(() => {
-    async function fetchCount() {
-      const since = new Date();
-      since.setHours(since.getHours() - 24);
-      const isoSince = since.toISOString();
+  const fetchNotifications = useCallback(async () => {
+    const since = new Date();
+    since.setHours(since.getHours() - 24);
+    const isoSince = since.toISOString();
 
-      const [jobsRes, invRes] = await Promise.allSettled([
-        supabase
-          .from("jobs")
-          .select("id", { count: "exact", head: true })
-          .gte("updated_at", isoSince),
-        supabase
-          .from("invoices")
-          .select("id", { count: "exact", head: true })
-          .gte("updated_at", isoSince),
-      ]);
+    const [jobsRes, invRes] = await Promise.allSettled([
+      supabase
+        .from("jobs")
+        .select("id, status, service_type, updated_at, clients(first_name, last_name)")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(6),
+      supabase
+        .from("invoices")
+        .select("id, status, total, updated_at, clients(first_name, last_name)")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(6),
+    ]);
 
-      let total = 0;
-      if (jobsRes.status === "fulfilled" && jobsRes.value.count)
-        total += jobsRes.value.count;
-      if (invRes.status === "fulfilled" && invRes.value.count)
-        total += invRes.value.count;
-      setNotifCount(total);
+    const items: NotifItem[] = [];
+
+    if (jobsRes.status === "fulfilled" && jobsRes.value.data) {
+      for (const job of jobsRes.value.data) {
+        const clientData = job.clients as unknown as { first_name: string; last_name: string } | null;
+        const name = clientData ? `${clientData.first_name} ${clientData.last_name}` : "Client";
+        const statusLabel: Record<string, string> = {
+          scheduled: "Job scheduled",
+          in_progress: "Job in progress",
+          completed: "Job completed",
+          invoiced: "Job invoiced",
+          cancelled: "Job cancelled",
+        };
+        items.push({
+          id: `job-${job.id}`,
+          label: statusLabel[job.status] || "Job updated",
+          detail: `${name} · ${job.service_type || "Service"}`,
+          time: job.updated_at,
+          color: job.status === "completed" ? "text-[#34C759]" : job.status === "cancelled" ? "text-red-400" : "text-[#0071E3]",
+          iconType: "job",
+        });
+      }
     }
-    fetchCount();
-  }, [supabase, pathname]);
+
+    if (invRes.status === "fulfilled" && invRes.value.data) {
+      for (const inv of invRes.value.data) {
+        const clientData = inv.clients as unknown as { first_name: string; last_name: string } | null;
+        const name = clientData ? `${clientData.first_name} ${clientData.last_name}` : "Client";
+        items.push({
+          id: `inv-${inv.id}`,
+          label: inv.status === "paid" ? "Payment received" : "Invoice created",
+          detail: `${name} · $${(inv.total || 0).toFixed(2)}`,
+          time: inv.updated_at,
+          color: inv.status === "paid" ? "text-[#34C759]" : "text-[#FF9F0A]",
+          iconType: "invoice",
+        });
+      }
+    }
+
+    items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+    // Count items from last 24h
+    const recent = items.filter((i) => new Date(i.time) >= since);
+    setNotifCount(recent.length);
+    setNotifications(items.slice(0, 4));
+  }, [supabase, user.id]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications, pathname]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -304,26 +361,20 @@ export function DashboardShell({
         >
           <X className="h-4 w-4" />
         </button>
-        <SidebarContent
-          profile={profile}
-          notifCount={notifCount}
-          onNavClick={() => setMobileOpen(false)}
-        />
+        <SidebarContent profile={profile} notifCount={notifCount} onNavClick={() => setMobileOpen(false)} />
       </aside>
 
-      {/* Main content area */}
+      {/* Main content */}
       <div className="flex flex-1 flex-col min-w-0">
         {/* Topbar */}
         <header className="sticky top-0 z-30 h-[50px] bg-[#141414]/90 backdrop-blur-md border-b border-[#222222] flex items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
-            {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen(true)}
               className="md:hidden p-2 rounded-md hover:bg-white/[0.05] text-[#888888] transition-colors"
             >
               <Menu className="h-4 w-4" />
             </button>
-            {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-[13px]">
               <span className="text-[#444444] hidden sm:block">Home</span>
               <span className="text-[#333333] hidden sm:block">/</span>
@@ -332,23 +383,70 @@ export function DashboardShell({
           </div>
 
           <div className="flex items-center gap-1">
-            {/* Business name */}
-            <span className="hidden sm:block text-[13px] text-[#555555] mr-3 font-medium">
-              {businessName}
-            </span>
+            {/* Notification bell with dropdown */}
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={() => setNotifOpen(!notifOpen)}
+                className="relative p-2 rounded-md hover:bg-white/[0.05] text-[#888888] hover:text-[#D4D4D4] transition-colors"
+              >
+                <Bell className="h-4 w-4" strokeWidth={1.8} />
+                {notifCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-[#0071E3] px-0.5 text-[8px] font-bold text-white">
+                    {notifCount > 99 ? "99+" : notifCount}
+                  </span>
+                )}
+              </button>
 
-            {/* Bell */}
-            <Link
-              href="/dashboard/notifications"
-              className="relative p-2 rounded-md hover:bg-white/[0.05] text-[#888888] hover:text-[#D4D4D4] transition-colors"
-            >
-              <Bell className="h-4 w-4" strokeWidth={1.8} />
-              {notifCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-[#0071E3] px-0.5 text-[8px] font-bold text-white">
-                  {notifCount > 99 ? "99+" : notifCount}
-                </span>
+              {/* Notification dropdown */}
+              {notifOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-80 bg-[#1A1A1A] rounded-[8px] border border-[#2C2C2C] shadow-[0_8px_32px_rgba(0,0,0,0.6)] z-50 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-[#252525]">
+                    <span className="text-[13px] font-semibold text-[#D4D4D4]">Notifications</span>
+                    {notifCount > 0 && (
+                      <span className="text-[10px] font-semibold text-[#0071E3] bg-[#0071E3]/10 px-2 py-0.5 rounded-full">
+                        {notifCount} new
+                      </span>
+                    )}
+                  </div>
+
+                  {notifications.length === 0 ? (
+                    <div className="py-8 text-center">
+                      <Bell className="h-6 w-6 text-[#333333] mx-auto mb-2" strokeWidth={1.5} />
+                      <p className="text-[12px] text-[#555555]">No recent activity</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-[#222222]">
+                      {notifications.map((item) => (
+                        <div key={item.id} className="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">
+                          <div className={`mt-0.5 h-7 w-7 rounded-[4px] bg-[#252525] flex items-center justify-center shrink-0`}>
+                            {item.iconType === "invoice"
+                              ? <Receipt className={`h-3.5 w-3.5 ${item.color}`} strokeWidth={1.8} />
+                              : <Briefcase className={`h-3.5 w-3.5 ${item.color}`} strokeWidth={1.8} />
+                            }
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[12px] font-semibold text-[#D4D4D4] leading-tight">{item.label}</p>
+                            <p className="text-[11px] text-[#888888] truncate mt-0.5">{item.detail}</p>
+                          </div>
+                          <span className="text-[10px] text-[#444444] shrink-0 mt-0.5 tabular-nums">{timeAgo(item.time)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="border-t border-[#252525] p-2">
+                    <Link
+                      href="/dashboard/notifications"
+                      onClick={() => setNotifOpen(false)}
+                      className="flex items-center justify-center gap-1.5 w-full py-2 text-[12px] font-semibold text-[#0071E3] hover:bg-[#0071E3]/[0.08] rounded-[4px] transition-colors"
+                    >
+                      View all notifications
+                      <ArrowUpRight className="h-3 w-3" strokeWidth={2} />
+                    </Link>
+                  </div>
+                </div>
               )}
-            </Link>
+            </div>
 
             {/* User dropdown */}
             <div className="relative" ref={dropdownRef}>
@@ -357,27 +455,17 @@ export function DashboardShell({
                 className="flex items-center gap-2 pl-2 pr-1.5 py-1.5 rounded-md hover:bg-white/[0.05] transition-colors ml-0.5"
               >
                 <div className="h-6 w-6 rounded-full bg-[#0071E3]/20 border border-[#0071E3]/30 flex items-center justify-center shrink-0">
-                  <span className="text-[#0071E3] text-[9px] font-bold tracking-wide">
-                    {initials}
-                  </span>
+                  <span className="text-[#0071E3] text-[9px] font-bold tracking-wide">{initials}</span>
                 </div>
-                <span className="hidden sm:block text-[13px] font-medium text-[#D4D4D4]">
-                  {displayName}
-                </span>
-                <ChevronDown
-                  className={`h-3 w-3 text-[#555555] transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
-                />
+                <span className="hidden sm:block text-[13px] font-medium text-[#D4D4D4]">{displayName}</span>
+                <ChevronDown className={`h-3 w-3 text-[#555555] transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#1A1A1A] rounded-[6px] shadow-[0_4px_16px_rgba(0,0,0,0.5),0_1px_4px_rgba(0,0,0,0.4)] border border-[#2C2C2C] py-1 z-50 overflow-hidden">
+                <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#1A1A1A] rounded-[6px] shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-[#2C2C2C] py-1 z-50 overflow-hidden">
                   <div className="px-3.5 py-2.5 border-b border-[#2C2C2C]">
-                    <p className="text-[13px] font-semibold text-[#D4D4D4]">
-                      {displayName}
-                    </p>
-                    <p className="text-[11px] text-[#555555] truncate">
-                      {user.email}
-                    </p>
+                    <p className="text-[13px] font-semibold text-[#D4D4D4]">{displayName}</p>
+                    <p className="text-[11px] text-[#555555] truncate">{user.email}</p>
                   </div>
                   <div className="py-0.5">
                     <Link
