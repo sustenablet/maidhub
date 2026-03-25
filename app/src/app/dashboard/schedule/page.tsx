@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Plus,
@@ -76,8 +76,8 @@ const STATUS_COLORS: Record<
   },
   cancelled: {
     bg: "bg-[#2A2A2A]",
-    border: "border-[#3A3A3A]",
-    text: "text-[#555555]",
+    border: "border-[var(--mh-border-strong)]",
+    text: "text-[var(--mh-text-subtle)]",
   },
 };
 
@@ -189,6 +189,10 @@ export default function SchedulePage() {
   const [editJobId, setEditJobId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
+  /* Service pricing defaults (loaded from user settings) */
+  const servicePricesRef = useRef<Record<string, number>>({});
+  const defaultRateRef = useRef<number>(0);
+
   /* Recurring rules */
   const [recurringOpen, setRecurringOpen] = useState(false);
   const [recurringRules, setRecurringRules] = useState<RecurringRule[]>([]);
@@ -242,6 +246,28 @@ export default function SchedulePage() {
     }
   }, [formClientId, clients, formServiceType]);
 
+  /* Auto-fill price when service type is selected (create mode only) */
+  useEffect(() => {
+    if (formMode !== "create" || !formServiceType) return;
+    const typePrice = servicePricesRef.current[formServiceType];
+    if (typePrice != null && typePrice > 0) {
+      setFormPrice(String(typePrice));
+    } else if (defaultRateRef.current > 0) {
+      setFormPrice(String(defaultRateRef.current));
+    }
+  }, [formServiceType, formMode]);
+
+  /* Auto-fill price for recurring rule when service type is selected */
+  useEffect(() => {
+    if (!recServiceType) return;
+    const typePrice = servicePricesRef.current[recServiceType];
+    if (typePrice != null && typePrice > 0) {
+      setRecPrice(String(typePrice));
+    } else if (defaultRateRef.current > 0) {
+      setRecPrice(String(defaultRateRef.current));
+    }
+  }, [recServiceType]);
+
   /* ── Data fetching ──────────────────────────────────────────── */
 
   const fetchJobs = useCallback(async () => {
@@ -278,6 +304,19 @@ export default function SchedulePage() {
     setLoading(true);
     Promise.all([fetchJobs(), fetchClients()]).finally(() => setLoading(false));
   }, [fetchJobs, fetchClients]);
+
+  // Load service pricing defaults from user settings
+  useEffect(() => {
+    async function loadPricing() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from("users").select("settings").eq("id", user.id).single();
+      const biz = (((data?.settings || {}) as Record<string, unknown>).business || {}) as Record<string, unknown>;
+      defaultRateRef.current = Number(biz.default_rate) || 0;
+      servicePricesRef.current = (biz.service_type_prices || {}) as Record<string, number>;
+    }
+    loadPricing();
+  }, [supabase]);
 
   // Auto-open form when navigated with clientId param
   useEffect(() => {
@@ -757,7 +796,7 @@ export default function SchedulePage() {
         label: "Cancel",
         status: "cancelled",
         color:
-          "bg-white hover:bg-white/[0.03] text-[#888888] border border-[#2C2C2C]",
+          "bg-white hover:bg-white/[0.03] text-[var(--mh-text-muted)] border border-[var(--mh-border)]",
       });
     }
 
@@ -791,12 +830,12 @@ export default function SchedulePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1
-            className="text-[21px] font-semibold text-[#D4D4D4] tracking-[-0.02em]"
+            className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]"
           >
             Schedule
           </h1>
           <p
-            className="text-sm text-[#888888] mt-1"
+            className="text-sm text-[var(--mh-text-muted)] mt-1"
           >
             Manage your cleaning appointments
           </p>
@@ -804,7 +843,7 @@ export default function SchedulePage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => { setRecurringOpen(true); fetchRecurringRules(); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.06] hover:bg-white/[0.1] text-[#D4D4D4] text-sm font-semibold rounded-[6px] transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[var(--mh-hover-overlay)] hover:bg-white/[0.1] text-[var(--mh-text)] text-sm font-semibold rounded-[6px] transition-colors"
           >
             <Repeat className="h-4 w-4" />
             Recurring
@@ -820,39 +859,39 @@ export default function SchedulePage() {
       </div>
 
       {/* Week navigation */}
-      <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] px-4 py-3 flex items-center justify-between">
+      <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setWeekOffset((o) => o - 1)}
-            className="p-1.5 rounded-[6px] hover:bg-[#2A2A2A] text-[#888888] transition-colors"
+            className="p-1.5 rounded-[6px] hover:bg-[#2A2A2A] text-[var(--mh-text-muted)] transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             onClick={() => setWeekOffset((o) => o + 1)}
-            className="p-1.5 rounded-[6px] hover:bg-[#2A2A2A] text-[#888888] transition-colors"
+            className="p-1.5 rounded-[6px] hover:bg-[#2A2A2A] text-[var(--mh-text-muted)] transition-colors"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
           <span
-            className="text-sm font-semibold text-[#D4D4D4] ml-1"
+            className="text-sm font-semibold text-[var(--mh-text)] ml-1"
           >
             {formatWeekLabel(weekStart)}
           </span>
         </div>
         <button
           onClick={() => setWeekOffset(0)}
-          className="px-3 py-1.5 text-xs font-semibold text-[#D4D4D4] bg-white/[0.05] hover:bg-white/[0.08] rounded-[6px] transition-colors"
+          className="px-3 py-1.5 text-xs font-semibold text-[var(--mh-text)] bg-white/[0.05] hover:bg-white/[0.08] rounded-[6px] transition-colors"
         >
           Today
         </button>
       </div>
 
       {/* Calendar grid */}
-      <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] overflow-hidden">
+      <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] overflow-hidden">
         {loading ? (
           <div
-            className="flex items-center justify-center py-32 text-[#888888] text-sm"
+            className="flex items-center justify-center py-32 text-[var(--mh-text-muted)] text-sm"
           >
             Loading...
           </div>
@@ -861,7 +900,7 @@ export default function SchedulePage() {
             <div style={{ minWidth: "640px" }}>
               {/* Day headers */}
               <div
-                className="grid border-b border-[#252525]"
+                className="grid border-b border-[var(--mh-divider)]"
                 style={{
                   gridTemplateColumns: "52px repeat(7, 1fr)",
                 }}
@@ -872,11 +911,11 @@ export default function SchedulePage() {
                   return (
                     <div
                       key={i}
-                      className="flex flex-col items-center justify-center h-14 border-l border-[#252525]"
+                      className="flex flex-col items-center justify-center h-14 border-l border-[var(--mh-divider)]"
                     >
                       <span
                         className={`text-[10px] font-bold uppercase tracking-wider ${
-                          isToday ? "text-teal-600" : "text-[#888888]"
+                          isToday ? "text-teal-600" : "text-[var(--mh-text-muted)]"
                         }`}
                       >
                         {DAY_NAMES[i]}
@@ -885,7 +924,7 @@ export default function SchedulePage() {
                         className={`text-sm font-bold mt-0.5 leading-none ${
                           isToday
                             ? "bg-[#0071E3] text-white w-7 h-7 rounded-full flex items-center justify-center"
-                            : "text-[#D4D4D4]"
+                            : "text-[var(--mh-text)]"
                         }`}
                       >
                         {day.getDate()}
@@ -900,15 +939,15 @@ export default function SchedulePage() {
                 {/* Empty state overlay */}
                 {jobs.length === 0 && (
                   <div
-                    className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#141414]/80 backdrop-blur-[1px]"
+                    className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--mh-sidebar)]/80 backdrop-blur-[1px]"
                   >
                     <div className="w-12 h-12 rounded-[6px] bg-[#2A2A2A] flex items-center justify-center mb-3">
-                      <Calendar className="h-6 w-6 text-[#888888]" />
+                      <Calendar className="h-6 w-6 text-[var(--mh-text-muted)]" />
                     </div>
-                    <p className="text-sm font-semibold text-[#D4D4D4]">
+                    <p className="text-sm font-semibold text-[var(--mh-text)]">
                       No jobs this week
                     </p>
-                    <p className="text-xs text-[#888888] mt-1 mb-4">
+                    <p className="text-xs text-[var(--mh-text-muted)] mt-1 mb-4">
                       Schedule a job to see it appear here
                     </p>
                     <button
@@ -933,7 +972,7 @@ export default function SchedulePage() {
                     {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                       <div
                         key={i}
-                        className="absolute right-2 text-[10px] text-[#888888] font-medium leading-none"
+                        className="absolute right-2 text-[10px] text-[var(--mh-text-muted)] font-medium leading-none"
                         style={{
                           top: `${i * HOUR_HEIGHT - 5}px`,
                         }}
@@ -948,7 +987,7 @@ export default function SchedulePage() {
                   {weekDays.map((_, dayIndex) => (
                     <div
                       key={dayIndex}
-                      className="relative border-l border-[#252525]"
+                      className="relative border-l border-[var(--mh-divider)]"
                     >
                       {/* Horizontal hour lines */}
                       {Array.from({ length: TOTAL_HOURS }, (_, i) => (
@@ -963,7 +1002,7 @@ export default function SchedulePage() {
                       {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                         <div
                           key={`hover-${i}`}
-                          className="absolute left-0 right-0 hover:bg-white/[0.02] transition-colors"
+                          className="absolute left-0 right-0 hover:bg-[var(--mh-hover-overlay)] transition-colors"
                           style={{
                             top: `${i * HOUR_HEIGHT}px`,
                             height: `${HOUR_HEIGHT}px`,
@@ -1025,15 +1064,15 @@ export default function SchedulePage() {
             {/* Info rows */}
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <User className="h-4 w-4 text-[#888888] mt-0.5 shrink-0" />
+                <User className="h-4 w-4 text-[var(--mh-text-muted)] mt-0.5 shrink-0" />
                 <div>
                   <p
-                    className="text-xs text-[#888888] font-medium"
+                    className="text-xs text-[var(--mh-text-muted)] font-medium"
                   >
                     Client
                   </p>
                   <p
-                    className="text-sm font-semibold text-[#D4D4D4]"
+                    className="text-sm font-semibold text-[var(--mh-text)]"
                   >
                     {selectedJob.clients
                       ? `${selectedJob.clients.first_name} ${selectedJob.clients.last_name}`
@@ -1043,15 +1082,15 @@ export default function SchedulePage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <Calendar className="h-4 w-4 text-[#888888] mt-0.5 shrink-0" />
+                <Calendar className="h-4 w-4 text-[var(--mh-text-muted)] mt-0.5 shrink-0" />
                 <div>
                   <p
-                    className="text-xs text-[#888888] font-medium"
+                    className="text-xs text-[var(--mh-text-muted)] font-medium"
                   >
                     Date & Time
                   </p>
                   <p
-                    className="text-sm font-semibold text-[#D4D4D4]"
+                    className="text-sm font-semibold text-[var(--mh-text)]"
                   >
                     {new Date(
                       selectedJob.scheduled_date + "T00:00:00"
@@ -1064,7 +1103,7 @@ export default function SchedulePage() {
                   </p>
                   {selectedJob.start_time && (
                     <p
-                      className="text-sm text-[#888888]"
+                      className="text-sm text-[var(--mh-text-muted)]"
                     >
                       {formatTimeRange(
                         selectedJob.start_time,
@@ -1080,15 +1119,15 @@ export default function SchedulePage() {
 
               {selectedJob.addresses && (
                 <div className="flex items-start gap-3">
-                  <MapPin className="h-4 w-4 text-[#888888] mt-0.5 shrink-0" />
+                  <MapPin className="h-4 w-4 text-[var(--mh-text-muted)] mt-0.5 shrink-0" />
                   <div>
                     <p
-                      className="text-xs text-[#888888] font-medium"
+                      className="text-xs text-[var(--mh-text-muted)] font-medium"
                     >
                       Address
                     </p>
                     <p
-                      className="text-sm text-[#D4D4D4]"
+                      className="text-sm text-[var(--mh-text)]"
                     >
                       {formatAddress(selectedJob.addresses)}
                     </p>
@@ -1098,15 +1137,15 @@ export default function SchedulePage() {
 
               {selectedJob.price != null && (
                 <div className="flex items-start gap-3">
-                  <DollarSign className="h-4 w-4 text-[#888888] mt-0.5 shrink-0" />
+                  <DollarSign className="h-4 w-4 text-[var(--mh-text-muted)] mt-0.5 shrink-0" />
                   <div>
                     <p
-                      className="text-xs text-[#888888] font-medium"
+                      className="text-xs text-[var(--mh-text-muted)] font-medium"
                     >
                       Price
                     </p>
                     <p
-                      className="text-sm font-bold text-[#D4D4D4]"
+                      className="text-sm font-bold text-[var(--mh-text)]"
                     >
                       ${Number(selectedJob.price).toFixed(2)}
                     </p>
@@ -1116,15 +1155,15 @@ export default function SchedulePage() {
 
               {selectedJob.notes && (
                 <div className="flex items-start gap-3">
-                  <FileText className="h-4 w-4 text-[#888888] mt-0.5 shrink-0" />
+                  <FileText className="h-4 w-4 text-[var(--mh-text-muted)] mt-0.5 shrink-0" />
                   <div>
                     <p
-                      className="text-xs text-[#888888] font-medium"
+                      className="text-xs text-[var(--mh-text-muted)] font-medium"
                     >
                       Notes
                     </p>
                     <p
-                      className="text-sm text-[#888888] whitespace-pre-wrap"
+                      className="text-sm text-[var(--mh-text-muted)] whitespace-pre-wrap"
                     >
                       {selectedJob.notes}
                     </p>
@@ -1134,14 +1173,14 @@ export default function SchedulePage() {
             </div>
 
             {/* Divider */}
-            <div className="border-t border-[#252525]" />
+            <div className="border-t border-[var(--mh-divider)]" />
 
             {/* Edit + Delete + Status actions */}
             <div className="flex flex-wrap gap-2">
               {selectedJob.status !== "invoiced" && selectedJob.status !== "cancelled" && (
                 <button
                   onClick={() => openEditForm(selectedJob)}
-                  className="px-4 py-2 text-sm font-semibold rounded-[6px] transition-colors bg-white/[0.06] text-[#D4D4D4] hover:bg-white/[0.1]"
+                  className="px-4 py-2 text-sm font-semibold rounded-[6px] transition-colors bg-[var(--mh-hover-overlay)] text-[var(--mh-text)] hover:bg-white/[0.1]"
                 >
                   Edit Job
                 </button>
@@ -1303,7 +1342,7 @@ export default function SchedulePage() {
         <div className="px-6 py-5 space-y-4">
           <button
             onClick={() => { setRecurringFormOpen(true); resetRecurringForm(); }}
-            className="flex items-center gap-2 w-full px-4 py-3 bg-white/[0.04] hover:bg-white/[0.07] text-[#D4D4D4] text-sm font-semibold rounded-[6px] transition-colors border border-dashed border-[#18181B]/15"
+            className="flex items-center gap-2 w-full px-4 py-3 bg-white/[0.04] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text)] text-sm font-semibold rounded-[6px] transition-colors border border-dashed border-[#18181B]/15"
           >
             <Plus className="h-4 w-4" />
             New Recurring Rule
@@ -1312,10 +1351,10 @@ export default function SchedulePage() {
           {recurringRules.length === 0 ? (
             <div className="py-12 text-center">
               <Repeat className="h-8 w-8 text-gray-200 mx-auto mb-3" />
-              <p className="text-sm font-semibold text-[#888888]">
+              <p className="text-sm font-semibold text-[var(--mh-text-muted)]">
                 No recurring rules
               </p>
-              <p className="text-xs text-[#888888] mt-1">
+              <p className="text-xs text-[var(--mh-text-muted)] mt-1">
                 Create a rule to auto-generate jobs
               </p>
             </div>
@@ -1334,16 +1373,16 @@ export default function SchedulePage() {
                     key={rule.id}
                     className={`p-4 rounded-[6px] border transition-colors ${
                       rule.is_active
-                        ? "bg-white border-[#2C2C2C]"
-                        : "bg-gray-50 border-[#252525] opacity-60"
+                        ? "bg-white border-[var(--mh-border)]"
+                        : "bg-gray-50 border-[var(--mh-divider)] opacity-60"
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-[13px] font-semibold text-[#D4D4D4]">
+                        <p className="text-[13px] font-semibold text-[var(--mh-text)]">
                           {clientName}
                         </p>
-                        <p className="text-[11px] text-[#888888] mt-0.5">
+                        <p className="text-[11px] text-[var(--mh-text-muted)] mt-0.5">
                           {freqLabel} &middot; {rule.service_type || "Cleaning"} &middot; {rule.price != null ? `$${rule.price}` : "No price"}
                         </p>
                       </div>
@@ -1352,7 +1391,7 @@ export default function SchedulePage() {
                         className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-colors ${
                           rule.is_active
                             ? "bg-[#34C759]/10 text-green-600"
-                            : "bg-[#2A2A2A] text-[#888888]"
+                            : "bg-[#2A2A2A] text-[var(--mh-text-muted)]"
                         }`}
                       >
                         {rule.is_active ? "Active" : "Paused"}
@@ -1362,7 +1401,7 @@ export default function SchedulePage() {
                       <button
                         onClick={() => generateJobs(rule)}
                         disabled={!rule.is_active || recGenerating === rule.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-[#252525] border border-[#3A3A3A] text-[#D4D4D4] rounded-[6px] hover:bg-[#2E2E2E] disabled:opacity-40 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] text-[var(--mh-text)] rounded-[6px] hover:bg-[#2E2E2E] disabled:opacity-40 transition-colors"
                       >
                         {recGenerating === rule.id ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
@@ -1373,7 +1412,7 @@ export default function SchedulePage() {
                       </button>
                       <button
                         onClick={() => deleteRule(rule.id)}
-                        className="p-1.5 text-[#555555] hover:text-red-400 transition-colors"
+                        className="p-1.5 text-[var(--mh-text-subtle)] hover:text-red-400 transition-colors"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>

@@ -43,9 +43,9 @@ function FieldGroup({ children }: { children: React.ReactNode }) {
 function SectionHeader({ title, description }: { title: string; description?: string }) {
   return (
     <div className="pb-1">
-      <h3 className="text-[14px] font-bold text-[#D4D4D4]">{title}</h3>
+      <h3 className="text-[14px] font-bold text-[var(--mh-text)]">{title}</h3>
       {description && (
-        <p className="text-[12px] text-[#888888] mt-0.5">{description}</p>
+        <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">{description}</p>
       )}
     </div>
   );
@@ -64,13 +64,13 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="flex items-center gap-1.5 text-[12px] font-semibold text-[#888888]">
+      <label className="flex items-center gap-1.5 text-[12px] font-semibold text-[var(--mh-text-muted)]">
         {Icon && <Icon className="h-3 w-3" strokeWidth={1.8} />}
         {label}
       </label>
       {children}
       {hint && (
-        <p className="text-[11px] text-[#555555]">{hint}</p>
+        <p className="text-[11px] text-[var(--mh-text-subtle)]">{hint}</p>
       )}
     </div>
   );
@@ -80,7 +80,7 @@ function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputEleme
   return (
     <input
       {...props}
-      className={`w-full px-3 py-2 text-[13px] bg-white/[0.015] border border-[#2C2C2C] rounded-[6px] outline-none transition-all focus:border-[#0071E3]/60 focus:shadow-[0_0_0_3px_rgba(26,35,50,0.04)] placeholder:text-[#555555] ${className || ""}`}
+      className={`w-full px-3 py-2 text-[13px] bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)] rounded-[6px] outline-none transition-all focus:border-[#0071E3]/60 focus:shadow-[0_0_0_3px_rgba(26,35,50,0.04)] placeholder:text-[var(--mh-text-subtle)] ${className || ""}`}
       style={props.style}
     />
   );
@@ -90,7 +90,7 @@ function TextArea({ className, ...props }: React.TextareaHTMLAttributes<HTMLText
   return (
     <textarea
       {...props}
-      className={`w-full px-3 py-2 text-[13px] bg-white/[0.015] border border-[#2C2C2C] rounded-[6px] outline-none transition-all focus:border-[#0071E3]/60 focus:shadow-[0_0_0_3px_rgba(26,35,50,0.04)] placeholder:text-[#555555] resize-none ${className || ""}`}
+      className={`w-full px-3 py-2 text-[13px] bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)] rounded-[6px] outline-none transition-all focus:border-[#0071E3]/60 focus:shadow-[0_0_0_3px_rgba(26,35,50,0.04)] placeholder:text-[var(--mh-text-subtle)] resize-none ${className || ""}`}
       style={props.style}
     />
   );
@@ -110,11 +110,11 @@ function Toggle({
       aria-checked={enabled}
       onClick={() => onChange(!enabled)}
       className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200 ${
-        enabled ? "bg-[#0071E3]" : "bg-white/[0.12]"
+        enabled ? "bg-[#0071E3]" : "bg-[var(--mh-toggle-off)]"
       }`}
     >
       <span
-        className={`inline-block h-3.5 w-3.5 rounded-full bg-[#1E1E1E] shadow-sm transition-transform duration-200 ${
+        className={`inline-block h-3.5 w-3.5 rounded-full bg-[var(--mh-surface)] shadow-sm transition-transform duration-200 ${
           enabled ? "translate-x-[18px]" : "translate-x-[3px]"
         }`}
       />
@@ -134,10 +134,10 @@ function NotifRow({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between py-3.5 border-b border-[#252525] last:border-0">
+    <div className="flex items-center justify-between py-3.5 border-b border-[var(--mh-divider)] last:border-0">
       <div className="pr-4">
-        <p className="text-[13px] font-semibold text-[#D4D4D4]">{label}</p>
-        <p className="text-[12px] text-[#888888] mt-0.5 leading-relaxed">{description}</p>
+        <p className="text-[13px] font-semibold text-[var(--mh-text)]">{label}</p>
+        <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5 leading-relaxed">{description}</p>
       </div>
       <Toggle enabled={enabled} onChange={onChange} />
     </div>
@@ -146,7 +146,7 @@ function NotifRow({
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] shadow-[0_1px_3px_rgba(0,0,0,0.4)] overflow-hidden">
+    <div className="bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] shadow-[0_1px_3px_rgba(0,0,0,0.4)] overflow-hidden">
       {children}
     </div>
   );
@@ -154,10 +154,10 @@ function Card({ children }: { children: React.ReactNode }) {
 
 function CardHeader({ title, description }: { title: string; description?: string }) {
   return (
-    <div className="px-6 py-4 border-b border-[#2C2C2C]">
-      <h2 className="text-[15px] font-bold text-[#D4D4D4]">{title}</h2>
+    <div className="px-6 py-4 border-b border-[var(--mh-border)]">
+      <h2 className="text-[15px] font-bold text-[var(--mh-text)]">{title}</h2>
       {description && (
-        <p className="text-[12px] text-[#888888] mt-0.5">{description}</p>
+        <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">{description}</p>
       )}
     </div>
   );
@@ -169,7 +169,7 @@ function CardBody({ children, className }: { children: React.ReactNode; classNam
 
 function CardFooter({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-6 py-4 border-t border-[#2C2C2C] flex justify-end gap-3">
+    <div className="px-6 py-4 border-t border-[var(--mh-border)] flex justify-end gap-3">
       {children}
     </div>
   );
@@ -209,6 +209,7 @@ export default function SettingsPage() {
 
   // Business
   const [serviceTypes, setServiceTypes] = useState<string[]>([...SERVICE_TYPES]);
+  const [servicePrices, setServicePrices] = useState<Record<string, string>>({});
   const [newService, setNewService] = useState("");
   const [defaultRate, setDefaultRate] = useState("50");
   const [taxRate, setTaxRate] = useState("0");
@@ -270,6 +271,10 @@ export default function SettingsPage() {
         if (Array.isArray(biz.service_types) && biz.service_types.length > 0) {
           setServiceTypes(biz.service_types as string[]);
         }
+        if (biz.service_type_prices && typeof biz.service_type_prices === "object") {
+          const raw = biz.service_type_prices as Record<string, unknown>;
+          setServicePrices(Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, String(v)])));
+        }
         if (biz.default_rate != null) setDefaultRate(String(biz.default_rate));
         if (biz.tax_rate != null) setTaxRate(String(biz.tax_rate));
         if (biz.payment_terms != null) setPaymentTerms(String(biz.payment_terms));
@@ -294,25 +299,6 @@ export default function SettingsPage() {
     load();
   }, [supabase]);
 
-  // Helper to read current settings from DB and merge updates
-  async function mergeSettings(userId: string, path: string, value: unknown) {
-    const { data: current } = await supabase
-      .from("users")
-      .select("settings")
-      .eq("id", userId)
-      .single();
-
-    const settings = ((current?.settings || {}) as Record<string, unknown>);
-    settings[path] = value;
-
-    const { error } = await supabase
-      .from("users")
-      .update({ settings, updated_at: new Date().toISOString() })
-      .eq("id", userId);
-
-    return error;
-  }
-
   async function handleProfileSave(e: React.FormEvent) {
     e.preventDefault();
     setProfileSaving(true);
@@ -320,46 +306,40 @@ export default function SettingsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setProfileSaving(false); return; }
 
-    // Update profile fields
-    const { error: profileError } = await supabase
+    // Fetch current settings once so we don't clobber other keys
+    const { data: userData } = await supabase
+      .from("users").select("settings").eq("id", user.id).single();
+    const currentSettings = ((userData?.settings || {}) as Record<string, unknown>);
+    const currentBiz = ((currentSettings.business || {}) as Record<string, unknown>);
+
+    const { error } = await supabase
       .from("users")
       .update({
         display_name: displayName,
         business_name: businessName,
         phone,
+        settings: {
+          ...currentSettings,
+          business: {
+            ...currentBiz,
+            business_address: {
+              street: businessStreet,
+              city: businessCity,
+              state: businessState,
+              zip: businessZip,
+            },
+          },
+        },
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id);
 
-    if (profileError) {
-      toast.error(profileError.message);
-      setProfileSaving(false);
-      return;
-    }
-
-    // Also persist business address in settings.business.business_address
-    const addressError = await mergeSettings(user.id, "business", {
-      ...(await getCurrentBusinessSettings(user.id)),
-      business_address: {
-        street: businessStreet,
-        city: businessCity,
-        state: businessState,
-        zip: businessZip,
-      },
-    });
-
-    if (addressError) {
-      toast.error("Profile saved but address preferences failed");
+    setProfileSaving(false);
+    if (error) {
+      toast.error(error.message);
     } else {
       toast.success("Profile updated");
     }
-    setProfileSaving(false);
-  }
-
-  async function getCurrentBusinessSettings(userId: string) {
-    const { data } = await supabase.from("users").select("settings").eq("id", userId).single();
-    const settings = ((data?.settings || {}) as Record<string, unknown>);
-    return (settings.business || {}) as Record<string, unknown>;
   }
 
   async function handleBusinessSave() {
@@ -369,6 +349,11 @@ export default function SettingsPage() {
 
     const bizSettings = {
       service_types: serviceTypes,
+      service_type_prices: Object.fromEntries(
+        Object.entries(servicePrices)
+          .filter(([, v]) => v !== "" && !isNaN(parseFloat(v)))
+          .map(([k, v]) => [k, parseFloat(v)])
+      ),
       default_rate: parseFloat(defaultRate) || 0,
       tax_rate: parseFloat(taxRate) || 0,
       payment_terms: parseInt(paymentTerms) || 14,
@@ -477,7 +462,7 @@ export default function SettingsPage() {
   if (initialLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-5 w-5 text-[#888888] animate-spin" />
+        <Loader2 className="h-5 w-5 text-[var(--mh-text-muted)] animate-spin" />
       </div>
     );
   }
@@ -486,10 +471,10 @@ export default function SettingsPage() {
     <div className="space-y-5">
       {/* Header */}
       <div>
-        <h1 className="text-[21px] font-semibold text-[#D4D4D4] tracking-[-0.02em]">
+        <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
           Settings
         </h1>
-        <p className="text-[13px] text-[#888888] mt-0.5">
+        <p className="text-[13px] text-[var(--mh-text-muted)] mt-0.5">
           Manage your profile, business, and account preferences
         </p>
       </div>
@@ -507,8 +492,8 @@ export default function SettingsPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-left transition-all whitespace-nowrap lg:whitespace-normal min-w-fit ${
                     isActive
-                      ? "bg-[#252525] border border-[#3A3A3A] text-[#D4D4D4]"
-                      : "text-[#888888] hover:text-[#D4D4D4] hover:bg-[#252525]/60"
+                      ? "bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] text-[var(--mh-text)]"
+                      : "text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] hover:bg-[var(--mh-surface-raised)]/60"
                   }`}
                 >
                   <div className={`h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 ${
@@ -518,7 +503,7 @@ export default function SettingsPage() {
                   </div>
                   <div className="hidden lg:block">
                     <p className="text-[13px] font-semibold leading-tight">{tab.label}</p>
-                    <p className={`text-[11px] mt-0.5 ${isActive ? "text-[#888888]" : "text-[#555555]"}`}>
+                    <p className={`text-[11px] mt-0.5 ${isActive ? "text-[var(--mh-text-muted)]" : "text-[var(--mh-text-subtle)]"}`}>
                       {tab.description}
                     </p>
                   </div>
@@ -541,8 +526,8 @@ export default function SettingsPage() {
                   <CardBody className="space-y-5">
                     {/* Avatar + name row */}
                     <div className="flex items-start gap-4">
-                      <div className="h-14 w-14 rounded-[6px] bg-white/[0.07] flex items-center justify-center shrink-0">
-                        <span className="text-[#D4D4D4] text-lg font-bold">
+                      <div className="h-14 w-14 rounded-[6px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
+                        <span className="text-[var(--mh-text)] text-lg font-bold">
                           {displayName ? displayName.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "?"}
                         </span>
                       </div>
@@ -658,20 +643,37 @@ export default function SettingsPage() {
                     </button>
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-3 px-3 pb-1.5">
+                      <div className="flex-1" />
+                      <span className="text-[11px] font-semibold text-[var(--mh-text-subtle)] w-24 text-right pr-1">Default Price</span>
+                      <div className="w-5" />
+                    </div>
                     {serviceTypes.map((service, index) => (
                       <div
                         key={`${service}-${index}`}
-                        className="flex items-center gap-3 px-3 py-2.5 bg-white/[0.015] border border-[#2C2C2C] rounded-[6px] group hover:bg-white/[0.04] transition-colors"
+                        className="flex items-center gap-3 px-3 py-2 bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)] rounded-[6px] group hover:bg-[var(--mh-hover-overlay)] transition-colors"
                       >
                         <div className="h-1.5 w-1.5 rounded-full bg-[#555555] shrink-0" />
-                        <span className="flex-1 text-[13px] text-[#D4D4D4]">
+                        <span className="flex-1 text-[13px] text-[var(--mh-text)]">
                           {service}
                         </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="text-[12px] text-[var(--mh-text-subtle)]">$</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="5"
+                            placeholder="—"
+                            value={servicePrices[service] || ""}
+                            onChange={(e) => setServicePrices(prev => ({ ...prev, [service]: e.target.value }))}
+                            className="w-20 px-2 py-1 text-[12px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] rounded-[4px] text-[var(--mh-text)] outline-none focus:border-[#0071E3]/50 placeholder:text-[var(--mh-text-faint)] text-right"
+                          />
+                        </div>
                         <button
                           type="button"
                           onClick={() => removeServiceType(index)}
-                          className="p-1 rounded text-[#555555] hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                          className="p-1 rounded text-[var(--mh-text-subtle)] hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -679,19 +681,22 @@ export default function SettingsPage() {
                     ))}
                   </div>
 
-                  <p className="text-[11px] text-[#555555]">
-                    {serviceTypes.length} service type{serviceTypes.length !== 1 ? "s" : ""} configured
+                  <p className="text-[11px] text-[var(--mh-text-subtle)]">
+                    {serviceTypes.length} service type{serviceTypes.length !== 1 ? "s" : ""} · Prices auto-fill when scheduling a job, always overridable per job
                   </p>
                 </CardBody>
+                <CardFooter>
+                  <SaveButton loading={businessSaving} onClick={handleBusinessSave} />
+                </CardFooter>
               </Card>
 
               <Card>
-                <CardHeader title="Default Pricing" description="Defaults when creating new jobs and invoices. You can always override per-job." />
+                <CardHeader title="Other Defaults" description="Fallback defaults for jobs without a specific service type price." />
                 <CardBody className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field label="Default Job Rate" icon={DollarSign} hint="Used when creating new jobs">
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-[#888888]">$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-[var(--mh-text-muted)]">$</span>
                         <Input
                           type="number"
                           min="0"
@@ -716,7 +721,7 @@ export default function SettingsPage() {
                           className="pr-7"
                           placeholder="0"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-[#888888]">%</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-[var(--mh-text-muted)]">%</span>
                       </div>
                     </Field>
 
@@ -731,13 +736,13 @@ export default function SettingsPage() {
                           className="pr-12"
                           placeholder="120"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-[#555555]">min</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-[var(--mh-text-subtle)]">min</span>
                       </div>
                     </Field>
 
                     <Field label="Payment Terms" icon={Hash} hint="Days until invoice is due">
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-[#555555]">Net</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-[var(--mh-text-subtle)]">Net</span>
                         <Input
                           type="number"
                           min="0"
@@ -747,7 +752,7 @@ export default function SettingsPage() {
                           className="pl-10"
                           placeholder="14"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-[#555555]">days</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-[var(--mh-text-subtle)]">days</span>
                       </div>
                     </Field>
                   </div>
@@ -801,9 +806,9 @@ export default function SettingsPage() {
                 </CardFooter>
               </Card>
 
-              <div className="bg-white/[0.02] rounded-[6px] border border-[#2C2C2C] px-5 py-4">
-                <p className="text-[12px] text-[#888888] leading-relaxed">
-                  Email notifications are sent to <span className="font-semibold text-[#888888]">{email}</span>.
+              <div className="bg-[var(--mh-surface-sunken)] rounded-[6px] border border-[var(--mh-border)] px-5 py-4">
+                <p className="text-[12px] text-[var(--mh-text-muted)] leading-relaxed">
+                  Email notifications are sent to <span className="font-semibold text-[var(--mh-text-muted)]">{email}</span>.
                   To change your email address, update it through your login provider.
                 </p>
               </div>
@@ -816,45 +821,45 @@ export default function SettingsPage() {
               <Card>
                 <CardHeader title="Subscription" />
                 <CardBody className="space-y-0">
-                  <div className="flex items-center justify-between py-3.5 border-b border-[#252525]">
+                  <div className="flex items-center justify-between py-3.5 border-b border-[var(--mh-divider)]">
                     <div>
-                      <p className="text-[13px] font-semibold text-[#D4D4D4]">Current Plan</p>
-                      <p className="text-[12px] text-[#888888] mt-0.5">
+                      <p className="text-[13px] font-semibold text-[var(--mh-text)]">Current Plan</p>
+                      <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
                         {subscriptionPlan === "solo" ? "Solo Cleaner" : "Team"} Plan
                       </p>
                     </div>
                     <span
-                      className="px-2.5 py-1 text-[10px] font-semibold bg-white/[0.06] text-[#888888] rounded-md uppercase tracking-wider"
+                      className="px-2.5 py-1 text-[10px] font-semibold bg-[var(--mh-hover-overlay)] text-[var(--mh-text-muted)] rounded-md uppercase tracking-wider"
                     >
                       {subscriptionStatus}
                     </span>
                   </div>
 
                   {subscriptionStatus === "trialing" && (
-                    <div className="flex items-center justify-between py-3.5 border-b border-[#252525]">
+                    <div className="flex items-center justify-between py-3.5 border-b border-[var(--mh-divider)]">
                       <div>
-                        <p className="text-[13px] font-semibold text-[#D4D4D4]">Trial Period</p>
-                        <p className="text-[12px] text-[#888888] mt-0.5">
+                        <p className="text-[13px] font-semibold text-[var(--mh-text)]">Trial Period</p>
+                        <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
                           {getTrialDaysLeft()} days remaining in your free trial
                         </p>
                       </div>
                       <div className="h-8 w-8 rounded-[6px] bg-white/[0.05] flex items-center justify-center">
-                        <Clock className="h-4 w-4 text-[#888888]" strokeWidth={1.8} />
+                        <Clock className="h-4 w-4 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
                       </div>
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between py-3.5 border-b border-[#252525]">
+                  <div className="flex items-center justify-between py-3.5 border-b border-[var(--mh-divider)]">
                     <div>
-                      <p className="text-[13px] font-semibold text-[#D4D4D4]">Email</p>
-                      <p className="text-[12px] text-[#888888] mt-0.5">{email}</p>
+                      <p className="text-[13px] font-semibold text-[var(--mh-text)]">Email</p>
+                      <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">{email}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between py-3.5">
                     <div>
-                      <p className="text-[13px] font-semibold text-[#D4D4D4]">Payment Method</p>
-                      <p className="text-[12px] text-[#888888] mt-0.5">
+                      <p className="text-[13px] font-semibold text-[var(--mh-text)]">Payment Method</p>
+                      <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
                         {subscriptionStatus === "trialing" ? "No payment method on file" : "Managed by Square"}
                       </p>
                     </div>
@@ -871,7 +876,7 @@ export default function SettingsPage() {
                     <p className="text-[14px] font-semibold text-[#60AAFF]">
                       Upgrade your plan
                     </p>
-                    <p className="text-[12px] text-[#888888] mt-0.5">
+                    <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
                       Get unlimited access to all MaidHub features
                     </p>
                   </div>
@@ -906,7 +911,7 @@ export default function SettingsPage() {
                       type="button"
                       onClick={handlePasswordChange}
                       disabled={passwordSaving || !newPassword || !confirmPassword}
-                      className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold bg-[#252525] border border-[#3A3A3A] text-[#D4D4D4] rounded-[6px] hover:bg-[#2E2E2E] hover:border-[#444444] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] text-[var(--mh-text)] rounded-[6px] hover:bg-[#2E2E2E] hover:border-[#444444] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {passwordSaving ? (
                         <>
@@ -929,7 +934,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <CardBody className="space-y-3">
-                  <p className="text-[12px] text-[#888888] leading-relaxed">
+                  <p className="text-[12px] text-[var(--mh-text-muted)] leading-relaxed">
                     Deleting your account is permanent. All your data including clients, jobs, invoices,
                     and estimates will be permanently removed. This action cannot be undone.
                   </p>
@@ -949,23 +954,23 @@ export default function SettingsPage() {
 
       {/* Delete Account Modal */}
       {deleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={() => setDeleteModalOpen(false)}>
-          <div className="bg-[#1E1E1E] border border-[#2C2C2C] rounded-[8px] shadow-[0_8px_40px_rgba(0,0,0,0.6)] w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-            <div className="px-6 py-5 border-b border-[#2C2C2C] flex items-center gap-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--mh-overlay-scrim)] px-4" onClick={() => setDeleteModalOpen(false)}>
+          <div className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[8px] shadow-[0_8px_40px_rgba(0,0,0,0.6)] w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-[var(--mh-border)] flex items-center gap-3">
               <div className="h-9 w-9 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
                 <AlertTriangle className="h-4.5 w-4.5 text-red-400" strokeWidth={1.8} />
               </div>
               <div>
-                <h2 className="text-[15px] font-bold text-[#D4D4D4]">Delete Account</h2>
-                <p className="text-[12px] text-[#888888] mt-0.5">This action is permanent and cannot be undone.</p>
+                <h2 className="text-[15px] font-bold text-[var(--mh-text)]">Delete Account</h2>
+                <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">This action is permanent and cannot be undone.</p>
               </div>
             </div>
             <div className="px-6 py-5 space-y-4">
-              <p className="text-[13px] text-[#888888] leading-relaxed">
+              <p className="text-[13px] text-[var(--mh-text-muted)] leading-relaxed">
                 All your data — clients, jobs, invoices, estimates, and settings — will be permanently deleted. Your subscription will be cancelled immediately.
               </p>
               <div className="space-y-1.5">
-                <label className="text-[12px] font-semibold text-[#888888]">
+                <label className="text-[12px] font-semibold text-[var(--mh-text-muted)]">
                   Type <span className="text-red-400 font-mono">DELETE</span> to confirm
                 </label>
                 <input
@@ -973,15 +978,15 @@ export default function SettingsPage() {
                   value={deleteConfirmText}
                   onChange={(e) => setDeleteConfirmText(e.target.value)}
                   placeholder="DELETE"
-                  className="w-full px-3 py-2.5 text-[13px] bg-[#252525] border border-[#2C2C2C] rounded-[6px] outline-none focus:border-red-500/50 placeholder:text-[#444444] text-[#D4D4D4] transition-colors"
+                  className="w-full px-3 py-2.5 text-[13px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] outline-none focus:border-red-500/50 placeholder:text-[var(--mh-text-faint)] text-[var(--mh-text)] transition-colors"
                 />
               </div>
             </div>
-            <div className="px-6 py-4 border-t border-[#2C2C2C] flex items-center justify-end gap-3">
+            <div className="px-6 py-4 border-t border-[var(--mh-border)] flex items-center justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setDeleteModalOpen(false)}
-                className="px-4 py-2 text-[13px] font-semibold text-[#888888] hover:text-[#D4D4D4] border border-[#2C2C2C] hover:border-[#3A3A3A] rounded-[6px] transition-colors"
+                className="px-4 py-2 text-[13px] font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] border border-[var(--mh-border)] hover:border-[var(--mh-border-strong)] rounded-[6px] transition-colors"
               >
                 Cancel
               </button>
