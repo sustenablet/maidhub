@@ -85,31 +85,32 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
             );
           })}
 
-          {/* Center text */}
-          <text
-            x={cx}
-            y={cy - 9}
-            textAnchor="middle"
-            fontSize="8.5"
-            fill="#555555"
-            style={{ fontFamily: "var(--font-sans)" }}
-          >
-            Revenue Total
-          </text>
-          <text
-            x={cx}
-            y={cy + 11}
-            textAnchor="middle"
-            fontSize="15"
-            fontWeight="700"
-            fill="#D4D4D4"
-            style={{ fontFamily: "var(--font-sans)" }}
-          >
-            ${(total / 1000).toFixed(1)}K
-          </text>
-
-          {/* Hover tooltip in center */}
-          {hovered !== null && (
+          {/* Center text — mutually exclusive: default OR hover */}
+          {hovered === null ? (
+            <>
+              <text
+                x={cx}
+                y={cy - 9}
+                textAnchor="middle"
+                fontSize="8.5"
+                fill="#555555"
+                style={{ fontFamily: "var(--font-sans)" }}
+              >
+                Revenue Total
+              </text>
+              <text
+                x={cx}
+                y={cy + 11}
+                textAnchor="middle"
+                fontSize="15"
+                fontWeight="700"
+                fill="#D4D4D4"
+                style={{ fontFamily: "var(--font-sans)" }}
+              >
+                ${(total / 1000).toFixed(1)}K
+              </text>
+            </>
+          ) : (
             <>
               <text
                 x={cx}

@@ -22,6 +22,8 @@ interface ActivityItem {
   timestamp: string;
   relativeTime: string;
   unread: boolean;
+  count?: number;
+  groupKey?: string;
 }
 
 function getRelativeTime(dateStr: string): string {
@@ -130,6 +132,7 @@ export default function NotificationsPage() {
           timestamp: job.updated_at || job.created_at,
           relativeTime: getRelativeTime(job.updated_at || job.created_at),
           unread: !readIds.has(`job-${job.id}`),
+          groupKey: `${job.status}-${clientName}-${job.service_type || ""}`,
         });
       }
     }
@@ -234,7 +237,24 @@ export default function NotificationsPage() {
 
     // Sort all by timestamp descending
     items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    setActivities(items);
+
+    // Deduplicate: group same groupKey within 10 minutes, keeping latest timestamp
+    const deduped: ActivityItem[] = [];
+    for (const item of items) {
+      if (item.groupKey) {
+        const existing = deduped.find(
+          (d) => d.groupKey === item.groupKey &&
+          Math.abs(new Date(d.timestamp).getTime() - new Date(item.timestamp).getTime()) < 10 * 60 * 1000
+        );
+        if (existing) {
+          existing.count = (existing.count ?? 1) + 1;
+          continue;
+        }
+      }
+      deduped.push({ ...item, count: 1 });
+    }
+
+    setActivities(deduped);
     setLoading(false);
   }, [supabase, readIds]);
 
@@ -371,11 +391,13 @@ export default function NotificationsPage() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p
-                        className={`text-sm font-semibold ${item.unread ? "text-[var(--mh-text)]" : "text-[var(--mh-text-muted)]"}`}
-                      >
-                        {item.title}
-                      </p>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <p
+                          className={`text-sm font-semibold ${item.unread ? "text-[var(--mh-text)]" : "text-[var(--mh-text-muted)]"}`}
+                        >
+                          {item.count && item.count > 1 ? `${item.count}× ${item.title}` : item.title}
+                        </p>
+                      </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="flex items-center gap-1 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
                           <Clock className="h-3 w-3" />

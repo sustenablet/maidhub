@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -17,8 +17,6 @@ import {
   ChevronDown,
   ArrowUpRight,
   Wallet,
-  Briefcase,
-  Check,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
@@ -27,15 +25,6 @@ interface Profile {
   business_name: string | null;
   subscription_status: string;
   trial_start_date: string;
-}
-
-interface NotifItem {
-  id: string;
-  label: string;
-  detail: string;
-  time: string;
-  color: string;
-  iconType: "job" | "invoice";
 }
 
 const homeNav = [
@@ -78,18 +67,6 @@ function getBreadcrumb(pathname: string) {
     return parent.charAt(0).toUpperCase() + parent.slice(1, -1) + " Detail";
   }
   return last.charAt(0).toUpperCase() + last.slice(1);
-}
-
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days === 1) return "Yesterday";
-  return `${days}d ago`;
 }
 
 function NavItem({
@@ -143,11 +120,9 @@ function NavSection({ label, children }: { label: string; children: React.ReactN
 
 function SidebarContent({
   profile,
-  notifCount,
   onNavClick,
 }: {
   profile: Profile | null;
-  notifCount: number;
   onNavClick?: () => void;
 }) {
   const daysLeft = profile?.trial_start_date ? getTrialDaysLeft(profile.trial_start_date) : 14;
@@ -177,12 +152,7 @@ function SidebarContent({
         </NavSection>
         <NavSection label="Account">
           {activityNav.map((item) => (
-            <NavItem
-              key={item.href}
-              {...item}
-              badge={item.label === "Notifications" ? notifCount : undefined}
-              onClick={onNavClick}
-            />
+            <NavItem key={item.href} {...item} onClick={onNavClick} />
           ))}
         </NavSection>
       </div>
@@ -224,11 +194,7 @@ export function DashboardShell({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [notifCount, setNotifCount] = useState(0);
-  const [notifications, setNotifications] = useState<NotifItem[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const notifRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createClient();
   const pathname = usePathname();
@@ -242,9 +208,6 @@ export function DashboardShell({
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setNotifOpen(false);
-      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -252,77 +215,7 @@ export function DashboardShell({
 
   useEffect(() => {
     setMobileOpen(false);
-    setNotifOpen(false);
   }, [pathname]);
-
-  const fetchNotifications = useCallback(async () => {
-    const since = new Date();
-    since.setHours(since.getHours() - 24);
-
-    const [jobsRes, invRes] = await Promise.allSettled([
-      supabase
-        .from("jobs")
-        .select("id, status, service_type, updated_at, clients(first_name, last_name)")
-        .eq("user_id", user.id)
-        .order("updated_at", { ascending: false })
-        .limit(6),
-      supabase
-        .from("invoices")
-        .select("id, status, total, updated_at, clients(first_name, last_name)")
-        .eq("user_id", user.id)
-        .order("updated_at", { ascending: false })
-        .limit(6),
-    ]);
-
-    const items: NotifItem[] = [];
-
-    if (jobsRes.status === "fulfilled" && jobsRes.value.data) {
-      for (const job of jobsRes.value.data) {
-        const clientData = job.clients as unknown as { first_name: string; last_name: string } | null;
-        const name = clientData ? `${clientData.first_name} ${clientData.last_name}` : "Client";
-        const statusLabel: Record<string, string> = {
-          scheduled: "Job scheduled",
-          in_progress: "Job in progress",
-          completed: "Job completed",
-          invoiced: "Job invoiced",
-          cancelled: "Job cancelled",
-        };
-        items.push({
-          id: `job-${job.id}`,
-          label: statusLabel[job.status] || "Job updated",
-          detail: `${name} · ${job.service_type || "Service"}`,
-          time: job.updated_at,
-          color: job.status === "completed" ? "text-[#34C759]" : job.status === "cancelled" ? "text-red-400" : "text-[#0071E3]",
-          iconType: "job",
-        });
-      }
-    }
-
-    if (invRes.status === "fulfilled" && invRes.value.data) {
-      for (const inv of invRes.value.data) {
-        const clientData = inv.clients as unknown as { first_name: string; last_name: string } | null;
-        const name = clientData ? `${clientData.first_name} ${clientData.last_name}` : "Client";
-        items.push({
-          id: `inv-${inv.id}`,
-          label: inv.status === "paid" ? "Payment received" : "Invoice created",
-          detail: `${name} · $${(inv.total || 0).toFixed(2)}`,
-          time: inv.updated_at,
-          color: inv.status === "paid" ? "text-[#34C759]" : "text-[#FF9F0A]",
-          iconType: "invoice",
-        });
-      }
-    }
-
-    items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-
-    const recent = items.filter((i) => new Date(i.time) >= since);
-    setNotifCount(recent.length);
-    setNotifications(items.slice(0, 4));
-  }, [supabase, user.id]);
-
-  useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications, pathname]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -334,7 +227,7 @@ export function DashboardShell({
     <div className="flex min-h-screen bg-[var(--mh-bg)]">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-[220px] shrink-0 flex-col bg-[var(--mh-sidebar)] border-r border-[var(--mh-border-subtle)] sticky top-0 h-screen overflow-hidden">
-        <SidebarContent profile={profile} notifCount={notifCount} />
+        <SidebarContent profile={profile} />
       </aside>
 
       {/* Mobile overlay */}
@@ -357,7 +250,7 @@ export function DashboardShell({
         >
           <X className="h-4 w-4" />
         </button>
-        <SidebarContent profile={profile} notifCount={notifCount} onNavClick={() => setMobileOpen(false)} />
+        <SidebarContent profile={profile} onNavClick={() => setMobileOpen(false)} />
       </aside>
 
       {/* Main content */}
@@ -379,70 +272,6 @@ export function DashboardShell({
           </div>
 
           <div className="flex items-center gap-1">
-            {/* Notification bell */}
-            <div className="relative" ref={notifRef}>
-              <button
-                onClick={() => setNotifOpen(!notifOpen)}
-                className="relative p-2 rounded-md hover:bg-[var(--mh-hover-overlay)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
-              >
-                <Bell className="h-4 w-4" strokeWidth={1.8} />
-                {notifCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-[#0071E3] px-0.5 text-[8px] font-bold text-white">
-                    {notifCount > 99 ? "99+" : notifCount}
-                  </span>
-                )}
-              </button>
-
-              {notifOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-80 bg-[var(--mh-surface)] rounded-[8px] border border-[var(--mh-border)] shadow-[var(--mh-shadow-dropdown)] z-50 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--mh-divider)]">
-                    <span className="text-[13px] font-semibold text-[var(--mh-text)]">Notifications</span>
-                    {notifCount > 0 && (
-                      <span className="text-[10px] font-semibold text-[#0071E3] bg-[#0071E3]/10 px-2 py-0.5 rounded-full">
-                        {notifCount} new
-                      </span>
-                    )}
-                  </div>
-
-                  {notifications.length === 0 ? (
-                    <div className="py-8 text-center">
-                      <Bell className="h-6 w-6 text-[var(--mh-text-faint)] mx-auto mb-2" strokeWidth={1.5} />
-                      <p className="text-[12px] text-[var(--mh-text-muted)]">No recent activity</p>
-                    </div>
-                  ) : (
-                    <div className="divide-y divide-[var(--mh-divider)]">
-                      {notifications.map((item) => (
-                        <div key={item.id} className="flex items-start gap-3 px-4 py-3 hover:bg-[var(--mh-hover-overlay)] transition-colors">
-                          <div className="mt-0.5 h-7 w-7 rounded-[4px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
-                            {item.iconType === "invoice"
-                              ? <Receipt className={`h-3.5 w-3.5 ${item.color}`} strokeWidth={1.8} />
-                              : <Briefcase className={`h-3.5 w-3.5 ${item.color}`} strokeWidth={1.8} />
-                            }
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[12px] font-semibold text-[var(--mh-text)] leading-tight">{item.label}</p>
-                            <p className="text-[11px] text-[var(--mh-text-muted)] truncate mt-0.5">{item.detail}</p>
-                          </div>
-                          <span className="text-[10px] text-[var(--mh-text-faint)] shrink-0 mt-0.5 tabular-nums">{timeAgo(item.time)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="border-t border-[var(--mh-divider)] p-2">
-                    <Link
-                      href="/dashboard/notifications"
-                      onClick={() => setNotifOpen(false)}
-                      className="flex items-center justify-center gap-1.5 w-full py-2 text-[12px] font-semibold text-[#0071E3] hover:bg-[#0071E3]/[0.08] rounded-[4px] transition-colors"
-                    >
-                      View all notifications
-                      <ArrowUpRight className="h-3 w-3" strokeWidth={2} />
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* User dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button

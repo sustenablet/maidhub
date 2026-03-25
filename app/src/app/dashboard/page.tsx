@@ -53,10 +53,10 @@ export default async function DashboardPage() {
     thisMonthRevRes, lastMonthRevRes,
   ] = await Promise.allSettled([
     supabase.from("clients").select("*", { count: "exact", head: true }).eq("user_id", user!.id),
-    supabase.from("jobs").select("*", { count: "exact", head: true }).eq("user_id", user!.id).eq("status", "scheduled"),
+    supabase.from("jobs").select("*", { count: "exact", head: true }).eq("user_id", user!.id).eq("status", "scheduled").gte("scheduled_date", todayStr).lte("scheduled_date", new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0]),
     supabase.from("invoices").select("*", { count: "exact", head: true }).eq("user_id", user!.id).eq("status", "unpaid"),
     supabase.from("jobs").select("*, clients(first_name, last_name)").eq("user_id", user!.id).eq("scheduled_date", todayStr).order("start_time", { ascending: true }).limit(6),
-    supabase.from("jobs").select("*, clients(first_name, last_name)").eq("user_id", user!.id).order("updated_at", { ascending: false }).limit(5),
+    supabase.from("jobs").select("*, clients(first_name, last_name)").eq("user_id", user!.id).order("updated_at", { ascending: false }).limit(30),
     supabase.from("invoices").select("*, clients(first_name, last_name)").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(5),
     supabase.from("invoices").select("total, payment_date").eq("user_id", user!.id).eq("status", "paid").gte("payment_date", new Date(Date.now() - 180 * 86400000).toISOString().split("T")[0]),
     supabase.from("jobs").select("service_type, price").eq("user_id", user!.id),
@@ -114,22 +114,23 @@ export default async function DashboardPage() {
   const serviceTotal = serviceDonutData.reduce((sum, d) => sum + d.amount, 0);
 
   // Activity feed
-  type ActivityItem = { type: string; label: string; detail: string; time: string; icon: string; color: string };
+  type ActivityItem = { type: string; label: string; detail: string; time: string; icon: string; color: string; count: number };
   const activity: ActivityItem[] = [];
+  const jobStatusLabel: Record<string, string> = {
+    scheduled: "Job scheduled", in_progress: "Job in progress",
+    completed: "Job completed", invoiced: "Job invoiced", cancelled: "Job cancelled",
+  };
   for (const job of recentJobs) {
     const clientData = job.clients as { first_name: string; last_name: string } | null;
     const name = clientData ? `${clientData.first_name} ${clientData.last_name}` : "Client";
-    const statusLabel: Record<string, string> = {
-      scheduled: "Job scheduled", in_progress: "Job in progress",
-      completed: "Job completed", invoiced: "Job invoiced", cancelled: "Job cancelled",
-    };
     activity.push({
       type: "job",
-      label: statusLabel[job.status] || "Job updated",
+      label: jobStatusLabel[job.status] || "Job updated",
       detail: `${name} · ${job.service_type || "Service"}`,
       time: job.updated_at,
       icon: "briefcase",
       color: job.status === "completed" ? "text-[#34C759]" : job.status === "cancelled" ? "text-red-400" : "text-[#0071E3]",
+      count: 1,
     });
   }
   for (const inv of recentInvoices) {
@@ -142,10 +143,25 @@ export default async function DashboardPage() {
       time: inv.created_at,
       icon: "receipt",
       color: inv.status === "paid" ? "text-[#34C759]" : "text-[#FF9F0A]",
+      count: 1,
     });
   }
   activity.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-  const recentActivity = activity.slice(0, 8);
+
+  // Deduplicate: group same label+detail within 10 minutes
+  const deduped: ActivityItem[] = [];
+  for (const item of activity) {
+    const existing = deduped.find(
+      (d) => d.label === item.label && d.detail === item.detail &&
+      Math.abs(new Date(d.time).getTime() - new Date(item.time).getTime()) < 10 * 60 * 1000
+    );
+    if (existing) {
+      existing.count++;
+    } else {
+      deduped.push({ ...item });
+    }
+  }
+  const recentActivity = deduped.slice(0, 8);
 
   const jobStatusConfig: Record<string, { dot: string; label: string; badge: string }> = {
     scheduled: { dot: "bg-[#0071E3]", label: "Scheduled", badge: "bg-[#0071E3]/10 text-[#0071E3]" },
@@ -391,7 +407,14 @@ export default async function DashboardPage() {
                     }
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-semibold text-[var(--mh-text)] leading-tight">{item.label}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-[12px] font-semibold text-[var(--mh-text)] leading-tight">{item.label}</p>
+                      {item.count > 1 && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] tabular-nums">
+                          ×{item.count}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[11px] text-[var(--mh-text-muted)] truncate mt-0.5">{item.detail}</p>
                   </div>
                   <span className="text-[10px] text-[var(--mh-text-faint)] shrink-0 tabular-nums mt-0.5">{timeAgo(item.time)}</span>
