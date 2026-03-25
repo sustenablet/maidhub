@@ -118,7 +118,7 @@ function NavItem({
       className={`flex items-center gap-2.5 px-3 py-[7px] rounded-[4px] text-[13px] font-medium transition-all duration-150 ${
         isActive
           ? "bg-[#0071E3]/[0.14] text-[#0071E3]"
-          : "text-[#888888] hover:bg-white/[0.05] hover:text-[#D4D4D4]"
+          : "text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)] hover:text-[var(--mh-text)]"
       }`}
     >
       <Icon className="h-[15px] w-[15px] shrink-0" strokeWidth={isActive ? 2 : 1.6} />
@@ -135,7 +135,7 @@ function NavItem({
 function NavSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="px-3 mb-1.5 text-[10px] font-semibold tracking-[0.1em] text-[#555555] uppercase">
+      <p className="px-3 mb-1.5 text-[10px] font-semibold tracking-[0.1em] text-[var(--mh-text-faint)] uppercase">
         {label}
       </p>
       <div className="space-y-0.5">{children}</div>
@@ -162,7 +162,7 @@ function SidebarContent({
         <div className="flex h-[28px] w-[28px] items-center justify-center rounded-[4px] bg-[#0071E3]">
           <span className="text-white font-bold text-[13px] leading-none tracking-tight">M</span>
         </div>
-        <span className="text-[#D4D4D4] font-bold text-[15px] tracking-[-0.03em]">MaidHub</span>
+        <span className="text-[var(--mh-text)] font-bold text-[15px] tracking-[-0.03em]">MaidHub</span>
       </div>
 
       {/* Nav */}
@@ -191,12 +191,12 @@ function SidebarContent({
 
       {/* Trial banner */}
       {isTrial && (
-        <div className="mx-3 mb-4 rounded-[4px] bg-[#1E1E1E] border border-[#2C2C2C] p-3.5">
+        <div className="mx-3 mb-4 rounded-[4px] bg-[var(--mh-surface)] border border-[var(--mh-border)] p-3.5">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-semibold text-[#555555] uppercase tracking-[0.08em]">Free Trial</p>
-            <span className="text-[11px] font-medium text-[#888888] tabular-nums">{daysLeft}d left</span>
+            <p className="text-[10px] font-semibold text-[var(--mh-text-faint)] uppercase tracking-[0.08em]">Free Trial</p>
+            <span className="text-[11px] font-medium text-[var(--mh-text-muted)] tabular-nums">{daysLeft}d left</span>
           </div>
-          <div className="w-full h-[3px] rounded-full bg-white/[0.06] mb-3">
+          <div className="w-full h-[3px] rounded-full bg-[var(--mh-border)] mb-3">
             <div
               className="h-[3px] rounded-full bg-[#0071E3] transition-all"
               style={{ width: `${Math.min(100, ((30 - daysLeft) / 30) * 100)}%` }}
@@ -260,7 +260,6 @@ export function DashboardShell({
   const fetchNotifications = useCallback(async () => {
     const since = new Date();
     since.setHours(since.getHours() - 24);
-    const isoSince = since.toISOString();
 
     const [jobsRes, invRes] = await Promise.allSettled([
       supabase
@@ -318,7 +317,6 @@ export function DashboardShell({
 
     items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
-    // Count items from last 24h
     const recent = items.filter((i) => new Date(i.time) >= since);
     setNotifCount(recent.length);
     setNotifications(items.slice(0, 4));
@@ -335,9 +333,9 @@ export function DashboardShell({
   }
 
   return (
-    <div className="flex min-h-screen bg-[#191919]">
+    <div className="flex min-h-screen bg-[var(--mh-bg)]">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-[220px] shrink-0 flex-col bg-[#141414] border-r border-[#222222] sticky top-0 h-screen overflow-hidden">
+      <aside className="hidden md:flex w-[220px] shrink-0 flex-col bg-[var(--mh-sidebar)] border-r border-[var(--mh-border-subtle)] sticky top-0 h-screen overflow-hidden">
         <SidebarContent profile={profile} notifCount={notifCount} />
       </aside>
 
@@ -351,13 +349,13 @@ export function DashboardShell({
 
       {/* Mobile drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[220px] bg-[#141414] border-r border-[#222222] transform transition-transform duration-300 ease-in-out md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-[220px] bg-[var(--mh-sidebar)] border-r border-[var(--mh-border-subtle)] transform transition-transform duration-300 ease-in-out md:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <button
           onClick={() => setMobileOpen(false)}
-          className="absolute top-4 right-4 p-1.5 rounded-md hover:bg-white/[0.05] text-[#555555] transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-md hover:bg-[var(--mh-hover-overlay)] text-[var(--mh-text-faint)] transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
@@ -367,27 +365,27 @@ export function DashboardShell({
       {/* Main content */}
       <div className="flex flex-1 flex-col min-w-0">
         {/* Topbar */}
-        <header className="sticky top-0 z-30 h-[50px] bg-[#141414]/90 backdrop-blur-md border-b border-[#222222] flex items-center justify-between px-4 md:px-6">
+        <header className="sticky top-0 z-30 h-[50px] bg-[var(--mh-sidebar)]/90 backdrop-blur-md border-b border-[var(--mh-border-subtle)] flex items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(true)}
-              className="md:hidden p-2 rounded-md hover:bg-white/[0.05] text-[#888888] transition-colors"
+              className="md:hidden p-2 rounded-md hover:bg-[var(--mh-hover-overlay)] text-[var(--mh-text-muted)] transition-colors"
             >
               <Menu className="h-4 w-4" />
             </button>
             <div className="flex items-center gap-2 text-[13px]">
-              <span className="text-[#444444] hidden sm:block">Home</span>
-              <span className="text-[#333333] hidden sm:block">/</span>
-              <span className="text-[#D4D4D4] font-semibold">{breadcrumb}</span>
+              <span className="text-[var(--mh-text-faint)] hidden sm:block">Home</span>
+              <span className="text-[var(--mh-text-faint)] hidden sm:block">/</span>
+              <span className="text-[var(--mh-text)] font-semibold">{breadcrumb}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-1">
-            {/* Notification bell with dropdown */}
+            {/* Notification bell */}
             <div className="relative" ref={notifRef}>
               <button
                 onClick={() => setNotifOpen(!notifOpen)}
-                className="relative p-2 rounded-md hover:bg-white/[0.05] text-[#888888] hover:text-[#D4D4D4] transition-colors"
+                className="relative p-2 rounded-md hover:bg-[var(--mh-hover-overlay)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
               >
                 <Bell className="h-4 w-4" strokeWidth={1.8} />
                 {notifCount > 0 && (
@@ -397,11 +395,10 @@ export function DashboardShell({
                 )}
               </button>
 
-              {/* Notification dropdown */}
               {notifOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-80 bg-[#1A1A1A] rounded-[8px] border border-[#2C2C2C] shadow-[0_8px_32px_rgba(0,0,0,0.6)] z-50 overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-[#252525]">
-                    <span className="text-[13px] font-semibold text-[#D4D4D4]">Notifications</span>
+                <div className="absolute right-0 top-full mt-1.5 w-80 bg-[var(--mh-surface)] rounded-[8px] border border-[var(--mh-border)] shadow-[var(--mh-shadow-dropdown)] z-50 overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--mh-divider)]">
+                    <span className="text-[13px] font-semibold text-[var(--mh-text)]">Notifications</span>
                     {notifCount > 0 && (
                       <span className="text-[10px] font-semibold text-[#0071E3] bg-[#0071E3]/10 px-2 py-0.5 rounded-full">
                         {notifCount} new
@@ -411,30 +408,30 @@ export function DashboardShell({
 
                   {notifications.length === 0 ? (
                     <div className="py-8 text-center">
-                      <Bell className="h-6 w-6 text-[#333333] mx-auto mb-2" strokeWidth={1.5} />
-                      <p className="text-[12px] text-[#555555]">No recent activity</p>
+                      <Bell className="h-6 w-6 text-[var(--mh-text-faint)] mx-auto mb-2" strokeWidth={1.5} />
+                      <p className="text-[12px] text-[var(--mh-text-muted)]">No recent activity</p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-[#222222]">
+                    <div className="divide-y divide-[var(--mh-divider)]">
                       {notifications.map((item) => (
-                        <div key={item.id} className="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">
-                          <div className={`mt-0.5 h-7 w-7 rounded-[4px] bg-[#252525] flex items-center justify-center shrink-0`}>
+                        <div key={item.id} className="flex items-start gap-3 px-4 py-3 hover:bg-[var(--mh-hover-overlay)] transition-colors">
+                          <div className="mt-0.5 h-7 w-7 rounded-[4px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
                             {item.iconType === "invoice"
                               ? <Receipt className={`h-3.5 w-3.5 ${item.color}`} strokeWidth={1.8} />
                               : <Briefcase className={`h-3.5 w-3.5 ${item.color}`} strokeWidth={1.8} />
                             }
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[12px] font-semibold text-[#D4D4D4] leading-tight">{item.label}</p>
-                            <p className="text-[11px] text-[#888888] truncate mt-0.5">{item.detail}</p>
+                            <p className="text-[12px] font-semibold text-[var(--mh-text)] leading-tight">{item.label}</p>
+                            <p className="text-[11px] text-[var(--mh-text-muted)] truncate mt-0.5">{item.detail}</p>
                           </div>
-                          <span className="text-[10px] text-[#444444] shrink-0 mt-0.5 tabular-nums">{timeAgo(item.time)}</span>
+                          <span className="text-[10px] text-[var(--mh-text-faint)] shrink-0 mt-0.5 tabular-nums">{timeAgo(item.time)}</span>
                         </div>
                       ))}
                     </div>
                   )}
 
-                  <div className="border-t border-[#252525] p-2">
+                  <div className="border-t border-[var(--mh-divider)] p-2">
                     <Link
                       href="/dashboard/notifications"
                       onClick={() => setNotifOpen(false)}
@@ -452,32 +449,32 @@ export function DashboardShell({
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 pl-2 pr-1.5 py-1.5 rounded-md hover:bg-white/[0.05] transition-colors ml-0.5"
+                className="flex items-center gap-2 pl-2 pr-1.5 py-1.5 rounded-md hover:bg-[var(--mh-hover-overlay)] transition-colors ml-0.5"
               >
                 <div className="h-6 w-6 rounded-full bg-[#0071E3]/20 border border-[#0071E3]/30 flex items-center justify-center shrink-0">
                   <span className="text-[#0071E3] text-[9px] font-bold tracking-wide">{initials}</span>
                 </div>
-                <span className="hidden sm:block text-[13px] font-medium text-[#D4D4D4]">{displayName}</span>
-                <ChevronDown className={`h-3 w-3 text-[#555555] transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
+                <span className="hidden sm:block text-[13px] font-medium text-[var(--mh-text)]">{displayName}</span>
+                <ChevronDown className={`h-3 w-3 text-[var(--mh-text-faint)] transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
               </button>
 
               {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#1A1A1A] rounded-[6px] shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-[#2C2C2C] py-1 z-50 overflow-hidden">
-                  <div className="px-3.5 py-2.5 border-b border-[#2C2C2C]">
-                    <p className="text-[13px] font-semibold text-[#D4D4D4]">{displayName}</p>
-                    <p className="text-[11px] text-[#555555] truncate">{user.email}</p>
+                <div className="absolute right-0 top-full mt-1.5 w-52 bg-[var(--mh-surface)] rounded-[6px] shadow-[var(--mh-shadow-dropdown)] border border-[var(--mh-border)] py-1 z-50 overflow-hidden">
+                  <div className="px-3.5 py-2.5 border-b border-[var(--mh-border)]">
+                    <p className="text-[13px] font-semibold text-[var(--mh-text)]">{displayName}</p>
+                    <p className="text-[11px] text-[var(--mh-text-faint)] truncate">{user.email}</p>
                   </div>
                   <div className="py-0.5">
                     <Link
                       href="/dashboard/settings"
-                      className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-[#888888] hover:bg-white/[0.04] hover:text-[#D4D4D4] transition-colors"
+                      className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)] hover:text-[var(--mh-text)] transition-colors"
                       onClick={() => setDropdownOpen(false)}
                     >
                       <Settings className="h-[14px] w-[14px]" strokeWidth={1.8} />
                       Settings
                     </Link>
                   </div>
-                  <div className="border-t border-[#2C2C2C] py-0.5">
+                  <div className="border-t border-[var(--mh-border)] py-0.5">
                     <button
                       onClick={handleSignOut}
                       className="flex w-full items-center gap-2.5 px-3.5 py-2 text-[13px] text-red-400/80 hover:bg-red-500/[0.06] hover:text-red-400 transition-colors"

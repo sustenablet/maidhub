@@ -8,7 +8,6 @@ import {
   Building2,
   Phone,
   Loader2,
-  Briefcase,
   Plus,
   X,
   Shield,
@@ -21,16 +20,21 @@ import {
   Percent,
   Hash,
   AlertTriangle,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 import { SERVICE_TYPES } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-type SettingsTab = "profile" | "business" | "notifications" | "account";
+import { useTheme, type Theme } from "@/components/theme-provider";
+
+type SettingsTab = "profile" | "business" | "preferences" | "account";
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType; description: string }[] = [
   { id: "profile", label: "Profile", icon: User, description: "Your personal info" },
   { id: "business", label: "Business", icon: Building2, description: "Services & pricing" },
-  { id: "notifications", label: "Notifications", icon: Bell, description: "Email preferences" },
+  { id: "preferences", label: "Preferences", icon: Bell, description: "Appearance & notifications" },
   { id: "account", label: "Account", icon: Shield, description: "Plan & security" },
 ];
 
@@ -193,6 +197,7 @@ function SaveButton({ loading, onClick }: { loading: boolean; onClick?: () => vo
 
 export default function SettingsPage() {
   const supabase = createClient();
+  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -366,7 +371,15 @@ export default function SettingsPage() {
       },
     };
 
-    const error = await mergeSettings(user.id, "business", bizSettings);
+    const { data: userData } = await supabase
+      .from("users").select("settings").eq("id", user.id).single();
+    const currentSettings = ((userData?.settings || {}) as Record<string, unknown>);
+
+    const { error } = await supabase
+      .from("users")
+      .update({ settings: { ...currentSettings, business: bizSettings }, updated_at: new Date().toISOString() })
+      .eq("id", user.id);
+
     if (error) {
       toast.error("Failed to save business settings");
     } else {
@@ -388,7 +401,15 @@ export default function SettingsPage() {
       weekly_summary: notifWeeklySummary,
     };
 
-    const error = await mergeSettings(user.id, "notifications", notifSettings);
+    const { data: userData } = await supabase
+      .from("users").select("settings").eq("id", user.id).single();
+    const currentSettings = ((userData?.settings || {}) as Record<string, unknown>);
+
+    const { error } = await supabase
+      .from("users")
+      .update({ settings: { ...currentSettings, notifications: notifSettings }, updated_at: new Date().toISOString() })
+      .eq("id", user.id);
+
     if (error) {
       toast.error("Failed to save notification preferences");
     } else {
@@ -764,9 +785,46 @@ export default function SettingsPage() {
             </>
           )}
 
-          {/* ─── NOTIFICATIONS TAB ───────────────────────── */}
-          {activeTab === "notifications" && (
+          {/* ─── PREFERENCES TAB ─────────────────────────── */}
+          {activeTab === "preferences" && (
             <>
+              {/* Appearance */}
+              <Card>
+                <CardHeader title="Appearance" description="Choose how MaidHub looks on this device." />
+                <CardBody className="space-y-3">
+                  <div className="grid grid-cols-3 gap-3">
+                    {(
+                      [
+                        { value: "light" as Theme, label: "Light", icon: Sun },
+                        { value: "dark" as Theme, label: "Dark", icon: Moon },
+                        { value: "system" as Theme, label: "System", icon: Monitor },
+                      ] as { value: Theme; label: string; icon: React.ElementType }[]
+                    ).map(({ value, label, icon: Icon }) => {
+                      const isSelected = theme === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setTheme(value)}
+                          className={`flex flex-col items-center gap-2 py-4 px-3 rounded-[8px] border transition-all ${
+                            isSelected
+                              ? "bg-[#0071E3]/10 border-[#0071E3]/50 text-[#0071E3]"
+                              : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:border-[var(--mh-text-faint)] hover:text-[var(--mh-text)]"
+                          }`}
+                        >
+                          <Icon className="h-5 w-5" strokeWidth={1.8} />
+                          <span className="text-[12px] font-semibold">{label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[11px] text-[var(--mh-text-subtle)]">
+                    Preference is saved to this browser only.
+                  </p>
+                </CardBody>
+              </Card>
+
+              {/* Email Notifications */}
               <Card>
                 <CardHeader title="Email Notifications" description="Choose which emails you receive. You can change these at any time." />
                 <CardBody>
@@ -808,7 +866,7 @@ export default function SettingsPage() {
 
               <div className="bg-[var(--mh-surface-sunken)] rounded-[6px] border border-[var(--mh-border)] px-5 py-4">
                 <p className="text-[12px] text-[var(--mh-text-muted)] leading-relaxed">
-                  Email notifications are sent to <span className="font-semibold text-[var(--mh-text-muted)]">{email}</span>.
+                  Email notifications are sent to <span className="font-semibold text-[var(--mh-text)]">{email}</span>.
                   To change your email address, update it through your login provider.
                 </p>
               </div>
