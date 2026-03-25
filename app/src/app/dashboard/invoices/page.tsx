@@ -84,6 +84,7 @@ export default function InvoicesPage() {
   ]);
   const [formTaxPercent, setFormTaxPercent] = useState(0);
   const [formDueDate, setFormDueDate] = useState(defaultDueDate());
+  const [dueDatePreset, setDueDatePreset] = useState<"7" | "14" | "30" | "custom">("14");
   const [formNotes, setFormNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -285,6 +286,12 @@ export default function InvoicesPage() {
     );
   });
 
+  function dueDateFromPreset(preset: "7" | "14" | "30") {
+    const d = new Date();
+    d.setDate(d.getDate() + parseInt(preset));
+    return d.toISOString().split("T")[0];
+  }
+
   // Open create panel
   function openCreate() {
     setEditMode(false);
@@ -293,7 +300,8 @@ export default function InvoicesPage() {
     setFormJobId("");
     setFormLineItems([emptyLineItem()]);
     setFormTaxPercent(0);
-    setFormDueDate(defaultDueDate());
+    setDueDatePreset("14");
+    setFormDueDate(dueDateFromPreset("14"));
     setFormNotes("");
     setClientJobs([]);
     setPanelOpen(true);
@@ -314,6 +322,7 @@ export default function InvoicesPage() {
       ? Math.round(((inv.total - lineSubtotal) / lineSubtotal) * 10000) / 100
       : 0;
     setFormTaxPercent(Math.max(0, taxPct));
+    setDueDatePreset("custom");
     setFormDueDate(inv.due_date || defaultDueDate());
     setFormNotes(inv.notes || "");
     setPanelOpen(true);
@@ -772,7 +781,7 @@ export default function InvoicesPage() {
         }
       >
         <div className="px-6 py-6 space-y-6">
-          <FormSection label="Client & Job">
+          <FormSection label="Client">
             <FormField label="Client" required>
               <div className="space-y-2">
                 <FormSelect
@@ -847,23 +856,6 @@ export default function InvoicesPage() {
                 )}
               </div>
             </FormField>
-            {formClientId && (
-              <FormField label="Link to Job (optional)">
-                <FormSelect
-                  value={formJobId}
-                  onChange={(e) => setFormJobId(e.target.value)}
-                >
-                  <option value="">No linked job</option>
-                  {clientJobs.map((j) => (
-                    <option key={j.id} value={j.id}>
-                      {j.service_type || "Job"} &mdash;{" "}
-                      {formatDate(j.scheduled_date)} &mdash;{" "}
-                      {formatCurrency(j.price || 0)}
-                    </option>
-                  ))}
-                </FormSelect>
-              </FormField>
-            )}
           </FormSection>
 
           <FormSection label="Line Items">
@@ -945,27 +937,52 @@ export default function InvoicesPage() {
           </FormSection>
 
           <FormSection label="Details">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField label="Tax %">
-                <FormInput
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  value={formTaxPercent || ""}
-                  onChange={(e) =>
-                    setFormTaxPercent(parseFloat(e.target.value) || 0)
-                  }
-                  placeholder="0"
-                />
-              </FormField>
-              <FormField label="Due Date">
-                <FormInput
-                  type="date"
-                  value={formDueDate}
-                  onChange={(e) => setFormDueDate(e.target.value)}
-                />
-              </FormField>
-            </div>
+            <FormField label="Due Date">
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  {(["7", "14", "30"] as const).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => {
+                        setDueDatePreset(p);
+                        setFormDueDate(dueDateFromPreset(p));
+                      }}
+                      className={`px-3 py-1.5 text-[12px] font-semibold rounded-[4px] border transition-colors ${
+                        dueDatePreset === p
+                          ? "bg-[#0071E3] border-[#0071E3] text-white"
+                          : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] hover:border-[var(--mh-border-strong)]"
+                      }`}
+                    >
+                      {p} days
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setDueDatePreset("custom")}
+                    className={`px-3 py-1.5 text-[12px] font-semibold rounded-[4px] border transition-colors ${
+                      dueDatePreset === "custom"
+                        ? "bg-[#0071E3] border-[#0071E3] text-white"
+                        : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] hover:border-[var(--mh-border-strong)]"
+                    }`}
+                  >
+                    Custom date
+                  </button>
+                </div>
+                {dueDatePreset === "custom" && (
+                  <FormInput
+                    type="date"
+                    value={formDueDate}
+                    onChange={(e) => setFormDueDate(e.target.value)}
+                  />
+                )}
+                {dueDatePreset !== "custom" && (
+                  <p className="text-[11px] text-[var(--mh-text-subtle)]">
+                    Due {formatDate(formDueDate)}
+                  </p>
+                )}
+              </div>
+            </FormField>
             <FormField label="Notes">
               <FormTextarea
                 rows={3}

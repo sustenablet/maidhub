@@ -56,7 +56,7 @@ export function SlidePanel({
 
       {/* Panel */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 ${width} bg-[#1A1A1A] shadow-[0_20px_60px_rgba(0,0,0,0.6),0_4px_16px_rgba(0,0,0,0.4)] transform transition-transform duration-300 ease-out flex flex-col border-l border-[var(--mh-border)] ${
+        className={`fixed inset-y-0 right-0 z-50 ${width} bg-[var(--mh-surface)] shadow-[var(--mh-shadow-panel)] transform transition-transform duration-300 ease-out flex flex-col border-l border-[var(--mh-border)] ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -178,7 +178,7 @@ export function FormActions({
   children: React.ReactNode;
 }) {
   return (
-    <div className="shrink-0 bg-[#1A1A1A] border-t border-[var(--mh-border)] px-6 py-4 flex items-center justify-end gap-2.5">
+    <div className="shrink-0 bg-[var(--mh-surface)] border-t border-[var(--mh-border)] px-6 py-4 flex items-center justify-end gap-2.5">
       {children}
     </div>
   );
