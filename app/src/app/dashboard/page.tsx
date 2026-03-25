@@ -4,18 +4,17 @@ import {
   Clock,
   CheckCircle2,
   Receipt,
-  FileText,
   Users,
-  TrendingUp,
   CalendarDays,
   ArrowUpRight,
   UserPlus,
   CalendarPlus,
+  DollarSign,
 } from "lucide-react";
 import Link from "next/link";
-import { RevenueChart } from "@/components/dashboard/revenue-chart";
-import type { RevenueDataPoint } from "@/components/dashboard/revenue-chart";
-import { ServiceDonut } from "@/components/dashboard/service-donut";
+import { RevenueSection } from "@/components/dashboard/revenue-section";
+import type { RawInvoice } from "@/components/dashboard/revenue-section";
+import { ServiceDonutSection } from "@/components/dashboard/service-donut-section";
 import type { ServiceDataPoint } from "@/components/dashboard/service-donut";
 
 export default async function DashboardPage() {
@@ -48,14 +47,13 @@ export default async function DashboardPage() {
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
 
   const [
-    clientsRes, upcomingJobsRes, openEstimatesRes, unpaidInvRes,
+    clientsRes, upcomingJobsRes, unpaidInvRes,
     todayJobsRes, recentJobsRes, recentInvoicesRes,
     paidInvoicesRes, allJobsServiceRes, weekJobsRes,
     thisMonthRevRes, lastMonthRevRes,
   ] = await Promise.allSettled([
     supabase.from("clients").select("*", { count: "exact", head: true }).eq("user_id", user!.id),
     supabase.from("jobs").select("*", { count: "exact", head: true }).eq("user_id", user!.id).eq("status", "scheduled"),
-    supabase.from("estimates").select("*", { count: "exact", head: true }).eq("user_id", user!.id).in("status", ["draft", "sent"]),
     supabase.from("invoices").select("*", { count: "exact", head: true }).eq("user_id", user!.id).eq("status", "unpaid"),
     supabase.from("jobs").select("*, clients(first_name, last_name)").eq("user_id", user!.id).eq("scheduled_date", todayStr).order("start_time", { ascending: true }).limit(6),
     supabase.from("jobs").select("*, clients(first_name, last_name)").eq("user_id", user!.id).order("updated_at", { ascending: false }).limit(5),
@@ -69,7 +67,6 @@ export default async function DashboardPage() {
 
   const clientCount = clientsRes.status === "fulfilled" ? (clientsRes.value.count ?? 0) : 0;
   const jobCount = upcomingJobsRes.status === "fulfilled" ? (upcomingJobsRes.value.count ?? 0) : 0;
-  const estimateCount = openEstimatesRes.status === "fulfilled" ? (openEstimatesRes.value.count ?? 0) : 0;
   const invoiceCount = unpaidInvRes.status === "fulfilled" ? (unpaidInvRes.value.count ?? 0) : 0;
   const todayJobs = todayJobsRes.status === "fulfilled" ? (todayJobsRes.value.data ?? []) : [];
   const recentJobs = recentJobsRes.status === "fulfilled" ? (recentJobsRes.value.data ?? []) : [];
@@ -83,18 +80,10 @@ export default async function DashboardPage() {
     .reduce((sum: number, j: { price: number | null }) => sum + (j.price || 0), 0);
   const weekScheduled = weekJobs.filter((j: { status: string }) => j.status === "scheduled").length;
 
-  // Revenue data
-  const paidInvoices = paidInvoicesRes.status === "fulfilled" ? (paidInvoicesRes.value.data ?? []) : [];
-  const monthlyRevenue: Record<string, number> = {};
-  for (const inv of paidInvoices) {
-    if (!inv.payment_date) continue;
-    const date = new Date(inv.payment_date + "T00:00:00");
-    const key = date.toLocaleString("en-US", { month: "short", year: "2-digit" });
-    monthlyRevenue[key] = (monthlyRevenue[key] || 0) + (inv.total || 0);
-  }
-  const revenueChartData: RevenueDataPoint[] = Object.entries(monthlyRevenue)
-    .map(([month, amount]) => ({ month, amount: Math.round(amount * 100) / 100 }));
-  const totalRevenue = revenueChartData.reduce((sum, d) => sum + d.amount, 0);
+  // Revenue data — pass raw to client component for period filtering
+  const paidInvoices: RawInvoice[] = paidInvoicesRes.status === "fulfilled"
+    ? (paidInvoicesRes.value.data ?? []).map((inv) => ({ payment_date: inv.payment_date ?? null, total: inv.total ?? null }))
+    : [];
 
   const thisMonthRev = thisMonthRevRes.status === "fulfilled"
     ? (thisMonthRevRes.value.data ?? []).reduce((s: number, i: { total: number }) => s + (i.total || 0), 0) : 0;
@@ -120,6 +109,7 @@ export default async function DashboardPage() {
       value: Math.round((data.count / totalJobCount) * 100),
       color: serviceColors[i % serviceColors.length],
       amount: Math.round(data.revenue * 100) / 100,
+      count: data.count,
     }));
   const serviceTotal = serviceDonutData.reduce((sum, d) => sum + d.amount, 0);
 
@@ -247,19 +237,19 @@ export default async function DashboardPage() {
           </div>
         </Link>
 
-        {/* Open Estimates */}
-        <Link href="/dashboard/estimates" className="group block">
+        {/* This Month Revenue */}
+        <Link href="/dashboard/invoices" className="group block">
           <div className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] p-5 hover:border-[var(--mh-border-strong)] transition-all hover:shadow-[0_2px_12px_rgba(0,0,0,0.4)]">
             <div className="flex items-center justify-between mb-4">
               <div className="h-8 w-8 rounded-[4px] bg-[#FF9F0A]/10 flex items-center justify-center">
-                <FileText className="h-4 w-4 text-[#FF9F0A]" strokeWidth={1.8} />
+                <DollarSign className="h-4 w-4 text-[#FF9F0A]" strokeWidth={1.8} />
               </div>
               <ArrowUpRight className="h-3.5 w-3.5 text-[var(--mh-icon-dim)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={2} />
             </div>
-            <div className="text-[36px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
-              {estimateCount}
+            <div className="text-[28px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
+              ${thisMonthRev.toLocaleString("en-US", { maximumFractionDigits: 0 })}
             </div>
-            <p className="text-[12px] font-medium text-[var(--mh-text-subtle)]">Open Estimates</p>
+            <p className="text-[12px] font-medium text-[var(--mh-text-subtle)]">This Month Revenue</p>
           </div>
         </Link>
 
@@ -414,46 +404,8 @@ export default async function DashboardPage() {
 
       {/* ── Charts row ─────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-        {/* Revenue chart — 2 cols */}
-        <div className="lg:col-span-2 bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] overflow-hidden">
-          <div className="px-5 py-4 border-b border-[var(--mh-divider)]">
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <TrendingUp className="h-4 w-4 text-[#0071E3]" strokeWidth={2} />
-                  <h2 className="text-[14px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">Revenue</h2>
-                </div>
-                <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-[28px] font-bold text-[var(--mh-text)] tracking-[-0.04em] tabular-nums leading-none">
-                    ${totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                  </span>
-                  <span className="text-[12px] text-[var(--mh-text-subtle)]">last 6 months</span>
-                </div>
-              </div>
-              {revGrowth !== null && (
-                <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[12px] font-semibold ${revGrowth >= 0 ? "bg-[#34C759]/10 text-[#34C759]" : "bg-red-500/10 text-red-400"}`}>
-                  <TrendingUp className="h-3 w-3" strokeWidth={2} />
-                  {revGrowth >= 0 ? "+" : ""}{revGrowth}% vs last month
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="p-5">
-            <RevenueChart data={revenueChartData} />
-          </div>
-        </div>
-
-        {/* Services donut — 1 col */}
-        <div className="bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] overflow-hidden flex flex-col">
-          <div className="px-5 py-4 border-b border-[var(--mh-divider)]">
-            <h2 className="text-[14px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">Services</h2>
-            <p className="text-[11px] text-[var(--mh-text-subtle)] mt-0.5">Revenue by type</p>
-          </div>
-          <div className="p-5 flex-1 flex items-center justify-center">
-            <ServiceDonut services={serviceDonutData} total={serviceTotal} />
-          </div>
-        </div>
+        <RevenueSection rawInvoices={paidInvoices} revGrowth={revGrowth} />
+        <ServiceDonutSection services={serviceDonutData} total={serviceTotal} totalJobs={allJobsService.length} />
       </div>
 
     </div>

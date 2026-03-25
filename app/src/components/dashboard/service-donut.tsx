@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export type ServiceDataPoint = { label: string; value: number; color: string; amount: number };
+export type ServiceDataPoint = { label: string; value: number; color: string; amount: number; count?: number };
 const cx = 90;
 const cy = 90;
 const R = 68;

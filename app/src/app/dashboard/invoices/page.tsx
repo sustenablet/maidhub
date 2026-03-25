@@ -63,8 +63,8 @@ function formatDate(dateStr: string | null): string {
   });
 }
 
-function invoiceNumber(id: string): string {
-  return `INV-${id.substring(0, 4).toUpperCase()}`;
+function invoiceNumber(n: number): string {
+  return `INV-${String(n).padStart(3, "0")}`;
 }
 
 function defaultDueDate(): string {
@@ -106,6 +106,7 @@ export default function InvoicesPage() {
   const [editInvoiceId, setEditInvoiceId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [actionMenuId, setActionMenuId] = useState<string | null>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null);
 
   // Quick-add client state
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -241,6 +242,14 @@ export default function InvoicesPage() {
 
   const invoiceTotal = formBasePrice + formAddOns.reduce((s, a) => s + a.price, 0);
 
+  // Sequential invoice numbers (INV-001, INV-002...) based on creation order
+  const invoiceSeqMap = useMemo(() => {
+    const sorted = [...invoices].sort((a, b) =>
+      new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+    );
+    return Object.fromEntries(sorted.map((inv, i) => [inv.id, i + 1]));
+  }, [invoices]);
+
   // Filter invoices
   const filtered = invoices.filter((inv) => {
     if (statusFilter !== "all" && inv.status !== statusFilter) return false;
@@ -251,7 +260,7 @@ export default function InvoicesPage() {
       : "";
     return (
       clientName.includes(q) ||
-      invoiceNumber(inv.id).toLowerCase().includes(q)
+      invoiceNumber(invoiceSeqMap[inv.id] ?? 0).toLowerCase().includes(q)
     );
   });
 
@@ -644,7 +653,7 @@ export default function InvoicesPage() {
                   >
                     <td className="px-5 py-4">
                       <span className="text-sm font-medium text-[var(--mh-text)] font-mono">
-                        {invoiceNumber(inv.id)}
+                        {invoiceNumber(invoiceSeqMap[inv.id] ?? 0)}
                       </span>
                     </td>
                     <td className="px-5 py-4">
@@ -686,57 +695,31 @@ export default function InvoicesPage() {
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      <div className="relative flex justify-end">
+                      <div className="flex items-center justify-end gap-2">
+                        {inv.status === "unpaid" && (
+                          <button
+                            onClick={() => markPaid(inv)}
+                            className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-full bg-[#34C759]/10 text-[#34C759] hover:bg-[#34C759]/20 border border-[#34C759]/20 transition-colors whitespace-nowrap"
+                          >
+                            <CheckCircle2 className="h-3 w-3 shrink-0" strokeWidth={2.5} />
+                            Mark Paid
+                          </button>
+                        )}
                         <button
-                          onClick={() => setActionMenuId(actionMenuId === inv.id ? null : inv.id)}
+                          onClick={(e) => {
+                            if (actionMenuId === inv.id) {
+                              setActionMenuId(null);
+                              setMenuPos(null);
+                            } else {
+                              const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                              setMenuPos({ top: rect.bottom + 6, right: window.innerWidth - rect.right });
+                              setActionMenuId(inv.id);
+                            }
+                          }}
                           className="p-1.5 rounded-[5px] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
                         >
                           <MoreHorizontal className="h-4 w-4" strokeWidth={1.8} />
                         </button>
-                        {actionMenuId === inv.id && (
-                          <>
-                            <div className="fixed inset-0 z-40" onClick={() => setActionMenuId(null)} />
-                            <div className="absolute right-0 top-full mt-1 w-40 bg-[var(--mh-surface)] rounded-[6px] shadow-[var(--mh-shadow-dropdown)] border border-[var(--mh-border)] py-1 z-50 overflow-hidden">
-                              {inv.status === "unpaid" && (
-                                <>
-                                  <button
-                                    onClick={() => { openEdit(inv); setActionMenuId(null); }}
-                                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-medium text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)] hover:text-[var(--mh-text)] transition-colors text-left"
-                                  >
-                                    <Pencil className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
-                                    Edit
-                                  </button>
-                                  <button
-                                    onClick={() => { markPaid(inv); setActionMenuId(null); }}
-                                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-medium text-[#34C759] hover:bg-[#34C759]/8 transition-colors text-left"
-                                  >
-                                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
-                                    Mark Paid
-                                  </button>
-                                  <button
-                                    onClick={() => { voidInvoice(inv); setActionMenuId(null); }}
-                                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-medium text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)] hover:text-[var(--mh-text)] transition-colors text-left"
-                                  >
-                                    <Ban className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
-                                    Void
-                                  </button>
-                                  <div className="my-1 border-t border-[var(--mh-divider)]" />
-                                </>
-                              )}
-                              <button
-                                onClick={() => { deleteInvoice(inv); setActionMenuId(null); }}
-                                className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-medium transition-colors text-left ${
-                                  deleteConfirmId === inv.id
-                                    ? "text-red-500 bg-red-500/8"
-                                    : "text-red-400 hover:bg-red-500/8 hover:text-red-500"
-                                }`}
-                              >
-                                <Trash2 className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
-                                {deleteConfirmId === inv.id ? "Confirm delete?" : "Delete"}
-                              </button>
-                            </div>
-                          </>
-                        )}
                       </div>
                     </td>
                   </tr>
@@ -746,6 +729,52 @@ export default function InvoicesPage() {
           </div>
         )}
       </div>
+
+      {/* Action dropdown — rendered at root level with fixed position to avoid table overflow clipping */}
+      {actionMenuId && menuPos && (() => {
+        const inv = invoices.find((i) => i.id === actionMenuId);
+        if (!inv) return null;
+        return (
+          <>
+            <div className="fixed inset-0 z-[100]" onClick={() => { setActionMenuId(null); setMenuPos(null); }} />
+            <div
+              className="fixed z-[101] w-44 bg-[var(--mh-surface)] rounded-[8px] shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-[var(--mh-border)] py-1.5 overflow-hidden"
+              style={{ top: menuPos.top, right: menuPos.right }}
+            >
+              {inv.status === "unpaid" && (
+                <>
+                  <button
+                    onClick={() => { openEdit(inv); setActionMenuId(null); setMenuPos(null); }}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-medium text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)] hover:text-[var(--mh-text)] transition-colors text-left"
+                  >
+                    <Pencil className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => { voidInvoice(inv); setActionMenuId(null); setMenuPos(null); }}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-medium text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)] hover:text-[var(--mh-text)] transition-colors text-left"
+                  >
+                    <Ban className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
+                    Void
+                  </button>
+                  <div className="my-1 mx-2 border-t border-[var(--mh-divider)]" />
+                </>
+              )}
+              <button
+                onClick={() => { deleteInvoice(inv); if (deleteConfirmId !== inv.id) { setActionMenuId(null); setMenuPos(null); } }}
+                className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-medium transition-colors text-left ${
+                  deleteConfirmId === inv.id
+                    ? "text-red-500 bg-red-500/10"
+                    : "text-red-400 hover:bg-red-500/8 hover:text-red-500"
+                }`}
+              >
+                <Trash2 className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
+                {deleteConfirmId === inv.id ? "Confirm?" : "Delete"}
+              </button>
+            </div>
+          </>
+        );
+      })()}
 
       {/* Create Invoice Panel */}
       <SlidePanel
