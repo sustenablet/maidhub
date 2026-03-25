@@ -17,6 +17,9 @@ import {
   ChevronDown,
   ArrowUpRight,
   Wallet,
+  MoreHorizontal,
+  ChevronRight,
+  Plus,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
@@ -183,6 +186,258 @@ function SidebarContent({
   );
 }
 
+// ── FAB quick-action sheet ──────────────────────────────────────
+function MobileFAB({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="fixed z-50 md:hidden flex items-center justify-center rounded-full bg-[#0071E3] shadow-[0_4px_20px_rgba(0,113,227,0.5)] active:scale-95 transition-transform"
+      style={{
+        bottom: "calc(env(safe-area-inset-bottom) + 70px)",
+        right: "20px",
+        width: "52px",
+        height: "52px",
+      }}
+      aria-label="Quick actions"
+    >
+      <Plus className="h-6 w-6 text-white" strokeWidth={2.5} />
+    </button>
+  );
+}
+
+function MobileFABSheet({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  const actions = [
+    { href: "/dashboard/schedule", label: "New Job", desc: "Schedule a cleaning", icon: CalendarDays, color: "#0071E3" },
+    { href: "/dashboard/clients", label: "New Client", desc: "Add a client", icon: Users, color: "#34C759" },
+    { href: "/dashboard/invoices", label: "New Invoice", desc: "Create & send invoice", icon: Receipt, color: "#FF9F0A" },
+  ];
+
+  return (
+    <>
+      <div
+        className={`fixed inset-0 z-[55] md:hidden transition-opacity duration-200 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        style={{ background: "rgba(0,0,0,0.5)" }}
+        onClick={onClose}
+      />
+      <div
+        className={`fixed inset-x-0 bottom-0 z-[58] md:hidden bg-[var(--mh-surface)] rounded-t-[20px] border-t border-[var(--mh-border)] transition-transform duration-300 ease-out ${open ? "translate-y-0" : "translate-y-full"}`}
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)" }}
+      >
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-9 h-[4px] rounded-full bg-[var(--mh-border-strong)]" />
+        </div>
+        <div className="px-5 pt-2 pb-1">
+          <p className="text-[11px] font-semibold text-[var(--mh-text-faint)] uppercase tracking-[0.1em] mb-3">Quick Actions</p>
+          <div className="space-y-2">
+            {actions.map(({ href, label, desc, icon: Icon, color }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={onClose}
+                className="flex items-center gap-4 p-3.5 rounded-[12px] bg-[var(--mh-surface-raised)] active:opacity-70 transition-opacity"
+              >
+                <div
+                  className="h-10 w-10 rounded-[10px] flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: `${color}20` }}
+                >
+                  <Icon className="h-5 w-5" style={{ color }} strokeWidth={1.8} />
+                </div>
+                <div>
+                  <p className="text-[14px] font-semibold text-[var(--mh-text)]">{label}</p>
+                  <p className="text-[11px] text-[var(--mh-text-faint)]">{desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Mobile bottom tab items ─────────────────────────────────────
+const mobileTabs = [
+  { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+  { href: "/dashboard/schedule", label: "Schedule", icon: CalendarDays },
+  { href: "/dashboard/clients", label: "Clients", icon: Users },
+  { href: "/dashboard/invoices", label: "Invoices", icon: Receipt },
+];
+
+function MobileBottomNav({
+  onMoreClick,
+  moreOpen,
+}: {
+  onMoreClick: () => void;
+  moreOpen: boolean;
+}) {
+  const pathname = usePathname();
+
+  return (
+    <nav className="fixed bottom-0 inset-x-0 z-50 md:hidden">
+      <div
+        className="bg-[var(--mh-sidebar)]/95 backdrop-blur-xl border-t border-[var(--mh-border-subtle)]"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <div className="flex items-stretch h-[56px]">
+          {mobileTabs.map(({ href, label, icon: Icon }) => {
+            const isActive =
+              pathname === href ||
+              (href !== "/dashboard" && pathname.startsWith(href));
+            return (
+              <Link
+                key={href}
+                href={href}
+                className="flex-1 flex flex-col items-center justify-center gap-[3px] relative select-none"
+              >
+                {isActive && (
+                  <span className="absolute top-[10px] w-5 h-[3px] rounded-full bg-[#0071E3]" />
+                )}
+                <Icon
+                  className={`h-[22px] w-[22px] mt-[6px] transition-colors ${
+                    isActive ? "text-[#0071E3]" : "text-[var(--mh-text-faint)]"
+                  }`}
+                  strokeWidth={isActive ? 2.2 : 1.5}
+                />
+                <span
+                  className={`text-[9.5px] font-semibold tracking-[0.02em] transition-colors ${
+                    isActive ? "text-[#0071E3]" : "text-[var(--mh-text-faint)]"
+                  }`}
+                >
+                  {label}
+                </span>
+              </Link>
+            );
+          })}
+
+          {/* More tab */}
+          <button
+            onClick={onMoreClick}
+            className="flex-1 flex flex-col items-center justify-center gap-[3px] relative select-none"
+          >
+            {moreOpen && (
+              <span className="absolute top-[10px] w-5 h-[3px] rounded-full bg-[#0071E3]" />
+            )}
+            <MoreHorizontal
+              className={`h-[22px] w-[22px] mt-[6px] transition-colors ${
+                moreOpen ? "text-[#0071E3]" : "text-[var(--mh-text-faint)]"
+              }`}
+              strokeWidth={moreOpen ? 2.2 : 1.5}
+            />
+            <span
+              className={`text-[9.5px] font-semibold tracking-[0.02em] transition-colors ${
+                moreOpen ? "text-[#0071E3]" : "text-[var(--mh-text-faint)]"
+              }`}
+            >
+              More
+            </span>
+          </button>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+// ── More bottom sheet ────────────────────────────────────────────
+function MobileMoreSheet({
+  open,
+  onClose,
+  displayName,
+  email,
+  initials,
+  onSignOut,
+}: {
+  open: boolean;
+  onClose: () => void;
+  displayName: string;
+  email: string;
+  initials: string;
+  onSignOut: () => void;
+}) {
+  const moreItems = [
+    { href: "/dashboard/finances", label: "Finances Overview", icon: Wallet, desc: "Revenue & reports" },
+    { href: "/dashboard/notifications", label: "Notifications", icon: Bell, desc: "Recent activity" },
+    { href: "/dashboard/settings", label: "Settings", icon: Settings, desc: "Account & preferences" },
+  ];
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className={`fixed inset-0 z-[60] md:hidden transition-opacity duration-300 ${
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        style={{ background: "rgba(0,0,0,0.6)" }}
+        onClick={onClose}
+      />
+
+      {/* Sheet */}
+      <div
+        className={`fixed inset-x-0 bottom-0 z-[70] md:hidden bg-[var(--mh-surface)] rounded-t-[20px] border-t border-[var(--mh-border)] transition-transform duration-300 ease-out ${
+          open ? "translate-y-0" : "translate-y-full"
+        }`}
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 72px)" }}
+      >
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-2">
+          <div className="w-9 h-[4px] rounded-full bg-[var(--mh-border-strong)]" />
+        </div>
+
+        {/* User identity */}
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--mh-divider)]">
+          <div className="h-10 w-10 rounded-full bg-[#0071E3]/20 border border-[#0071E3]/30 flex items-center justify-center shrink-0">
+            <span className="text-[#0071E3] text-[13px] font-bold">{initials}</span>
+          </div>
+          <div className="min-w-0">
+            <p className="text-[14px] font-semibold text-[var(--mh-text)] truncate">{displayName}</p>
+            <p className="text-[11px] text-[var(--mh-text-faint)] truncate">{email}</p>
+          </div>
+        </div>
+
+        {/* Nav items */}
+        <div className="px-3 pt-2 pb-1 space-y-0.5">
+          {moreItems.map(({ href, label, icon: Icon, desc }) => (
+            <Link
+              key={href}
+              href={href}
+              onClick={onClose}
+              className="flex items-center gap-3.5 px-3 py-3 rounded-[10px] hover:bg-[var(--mh-hover-overlay)] active:bg-[var(--mh-hover-overlay)] transition-colors"
+            >
+              <div className="h-9 w-9 rounded-[8px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
+                <Icon className="h-4.5 w-4.5 text-[var(--mh-text-muted)]" strokeWidth={1.7} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[14px] font-semibold text-[var(--mh-text)]">{label}</p>
+                <p className="text-[11px] text-[var(--mh-text-faint)]">{desc}</p>
+              </div>
+              <ChevronRight className="h-4 w-4 text-[var(--mh-text-faint)]" strokeWidth={1.8} />
+            </Link>
+          ))}
+        </div>
+
+        {/* Sign out */}
+        <div className="px-3 pt-1">
+          <button
+            onClick={onSignOut}
+            className="flex w-full items-center gap-3.5 px-3 py-3 rounded-[10px] hover:bg-red-500/[0.06] active:bg-red-500/[0.08] transition-colors"
+          >
+            <div className="h-9 w-9 rounded-[8px] bg-red-500/10 flex items-center justify-center shrink-0">
+              <LogOut className="h-4 w-4 text-red-400" strokeWidth={1.7} />
+            </div>
+            <p className="text-[14px] font-semibold text-red-400">Sign Out</p>
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Main shell ───────────────────────────────────────────────────
 export function DashboardShell({
   user,
   profile,
@@ -192,8 +447,9 @@ export function DashboardShell({
   profile: Profile | null;
   children: React.ReactNode;
 }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [fabOpen, setFabOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createClient();
@@ -214,7 +470,9 @@ export function DashboardShell({
   }, []);
 
   useEffect(() => {
-    setMobileOpen(false);
+    setMoreOpen(false);
+    setDropdownOpen(false);
+    setFabOpen(false);
   }, [pathname]);
 
   async function handleSignOut() {
@@ -224,101 +482,108 @@ export function DashboardShell({
   }
 
   return (
-    <div className="flex min-h-screen bg-[var(--mh-bg)]">
-      {/* Desktop Sidebar */}
+    <div className="flex min-h-[100dvh] bg-[var(--mh-bg)]">
+      {/* ── Desktop Sidebar ── */}
       <aside className="hidden md:flex w-[220px] shrink-0 flex-col bg-[var(--mh-sidebar)] border-r border-[var(--mh-border-subtle)] sticky top-0 h-screen overflow-hidden">
         <SidebarContent profile={profile} />
       </aside>
 
-      {/* Mobile overlay */}
-      <div
-        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden transition-opacity duration-300 ${
-          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={() => setMobileOpen(false)}
-      />
-
-      {/* Mobile drawer */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-[220px] bg-[var(--mh-sidebar)] border-r border-[var(--mh-border-subtle)] transform transition-transform duration-300 ease-in-out md:hidden ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <button
-          onClick={() => setMobileOpen(false)}
-          className="absolute top-4 right-4 p-1.5 rounded-md hover:bg-[var(--mh-hover-overlay)] text-[var(--mh-text-faint)] transition-colors"
-        >
-          <X className="h-4 w-4" />
-        </button>
-        <SidebarContent profile={profile} onNavClick={() => setMobileOpen(false)} />
-      </aside>
-
-      {/* Main content */}
+      {/* ── Main content ── */}
       <div className="flex flex-1 flex-col min-w-0">
-        {/* Topbar */}
-        <header className="sticky top-0 z-30 h-[50px] bg-[var(--mh-sidebar)]/90 backdrop-blur-md border-b border-[var(--mh-border-subtle)] flex items-center justify-between px-4 md:px-6">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="md:hidden p-2 rounded-md hover:bg-[var(--mh-hover-overlay)] text-[var(--mh-text-muted)] transition-colors"
-            >
-              <Menu className="h-4 w-4" />
-            </button>
-            <div className="flex items-center gap-2 text-[13px]">
-              <span className="text-[var(--mh-text-faint)] hidden sm:block">Home</span>
-              <span className="text-[var(--mh-text-faint)] hidden sm:block">/</span>
-              <span className="text-[var(--mh-text)] font-semibold">{breadcrumb}</span>
-            </div>
+
+        {/* Desktop topbar */}
+        <header className="sticky top-0 z-30 bg-[var(--mh-sidebar)]/90 backdrop-blur-md border-b border-[var(--mh-border-subtle)] flex items-center justify-between px-6 h-[50px]"
+          style={{ paddingTop: "env(safe-area-inset-top)" }}>
+
+          {/* Left — desktop only breadcrumb */}
+          <div className="hidden md:flex items-center gap-2 text-[13px]">
+            <span className="text-[var(--mh-text-faint)]">Home</span>
+            <span className="text-[var(--mh-text-faint)]">/</span>
+            <span className="text-[var(--mh-text)] font-semibold">{breadcrumb}</span>
           </div>
 
-          <div className="flex items-center gap-1">
-            {/* User dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 pl-2 pr-1.5 py-1.5 rounded-md hover:bg-[var(--mh-hover-overlay)] transition-colors ml-0.5"
-              >
-                <div className="h-6 w-6 rounded-full bg-[#0071E3]/20 border border-[#0071E3]/30 flex items-center justify-center shrink-0">
-                  <span className="text-[#0071E3] text-[9px] font-bold tracking-wide">{initials}</span>
-                </div>
-                <span className="hidden sm:block text-[13px] font-medium text-[var(--mh-text)]">{displayName}</span>
-                <ChevronDown className={`h-3 w-3 text-[var(--mh-text-faint)] transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
-              </button>
-
-              {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-52 bg-[var(--mh-surface)] rounded-[6px] shadow-[var(--mh-shadow-dropdown)] border border-[var(--mh-border)] py-1 z-50 overflow-hidden">
-                  <div className="px-3.5 py-2.5 border-b border-[var(--mh-border)]">
-                    <p className="text-[13px] font-semibold text-[var(--mh-text)]">{displayName}</p>
-                    <p className="text-[11px] text-[var(--mh-text-faint)] truncate">{user.email}</p>
-                  </div>
-                  <div className="py-0.5">
-                    <Link
-                      href="/dashboard/settings"
-                      className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)] hover:text-[var(--mh-text)] transition-colors"
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      <Settings className="h-[14px] w-[14px]" strokeWidth={1.8} />
-                      Settings
-                    </Link>
-                  </div>
-                  <div className="border-t border-[var(--mh-border)] py-0.5">
-                    <button
-                      onClick={handleSignOut}
-                      className="flex w-full items-center gap-2.5 px-3.5 py-2 text-[13px] text-red-400/80 hover:bg-red-500/[0.06] hover:text-red-400 transition-colors"
-                    >
-                      <LogOut className="h-[14px] w-[14px]" strokeWidth={1.8} />
-                      Sign out
-                    </button>
-                  </div>
-                </div>
-              )}
+          {/* Mobile header — logo left, title center, avatar right */}
+          <div className="flex md:hidden items-center gap-3 w-full">
+            {/* Logo mark */}
+            <div className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] bg-[#0071E3] shrink-0">
+              <span className="text-white font-bold text-[13px] leading-none tracking-tight">M</span>
             </div>
+            {/* Page title */}
+            <span className="flex-1 text-[15px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">
+              {breadcrumb}
+            </span>
+          </div>
+
+          {/* Right — user avatar (both mobile & desktop) */}
+          <div className="relative shrink-0" ref={dropdownRef}>
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="flex items-center gap-2 pl-2 pr-1.5 py-1.5 rounded-md hover:bg-[var(--mh-hover-overlay)] transition-colors"
+            >
+              <div className="h-7 w-7 rounded-full bg-[#0071E3]/20 border border-[#0071E3]/30 flex items-center justify-center shrink-0">
+                <span className="text-[#0071E3] text-[10px] font-bold tracking-wide">{initials}</span>
+              </div>
+              <span className="hidden sm:block text-[13px] font-medium text-[var(--mh-text)]">{displayName}</span>
+              <ChevronDown className={`hidden sm:block h-3 w-3 text-[var(--mh-text-faint)] transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {dropdownOpen && (
+              <div className="absolute right-0 top-full mt-1.5 w-52 bg-[var(--mh-surface)] rounded-[6px] shadow-[var(--mh-shadow-dropdown)] border border-[var(--mh-border)] py-1 z-50 overflow-hidden">
+                <div className="px-3.5 py-2.5 border-b border-[var(--mh-border)]">
+                  <p className="text-[13px] font-semibold text-[var(--mh-text)]">{displayName}</p>
+                  <p className="text-[11px] text-[var(--mh-text-faint)] truncate">{user.email}</p>
+                </div>
+                <div className="py-0.5">
+                  <Link
+                    href="/dashboard/settings"
+                    className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)] hover:text-[var(--mh-text)] transition-colors"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    <Settings className="h-[14px] w-[14px]" strokeWidth={1.8} />
+                    Settings
+                  </Link>
+                </div>
+                <div className="border-t border-[var(--mh-border)] py-0.5">
+                  <button
+                    onClick={handleSignOut}
+                    className="flex w-full items-center gap-2.5 px-3.5 py-2 text-[13px] text-red-400/80 hover:bg-red-500/[0.06] hover:text-red-400 transition-colors"
+                  >
+                    <LogOut className="h-[14px] w-[14px]" strokeWidth={1.8} />
+                    Sign out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 p-4 md:p-6 overflow-auto">{children}</main>
+        {/* Page content — extra bottom padding on mobile for tab bar */}
+        <main className="flex-1 p-4 md:p-6 overflow-auto pb-[calc(72px+env(safe-area-inset-bottom))] md:pb-6">
+          {children}
+        </main>
       </div>
+
+      {/* ── Mobile FAB ── */}
+      <MobileFAB onClick={() => { setFabOpen((o) => !o); setMoreOpen(false); }} />
+
+      {/* ── Mobile FAB action sheet ── */}
+      <MobileFABSheet open={fabOpen} onClose={() => setFabOpen(false)} />
+
+      {/* ── Mobile bottom tab bar ── */}
+      <MobileBottomNav
+        onMoreClick={() => { setMoreOpen((o) => !o); setFabOpen(false); }}
+        moreOpen={moreOpen}
+      />
+
+      {/* ── Mobile "More" sheet ── */}
+      <MobileMoreSheet
+        open={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        displayName={displayName}
+        email={user.email || ""}
+        initials={initials}
+        onSignOut={handleSignOut}
+      />
     </div>
   );
 }
