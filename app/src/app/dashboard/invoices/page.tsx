@@ -11,6 +11,10 @@ import {
   Loader2,
   Trash2,
   UserPlus,
+  MoreHorizontal,
+  Pencil,
+  CheckCircle2,
+  Ban,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -101,6 +105,7 @@ export default function InvoicesPage() {
   const [editMode, setEditMode] = useState(false);
   const [editInvoiceId, setEditInvoiceId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [actionMenuId, setActionMenuId] = useState<string | null>(null);
 
   // Quick-add client state
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -628,7 +633,7 @@ export default function InvoicesPage() {
                   >
                     Status
                   </th>
-                  <th className="px-5 py-3 w-28" />
+                  <th className="px-4 py-3 w-12" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--mh-divider)]">
@@ -680,38 +685,56 @@ export default function InvoicesPage() {
                         {inv.status}
                       </span>
                     </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
-                        {inv.status === "unpaid" && (
+                    <td className="px-4 py-4">
+                      <div className="relative flex justify-end">
+                        <button
+                          onClick={() => setActionMenuId(actionMenuId === inv.id ? null : inv.id)}
+                          className="p-1.5 rounded-[5px] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
+                        >
+                          <MoreHorizontal className="h-4 w-4" strokeWidth={1.8} />
+                        </button>
+                        {actionMenuId === inv.id && (
                           <>
-                            <button
-                              onClick={() => openEdit(inv)}
-                              className="text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => markPaid(inv)}
-                              className="text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
-                            >
-                              Mark Paid
-                            </button>
-                            <button
-                              onClick={() => voidInvoice(inv)}
-                              className="text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text-muted)] transition-colors"
-                            >
-                              Void
-                            </button>
-                            <button
-                              onClick={() => deleteInvoice(inv)}
-                              className={`text-xs font-semibold transition-colors ${
-                                deleteConfirmId === inv.id
-                                  ? "text-red-500"
-                                  : "text-[var(--mh-text-subtle)] hover:text-red-400"
-                              }`}
-                            >
-                              {deleteConfirmId === inv.id ? "Confirm?" : "Delete"}
-                            </button>
+                            <div className="fixed inset-0 z-40" onClick={() => setActionMenuId(null)} />
+                            <div className="absolute right-0 top-full mt-1 w-40 bg-[var(--mh-surface)] rounded-[6px] shadow-[var(--mh-shadow-dropdown)] border border-[var(--mh-border)] py-1 z-50 overflow-hidden">
+                              {inv.status === "unpaid" && (
+                                <>
+                                  <button
+                                    onClick={() => { openEdit(inv); setActionMenuId(null); }}
+                                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-medium text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)] hover:text-[var(--mh-text)] transition-colors text-left"
+                                  >
+                                    <Pencil className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => { markPaid(inv); setActionMenuId(null); }}
+                                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-medium text-[#34C759] hover:bg-[#34C759]/8 transition-colors text-left"
+                                  >
+                                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
+                                    Mark Paid
+                                  </button>
+                                  <button
+                                    onClick={() => { voidInvoice(inv); setActionMenuId(null); }}
+                                    className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-medium text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)] hover:text-[var(--mh-text)] transition-colors text-left"
+                                  >
+                                    <Ban className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
+                                    Void
+                                  </button>
+                                  <div className="my-1 border-t border-[var(--mh-divider)]" />
+                                </>
+                              )}
+                              <button
+                                onClick={() => { deleteInvoice(inv); setActionMenuId(null); }}
+                                className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-[12px] font-medium transition-colors text-left ${
+                                  deleteConfirmId === inv.id
+                                    ? "text-red-500 bg-red-500/8"
+                                    : "text-red-400 hover:bg-red-500/8 hover:text-red-500"
+                                }`}
+                              >
+                                <Trash2 className="h-3.5 w-3.5 shrink-0" strokeWidth={1.8} />
+                                {deleteConfirmId === inv.id ? "Confirm delete?" : "Delete"}
+                              </button>
+                            </div>
                           </>
                         )}
                       </div>

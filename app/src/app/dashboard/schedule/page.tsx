@@ -16,6 +16,10 @@ import {
   Repeat,
   Loader2,
   Receipt,
+  Pencil,
+  CheckCircle2,
+  XCircle,
+  PlayCircle,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -547,6 +551,29 @@ export default function SchedulePage() {
       if (formStartTime) firstJobPayload.start_time = formStartTime;
 
       await supabase.from("jobs").insert(firstJobPayload);
+
+      // Generate the next few occurrences so they appear on future weeks
+      const nextDates = getNextOccurrences(newRule, 8).slice(1); // skip first (already created)
+      if (nextDates.length > 0) {
+        const moreJobs = nextDates.map((d) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const j: Record<string, any> = {
+            user_id: user.id,
+            client_id: formClientId,
+            recurring_rule_id: newRule.id,
+            scheduled_date: d,
+            duration_minutes: parseInt(formDuration) || 60,
+            service_type: formServiceType || null,
+            price: formPrice ? parseFloat(formPrice) : null,
+            status: "scheduled" as const,
+          };
+          if (formAddressId) j.address_id = formAddressId;
+          if (formStartTime) j.start_time = formStartTime;
+          return j;
+        });
+        await supabase.from("jobs").insert(moreJobs);
+      }
+
       setSaving(false);
       toast.success("Recurring schedule created");
     } else {
@@ -1381,166 +1408,210 @@ export default function SchedulePage() {
         subtitle={selectedJob?.service_type ?? undefined}
       >
         {selectedJob && (
-          <div className="px-6 py-5 space-y-5">
-            {/* Status badge */}
-            <div>
-              <span
-                className={`inline-flex items-center px-2.5 py-1 rounded-[6px] text-xs font-semibold ${
-                  STATUS_COLORS[selectedJob.status].bg
-                } ${STATUS_COLORS[selectedJob.status].text}`}
-              >
-                {selectedJob.status.replace("_", " ").replace(/\b\w/g, (c) =>
-                  c.toUpperCase()
-                )}
-              </span>
-            </div>
-
-            {selectedJob.status === "invoiced" && (
-              <div className="flex items-center gap-2 px-4 py-2.5 bg-[#0071E3]/10 rounded-[6px] mt-2">
-                <Receipt className="h-3.5 w-3.5 text-blue-500" strokeWidth={1.8} />
-                <span className="text-xs text-blue-600 font-medium">
-                  Invoice has been created for this job
-                </span>
-              </div>
-            )}
-
-            {/* Info rows */}
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <User className="h-4 w-4 text-[var(--mh-text-muted)] mt-0.5 shrink-0" />
-                <div>
-                  <p
-                    className="text-xs text-[var(--mh-text-muted)] font-medium"
-                  >
-                    Client
-                  </p>
-                  <p
-                    className="text-sm font-semibold text-[var(--mh-text)]"
-                  >
-                    {selectedJob.clients
-                      ? `${selectedJob.clients.first_name} ${selectedJob.clients.last_name}`
-                      : "Unknown"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Calendar className="h-4 w-4 text-[var(--mh-text-muted)] mt-0.5 shrink-0" />
-                <div>
-                  <p
-                    className="text-xs text-[var(--mh-text-muted)] font-medium"
-                  >
-                    Date & Time
-                  </p>
-                  <p
-                    className="text-sm font-semibold text-[var(--mh-text)]"
-                  >
-                    {new Date(
-                      selectedJob.scheduled_date + "T00:00:00"
-                    ).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </p>
-                  {selectedJob.start_time && (
-                    <p
-                      className="text-sm text-[var(--mh-text-muted)]"
-                    >
-                      {formatTimeRange(
-                        selectedJob.start_time,
-                        selectedJob.duration_minutes
-                      )}
-                      {selectedJob.duration_minutes
-                        ? ` (${selectedJob.duration_minutes} min)`
-                        : ""}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {selectedJob.addresses && (
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-4 w-4 text-[var(--mh-text-muted)] mt-0.5 shrink-0" />
-                  <div>
-                    <p
-                      className="text-xs text-[var(--mh-text-muted)] font-medium"
-                    >
-                      Address
-                    </p>
-                    <p
-                      className="text-sm text-[var(--mh-text)]"
-                    >
-                      {formatAddress(selectedJob.addresses)}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {selectedJob.price != null && (
-                <div className="flex items-start gap-3">
-                  <DollarSign className="h-4 w-4 text-[var(--mh-text-muted)] mt-0.5 shrink-0" />
-                  <div>
-                    <p
-                      className="text-xs text-[var(--mh-text-muted)] font-medium"
-                    >
-                      Price
-                    </p>
-                    <p
-                      className="text-sm font-bold text-[var(--mh-text)]"
-                    >
-                      ${Number(selectedJob.price).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {selectedJob.notes && (
-                <div className="flex items-start gap-3">
-                  <FileText className="h-4 w-4 text-[var(--mh-text-muted)] mt-0.5 shrink-0" />
-                  <div>
-                    <p
-                      className="text-xs text-[var(--mh-text-muted)] font-medium"
-                    >
-                      Notes
-                    </p>
-                    <p
-                      className="text-sm text-[var(--mh-text-muted)] whitespace-pre-wrap"
-                    >
-                      {selectedJob.notes}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Divider */}
-            <div className="border-t border-[var(--mh-divider)]" />
-
-            {/* Edit + Delete + Status actions */}
-            <div className="flex flex-wrap gap-2">
-              {selectedJob.status !== "invoiced" && selectedJob.status !== "cancelled" && (
-                <button
-                  onClick={() => openEditForm(selectedJob)}
-                  className="px-4 py-2 text-sm font-semibold rounded-[6px] transition-colors bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[var(--mh-text)] hover:bg-[var(--mh-hover-overlay)]"
+          <div className="flex flex-col min-h-0">
+            {/* ── Header strip: status + badges ── */}
+            <div className="px-6 pt-5 pb-4 border-b border-[var(--mh-divider)]">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                    STATUS_COLORS[selectedJob.status].bg
+                  } ${STATUS_COLORS[selectedJob.status].text}`}
                 >
-                  Edit Job
-                </button>
+                  {selectedJob.status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                </span>
+                {selectedJob.recurring_rule_id && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[var(--mh-text-muted)]">
+                    <Repeat className="h-2.5 w-2.5" strokeWidth={2} />
+                    Recurring
+                  </span>
+                )}
+              </div>
+              {selectedJob.service_type && (
+                <p className="text-[15px] font-bold text-[var(--mh-text)] mt-2 leading-tight">
+                  {selectedJob.service_type}
+                </p>
               )}
-              <button
-                onClick={() => handleDeleteJob(selectedJob)}
-                className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-[6px] transition-colors ${
-                  deleteConfirm
-                    ? "bg-red-500/100 text-white hover:bg-red-600"
-                    : "text-red-400 hover:bg-red-500/10 hover:text-red-500"
-                }`}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                {deleteConfirm ? "Confirm?" : "Delete"}
-              </button>
+              {selectedJob.price != null && (
+                <p className="text-[22px] font-bold text-[var(--mh-text)] mt-1 tracking-tight">
+                  ${Number(selectedJob.price).toFixed(2)}
+                </p>
+              )}
             </div>
-            {renderStatusActions(selectedJob)}
+
+            {/* ── Details rows ── */}
+            <div className="px-6 py-4 flex-1 overflow-y-auto">
+              <div className="divide-y divide-[var(--mh-divider)]">
+                {/* Client */}
+                <div className="flex items-center gap-3 py-3">
+                  <div className="h-7 w-7 rounded-[5px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
+                    <User className="h-3.5 w-3.5 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] text-[var(--mh-text-subtle)] font-medium uppercase tracking-wide">Client</p>
+                    <p className="text-[13px] font-semibold text-[var(--mh-text)] mt-0.5">
+                      {selectedJob.clients
+                        ? `${selectedJob.clients.first_name} ${selectedJob.clients.last_name}`
+                        : "Unknown"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Date */}
+                <div className="flex items-center gap-3 py-3">
+                  <div className="h-7 w-7 rounded-[5px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
+                    <Calendar className="h-3.5 w-3.5 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] text-[var(--mh-text-subtle)] font-medium uppercase tracking-wide">Date</p>
+                    <p className="text-[13px] font-semibold text-[var(--mh-text)] mt-0.5">
+                      {new Date(selectedJob.scheduled_date + "T00:00:00").toLocaleDateString("en-US", {
+                        weekday: "long",
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Time */}
+                {selectedJob.start_time && (
+                  <div className="flex items-center gap-3 py-3">
+                    <div className="h-7 w-7 rounded-[5px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
+                      <Clock className="h-3.5 w-3.5 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] text-[var(--mh-text-subtle)] font-medium uppercase tracking-wide">Time</p>
+                      <p className="text-[13px] font-semibold text-[var(--mh-text)] mt-0.5">
+                        {formatTimeRange(selectedJob.start_time, selectedJob.duration_minutes)}
+                      </p>
+                      {selectedJob.duration_minutes && (
+                        <p className="text-[11px] text-[var(--mh-text-muted)] mt-0.5">
+                          {selectedJob.duration_minutes >= 60
+                            ? `${Math.floor(selectedJob.duration_minutes / 60)}h${selectedJob.duration_minutes % 60 ? ` ${selectedJob.duration_minutes % 60}m` : ""}`
+                            : `${selectedJob.duration_minutes}m`} duration
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Address */}
+                {selectedJob.addresses && (
+                  <div className="flex items-center gap-3 py-3">
+                    <div className="h-7 w-7 rounded-[5px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
+                      <MapPin className="h-3.5 w-3.5 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] text-[var(--mh-text-subtle)] font-medium uppercase tracking-wide">Address</p>
+                      <p className="text-[13px] text-[var(--mh-text)] mt-0.5">{formatAddress(selectedJob.addresses)}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes */}
+                {selectedJob.notes && (
+                  <div className="flex items-start gap-3 py-3">
+                    <div className="h-7 w-7 rounded-[5px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0 mt-0.5">
+                      <FileText className="h-3.5 w-3.5 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] text-[var(--mh-text-subtle)] font-medium uppercase tracking-wide">Notes</p>
+                      <p className="text-[13px] text-[var(--mh-text-muted)] mt-0.5 leading-relaxed whitespace-pre-wrap">
+                        {selectedJob.notes}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Invoiced notice */}
+              {selectedJob.status === "invoiced" && (
+                <div className="flex items-center gap-2.5 mt-4 px-3.5 py-3 bg-[#0071E3]/8 border border-[#0071E3]/20 rounded-[6px]">
+                  <Receipt className="h-4 w-4 text-[#0071E3] shrink-0" strokeWidth={1.8} />
+                  <span className="text-[12px] text-[#0071E3] font-medium">Invoice has been created for this job</span>
+                </div>
+              )}
+            </div>
+
+            {/* ── Actions footer ── */}
+            <div className="px-6 py-4 border-t border-[var(--mh-divider)] space-y-3">
+              {/* Primary status action */}
+              {(() => {
+                const job = selectedJob;
+                if (job.status === "scheduled") {
+                  return (
+                    <button
+                      onClick={() => handleStatusChange(job, "in_progress")}
+                      disabled={updatingStatus}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#FF9F0A] hover:bg-amber-500 text-white text-[13px] font-semibold rounded-[6px] transition-colors disabled:opacity-50"
+                    >
+                      <PlayCircle className="h-4 w-4" strokeWidth={2} />
+                      Start Job
+                    </button>
+                  );
+                }
+                if (job.status === "in_progress") {
+                  return (
+                    <button
+                      onClick={() => handleStatusChange(job, "completed")}
+                      disabled={updatingStatus}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#34C759] hover:bg-green-500 text-white text-[13px] font-semibold rounded-[6px] transition-colors disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="h-4 w-4" strokeWidth={2} />
+                      Mark Complete
+                    </button>
+                  );
+                }
+                if (job.status === "completed") {
+                  return (
+                    <button
+                      onClick={() => handleCreateInvoiceFromJob(job)}
+                      disabled={updatingStatus}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0071E3] hover:bg-[#0077ED] text-white text-[13px] font-semibold rounded-[6px] transition-colors disabled:opacity-50"
+                    >
+                      <Receipt className="h-4 w-4" strokeWidth={2} />
+                      Create Invoice
+                    </button>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Secondary actions row */}
+              <div className="flex items-center gap-2">
+                {selectedJob.status !== "invoiced" && selectedJob.status !== "cancelled" && (
+                  <button
+                    onClick={() => openEditForm(selectedJob)}
+                    className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold rounded-[6px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[var(--mh-text)] hover:bg-[var(--mh-hover-overlay)] transition-colors flex-1 justify-center"
+                  >
+                    <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} />
+                    Edit Job
+                  </button>
+                )}
+                {selectedJob.status !== "cancelled" && selectedJob.status !== "invoiced" && (
+                  <button
+                    onClick={() => handleStatusChange(selectedJob, "cancelled")}
+                    disabled={updatingStatus}
+                    className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold rounded-[6px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)] transition-colors flex-1 justify-center disabled:opacity-50"
+                  >
+                    <XCircle className="h-3.5 w-3.5" strokeWidth={1.8} />
+                    Cancel
+                  </button>
+                )}
+                <button
+                  onClick={() => handleDeleteJob(selectedJob)}
+                  className={`flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold rounded-[6px] transition-colors ${
+                    deleteConfirm
+                      ? "bg-red-500 text-white hover:bg-red-600"
+                      : "text-red-400 border border-[var(--mh-border)] hover:bg-red-500/10 hover:border-red-500/30"
+                  }`}
+                >
+                  <Trash2 className="h-3.5 w-3.5" strokeWidth={1.8} />
+                  {deleteConfirm ? "Confirm?" : "Delete"}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </SlidePanel>

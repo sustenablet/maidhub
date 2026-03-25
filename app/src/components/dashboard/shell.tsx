@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   Users,
   CalendarDays,
-  FileText,
   Receipt,
   Bell,
   Settings,
@@ -48,7 +47,6 @@ const homeNav = [
 const financeNav = [
   { href: "/dashboard/finances", label: "Overview", icon: Wallet },
   { href: "/dashboard/invoices", label: "Invoices", icon: Receipt },
-  { href: "/dashboard/estimates", label: "Estimates", icon: FileText },
 ];
 
 const activityNav = [

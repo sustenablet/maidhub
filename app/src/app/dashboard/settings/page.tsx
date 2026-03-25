@@ -27,8 +27,9 @@ import {
   Check,
   Zap,
   Star,
+  Pencil,
 } from "lucide-react";
-import { SERVICE_TYPES } from "@/lib/types";
+import { SERVICE_TYPES, DEFAULT_SERVICE_PRICES } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme, type Theme } from "@/components/theme-provider";
@@ -221,6 +222,7 @@ export default function SettingsPage() {
   const [serviceTypes, setServiceTypes] = useState<string[]>([...SERVICE_TYPES]);
   const [servicePrices, setServicePrices] = useState<Record<string, string>>({});
   const [newService, setNewService] = useState("");
+  const [editingPriceFor, setEditingPriceFor] = useState<string | null>(null);
   const [defaultRate, setDefaultRate] = useState("50");
   const [taxRate, setTaxRate] = useState("0");
   const [paymentTerms, setPaymentTerms] = useState("14");
@@ -281,9 +283,16 @@ export default function SettingsPage() {
         if (Array.isArray(biz.service_types) && biz.service_types.length > 0) {
           setServiceTypes(biz.service_types as string[]);
         }
+        // Pre-fill with DEFAULT_SERVICE_PRICES as baseline, then overlay saved prices
+        const defaultPrices = Object.fromEntries(
+          Object.entries(DEFAULT_SERVICE_PRICES).map(([k, v]) => [k, String(v)])
+        );
         if (biz.service_type_prices && typeof biz.service_type_prices === "object") {
           const raw = biz.service_type_prices as Record<string, unknown>;
-          setServicePrices(Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, String(v)])));
+          const saved = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, String(v)]));
+          setServicePrices({ ...defaultPrices, ...saved });
+        } else {
+          setServicePrices(defaultPrices);
         }
         if (biz.default_rate != null) setDefaultRate(String(biz.default_rate));
         if (biz.tax_rate != null) setTaxRate(String(biz.tax_rate));
@@ -670,41 +679,60 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <div className="flex items-center gap-3 px-3 pb-1.5">
-                      <div className="flex-1" />
-                      <span className="text-[11px] font-semibold text-[var(--mh-text-subtle)] w-24 text-right pr-1">Default Price</span>
-                      <div className="w-5" />
-                    </div>
-                    {serviceTypes.map((service, index) => (
-                      <div
-                        key={`${service}-${index}`}
-                        className="flex items-center gap-3 px-3 py-2 bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)] rounded-[6px] group hover:bg-[var(--mh-hover-overlay)] transition-colors"
-                      >
-                        <div className="h-1.5 w-1.5 rounded-full bg-[#555555] shrink-0" />
-                        <span className="flex-1 text-[13px] text-[var(--mh-text)]">
-                          {service}
-                        </span>
-                        <div className="flex items-center gap-1 shrink-0">
-                          <span className="text-[12px] text-[var(--mh-text-subtle)]">$</span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="5"
-                            placeholder="—"
-                            value={servicePrices[service] || ""}
-                            onChange={(e) => setServicePrices(prev => ({ ...prev, [service]: e.target.value }))}
-                            className="w-20 px-2 py-1 text-[12px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] rounded-[4px] text-[var(--mh-text)] outline-none focus:border-[#0071E3]/50 placeholder:text-[var(--mh-text-faint)] text-right"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeServiceType(index)}
-                          className="p-1 rounded text-[var(--mh-text-subtle)] hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                    {serviceTypes.map((service, index) => {
+                      const isEditing = editingPriceFor === service;
+                      const savedPrice = servicePrices[service];
+                      const defaultPrice = DEFAULT_SERVICE_PRICES[service];
+                      const displayPrice = savedPrice || (defaultPrice ? String(defaultPrice) : "");
+                      return (
+                        <div
+                          key={`${service}-${index}`}
+                          className="flex items-center gap-3 px-3 py-2.5 bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)] rounded-[6px] group hover:bg-[var(--mh-hover-overlay)] transition-colors"
                         >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    ))}
+                          <div className="h-1.5 w-1.5 rounded-full bg-[var(--mh-text-faint)] shrink-0" />
+                          <span className="flex-1 text-[13px] text-[var(--mh-text)]">{service}</span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {isEditing ? (
+                              <div className="flex items-center gap-1">
+                                <span className="text-[12px] text-[var(--mh-text-subtle)]">$</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="5"
+                                  autoFocus
+                                  value={servicePrices[service] || ""}
+                                  onChange={(e) => setServicePrices(prev => ({ ...prev, [service]: e.target.value }))}
+                                  onBlur={() => setEditingPriceFor(null)}
+                                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === "Escape") setEditingPriceFor(null); }}
+                                  className="w-20 px-2 py-1 text-[12px] bg-[var(--mh-surface)] border border-[#0071E3]/50 rounded-[4px] text-[var(--mh-text)] outline-none text-right"
+                                />
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[13px] font-semibold text-[var(--mh-text)]">
+                                  {displayPrice ? `$${displayPrice}` : <span className="text-[var(--mh-text-faint)]">—</span>}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => { setEditingPriceFor(service); if (!servicePrices[service] && defaultPrice) { setServicePrices(prev => ({ ...prev, [service]: String(defaultPrice) })); } }}
+                                  className="p-1 rounded text-[var(--mh-text-faint)] hover:text-[#0071E3] hover:bg-[#0071E3]/10 opacity-0 group-hover:opacity-100 transition-all"
+                                  title="Edit price"
+                                >
+                                  <Pencil className="h-3 w-3" strokeWidth={2} />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeServiceType(index)}
+                            className="p-1 rounded text-[var(--mh-text-subtle)] hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   <p className="text-[11px] text-[var(--mh-text-subtle)]">
@@ -717,25 +745,10 @@ export default function SettingsPage() {
               </Card>
 
               <Card>
-                <CardHeader title="Other Defaults" description="Fallback defaults for jobs without a specific service type price." />
+                <CardHeader title="Invoicing Defaults" description="Applied automatically when creating new invoices." />
                 <CardBody className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Field label="Default Job Rate" icon={DollarSign} hint="Used when creating new jobs">
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-[var(--mh-text-muted)]">$</span>
-                        <Input
-                          type="number"
-                          min="0"
-                          step="5"
-                          value={defaultRate}
-                          onChange={(e) => setDefaultRate(e.target.value)}
-                          className="pl-7"
-                          placeholder="50"
-                        />
-                      </div>
-                    </Field>
-
-                    <Field label="Tax Rate" icon={Percent} hint="Applied to invoice totals">
+                    <Field label="Tax Rate" icon={Percent} hint="Appended to invoice totals">
                       <div className="relative">
                         <Input
                           type="number"
@@ -748,21 +761,6 @@ export default function SettingsPage() {
                           placeholder="0"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-[var(--mh-text-muted)]">%</span>
-                      </div>
-                    </Field>
-
-                    <Field label="Default Job Duration" icon={Clock} hint="Minutes per cleaning session">
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          min="30"
-                          step="15"
-                          value={defaultDuration}
-                          onChange={(e) => setDefaultDuration(e.target.value)}
-                          className="pr-12"
-                          placeholder="120"
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-[var(--mh-text-subtle)]">min</span>
                       </div>
                     </Field>
 
@@ -781,6 +779,52 @@ export default function SettingsPage() {
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-[var(--mh-text-subtle)]">days</span>
                       </div>
                     </Field>
+                  </div>
+                </CardBody>
+                <CardFooter>
+                  <SaveButton loading={businessSaving} onClick={handleBusinessSave} />
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader title="Scheduling Defaults" description="Used as fallback values when scheduling new jobs." />
+                <CardBody className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Field label="Default Job Rate" icon={DollarSign} hint="Fallback price when no service type price is set">
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-[var(--mh-text-muted)]">$</span>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="5"
+                          value={defaultRate}
+                          onChange={(e) => setDefaultRate(e.target.value)}
+                          className="pl-7"
+                          placeholder="50"
+                        />
+                      </div>
+                    </Field>
+
+                    <Field label="Default Duration" icon={Clock} hint="Default length of a cleaning session">
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          min="30"
+                          step="15"
+                          value={defaultDuration}
+                          onChange={(e) => setDefaultDuration(e.target.value)}
+                          className="pr-12"
+                          placeholder="120"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-[var(--mh-text-subtle)]">min</span>
+                      </div>
+                    </Field>
+                  </div>
+
+                  <div className="pt-1 border-t border-[var(--mh-divider)]">
+                    <p className="text-[11px] text-[var(--mh-text-subtle)] leading-relaxed">
+                      These values apply when no specific service type price or duration is selected. Per-job overrides always take priority.
+                    </p>
                   </div>
                 </CardBody>
                 <CardFooter>
