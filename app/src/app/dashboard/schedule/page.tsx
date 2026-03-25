@@ -188,6 +188,9 @@ export default function SchedulePage() {
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
   const [editJobId, setEditJobId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [viewMode, setViewMode] = useState<"week" | "day" | "list">("week");
+  const [selectedDay, setSelectedDay] = useState<Date>(today);
+  const [jobStatusFilter, setJobStatusFilter] = useState<Job["status"] | "all">("all");
 
   /* Service pricing defaults (loaded from user settings) */
   const servicePricesRef = useRef<Record<string, number>>({});
@@ -346,6 +349,37 @@ export default function SchedulePage() {
     }
     return map;
   }, [jobs, weekDays]);
+
+  const filteredJobsByDay = useMemo(() => {
+    const filtered = jobStatusFilter === "all" ? jobs : jobs.filter(j => j.status === jobStatusFilter);
+    const map: Record<number, Job[]> = {};
+    for (let i = 0; i < 7; i++) map[i] = [];
+    for (const job of filtered) {
+      const [y, m, d] = job.scheduled_date.split("-").map(Number);
+      const jobDate = new Date(y, m - 1, d);
+      const idx = weekDays.findIndex((wd) => isSameDay(wd, jobDate));
+      if (idx >= 0) map[idx].push(job);
+    }
+    return map;
+  }, [jobs, jobStatusFilter, weekDays]);
+
+  const selectedDayJobs = useMemo(() => {
+    const filtered = jobStatusFilter === "all" ? jobs : jobs.filter(j => j.status === jobStatusFilter);
+    return filtered
+      .filter(j => {
+        const [y, m, d] = j.scheduled_date.split("-").map(Number);
+        return isSameDay(new Date(y, m - 1, d), selectedDay);
+      })
+      .sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""));
+  }, [jobs, jobStatusFilter, selectedDay]);
+
+  const listViewJobs = useMemo(() => {
+    const filtered = jobStatusFilter === "all" ? jobs : jobs.filter(j => j.status === jobStatusFilter);
+    return [...filtered].sort((a, b) => {
+      if (a.scheduled_date !== b.scheduled_date) return a.scheduled_date.localeCompare(b.scheduled_date);
+      return (a.start_time || "").localeCompare(b.start_time || "");
+    });
+  }, [jobs, jobStatusFilter]);
 
   /* ── Actions ────────────────────────────────────────────────── */
 
@@ -889,102 +923,201 @@ export default function SchedulePage() {
         </div>
       </div>
 
-      {/* Week navigation */}
-      <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setWeekOffset((o) => o - 1)}
-            className="p-1.5 rounded-[6px] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] transition-colors"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setWeekOffset((o) => o + 1)}
-            className="p-1.5 rounded-[6px] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] transition-colors"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-          <span
-            className="text-sm font-semibold text-[var(--mh-text)] ml-1"
-          >
-            {formatWeekLabel(weekStart)}
-          </span>
+      {/* Navigation bar */}
+      <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] px-4 py-3 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (viewMode === "day") setSelectedDay((d) => addDays(d, -1));
+                else setWeekOffset((o) => o - 1);
+              }}
+              className="p-1.5 rounded-[6px] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => {
+                if (viewMode === "day") setSelectedDay((d) => addDays(d, 1));
+                else setWeekOffset((o) => o + 1);
+              }}
+              className="p-1.5 rounded-[6px] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] transition-colors"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+            <span className="text-sm font-semibold text-[var(--mh-text)] ml-1">
+              {viewMode === "day"
+                ? selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
+                : formatWeekLabel(weekStart)}
+            </span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => {
+                if (viewMode === "day") setSelectedDay(today);
+                else setWeekOffset(0);
+              }}
+              className="px-3 py-1.5 text-xs font-semibold text-[var(--mh-text)] bg-[var(--mh-surface-raised)] hover:bg-[var(--mh-hover-overlay)] border border-[var(--mh-border)] rounded-[6px] transition-colors"
+            >
+              Today
+            </button>
+            <div className="flex items-center gap-0.5 bg-[var(--mh-surface-raised)] rounded-[6px] p-0.5 border border-[var(--mh-border)]">
+              {(["week", "day", "list"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setViewMode(mode)}
+                  className={`px-3 py-1 text-[12px] font-semibold rounded-[4px] transition-colors capitalize ${
+                    viewMode === mode
+                      ? "bg-[var(--mh-surface)] text-[var(--mh-text)] shadow-sm"
+                      : "text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
+                  }`}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-        <button
-          onClick={() => setWeekOffset(0)}
-          className="px-3 py-1.5 text-xs font-semibold text-[var(--mh-text)] bg-[var(--mh-surface-raised)] hover:bg-[var(--mh-hover-overlay)] border border-[var(--mh-border)] rounded-[6px] transition-colors"
-        >
-          Today
-        </button>
+        {/* Status filter chips */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {([
+            { key: "all" as const, label: "All" },
+            { key: "scheduled" as const, label: "Scheduled" },
+            { key: "in_progress" as const, label: "In Progress" },
+            { key: "completed" as const, label: "Completed" },
+            { key: "cancelled" as const, label: "Cancelled" },
+          ]).map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setJobStatusFilter(f.key)}
+              className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${
+                jobStatusFilter === f.key
+                  ? "bg-[#0071E3] border-[#0071E3] text-white"
+                  : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Calendar grid */}
+      {/* Calendar / List view */}
       <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] overflow-hidden">
         {loading ? (
-          <div
-            className="flex items-center justify-center py-32 text-[var(--mh-text-muted)] text-sm"
-          >
+          <div className="flex items-center justify-center py-32 text-[var(--mh-text-muted)] text-sm">
             Loading...
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <div style={{ minWidth: "640px" }}>
-              {/* Day headers */}
-              <div
-                className="grid border-b border-[var(--mh-divider)]"
-                style={{
-                  gridTemplateColumns: "52px repeat(7, 1fr)",
-                }}
-              >
-                <div className="h-14" />
-                {weekDays.map((day, i) => {
-                  const isToday = isSameDay(day, today);
-                  return (
-                    <div
-                      key={i}
-                      className="flex flex-col items-center justify-center h-14 border-l border-[var(--mh-divider)]"
-                    >
-                      <span
-                        className={`text-[10px] font-bold uppercase tracking-wider ${
-                          isToday ? "text-teal-600" : "text-[var(--mh-text-muted)]"
-                        }`}
-                      >
-                        {DAY_NAMES[i]}
-                      </span>
-                      <span
-                        className={`text-sm font-bold mt-0.5 leading-none ${
-                          isToday
-                            ? "bg-[#0071E3] text-white w-7 h-7 rounded-full flex items-center justify-center"
-                            : "text-[var(--mh-text)]"
-                        }`}
-                      >
-                        {day.getDate()}
-                      </span>
-                    </div>
-                  );
-                })}
+        ) : viewMode === "list" ? (
+          /* ── List View ── */
+          <div className="divide-y divide-[var(--mh-divider)]">
+            {listViewJobs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                <Calendar className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" />
+                <p className="text-sm font-semibold text-[var(--mh-text)]">No jobs this week</p>
+                <p className="text-xs text-[var(--mh-text-muted)] mt-1 mb-4">Schedule a job to see it appear here</p>
+                <button onClick={openNewJobForm} className="flex items-center gap-2 px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED]/90 text-white text-sm font-semibold rounded-[6px] transition-colors">
+                  <Plus className="h-4 w-4" />
+                  New Job
+                </button>
               </div>
+            ) : Object.entries(
+                listViewJobs.reduce<Record<string, Job[]>>((acc, job) => {
+                  if (!acc[job.scheduled_date]) acc[job.scheduled_date] = [];
+                  acc[job.scheduled_date].push(job);
+                  return acc;
+                }, {})
+              ).map(([date, dayJobs]) => {
+                const d = new Date(date + "T00:00:00");
+                const isToday = isSameDay(d, today);
+                return (
+                  <div key={date}>
+                    <div className={`px-5 py-2 text-[11px] font-bold tracking-[0.06em] uppercase bg-[var(--mh-surface-raised)]/50 ${isToday ? "text-[#0071E3]" : "text-[var(--mh-text-subtle)]"}`}>
+                      {isToday ? "Today — " : ""}{d.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
+                    </div>
+                    {dayJobs.map((job) => {
+                      const colors = STATUS_COLORS[job.status];
+                      const clientName = job.clients ? `${job.clients.first_name} ${job.clients.last_name}` : "Unknown";
+                      return (
+                        <button
+                          key={job.id}
+                          onClick={() => { setSelectedJob(job); setDetailOpen(true); }}
+                          className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-[var(--mh-hover-overlay)] transition-colors text-left"
+                        >
+                          <div className={`w-1 self-stretch rounded-full ${colors.bg} ${colors.border} border-l-[3px]`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-semibold text-[var(--mh-text)] truncate">{clientName}</p>
+                            <p className="text-[11px] text-[var(--mh-text-muted)] mt-0.5">
+                              {job.service_type || "Service"}
+                              {job.start_time ? ` · ${formatTimeDisplay(job.start_time)}` : ""}
+                              {job.duration_minutes ? ` · ${job.duration_minutes >= 60 ? `${Math.floor(job.duration_minutes / 60)}h${job.duration_minutes % 60 ? ` ${job.duration_minutes % 60}m` : ""}` : `${job.duration_minutes}m`}` : ""}
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0 space-y-0.5">
+                            {job.price != null && (
+                              <p className="text-[13px] font-bold text-[var(--mh-text)]">${Number(job.price).toLocaleString()}</p>
+                            )}
+                            <span className={`text-[10px] font-semibold ${colors.text}`}>
+                              {job.status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+          </div>
+        ) : (
+          /* ── Week / Day View ── */
+          <div className="overflow-x-auto">
+            <div style={{ minWidth: viewMode === "day" ? "320px" : "640px" }}>
+              {/* Day headers — week view only (clickable to switch to day view) */}
+              {viewMode === "week" && (
+                <div className="grid border-b border-[var(--mh-divider)]" style={{ gridTemplateColumns: "52px repeat(7, 1fr)" }}>
+                  <div className="h-14" />
+                  {weekDays.map((day, i) => {
+                    const isToday = isSameDay(day, today);
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => { setSelectedDay(day); setViewMode("day"); }}
+                        className="flex flex-col items-center justify-center h-14 border-l border-[var(--mh-divider)] hover:bg-[var(--mh-hover-overlay)] transition-colors"
+                        title={`View ${DAY_NAMES[i]} ${day.getDate()}`}
+                      >
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${isToday ? "text-[#0071E3]" : "text-[var(--mh-text-muted)]"}`}>
+                          {DAY_NAMES[i]}
+                        </span>
+                        <span className={`text-sm font-bold mt-0.5 leading-none ${isToday ? "bg-[#0071E3] text-white w-7 h-7 rounded-full flex items-center justify-center" : "text-[var(--mh-text)]"}`}>
+                          {day.getDate()}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {/* Day header — day view */}
+              {viewMode === "day" && (
+                <div className="flex items-center justify-center h-14 border-b border-[var(--mh-divider)]">
+                  <span className={`text-sm font-semibold ${isSameDay(selectedDay, today) ? "text-[#0071E3]" : "text-[var(--mh-text)]"}`}>
+                    {selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                  </span>
+                </div>
+              )}
 
               {/* Time grid body */}
               <div className="relative">
                 {/* Empty state overlay */}
-                {jobs.length === 0 && (
-                  <div
-                    className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--mh-sidebar)]/80 backdrop-blur-[1px]"
-                  >
+                {(viewMode === "week" ? jobs : selectedDayJobs).length === 0 && (
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--mh-sidebar)]/80 backdrop-blur-[1px]">
                     <div className="w-12 h-12 rounded-[6px] bg-[var(--mh-surface-raised)] flex items-center justify-center mb-3">
                       <Calendar className="h-6 w-6 text-[var(--mh-text-muted)]" />
                     </div>
                     <p className="text-sm font-semibold text-[var(--mh-text)]">
-                      No jobs this week
+                      {viewMode === "day" ? "No jobs this day" : "No jobs this week"}
                     </p>
-                    <p className="text-xs text-[var(--mh-text-muted)] mt-1 mb-4">
-                      Schedule a job to see it appear here
-                    </p>
-                    <button
-                      onClick={openNewJobForm}
-                      className="flex items-center gap-2 px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED]/90 text-white text-sm font-semibold rounded-[6px] transition-colors"
-                    >
+                    <p className="text-xs text-[var(--mh-text-muted)] mt-1 mb-4">Schedule a job to see it appear here</p>
+                    <button onClick={openNewJobForm} className="flex items-center gap-2 px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED]/90 text-white text-sm font-semibold rounded-[6px] transition-colors">
                       <Plus className="h-4 w-4" />
                       New Job
                     </button>
@@ -994,7 +1127,7 @@ export default function SchedulePage() {
                 <div
                   className="grid"
                   style={{
-                    gridTemplateColumns: "52px repeat(7, 1fr)",
+                    gridTemplateColumns: viewMode === "day" ? "52px 1fr" : "52px repeat(7, 1fr)",
                     height: `${TOTAL_HOURS * HOUR_HEIGHT}px`,
                   }}
                 >
@@ -1004,49 +1137,36 @@ export default function SchedulePage() {
                       <div
                         key={i}
                         className="absolute right-2 text-[10px] text-[var(--mh-text-muted)] font-medium leading-none"
-                        style={{
-                          top: `${i * HOUR_HEIGHT - 5}px`,
-                        }}
+                        style={{ top: `${i * HOUR_HEIGHT - 5}px` }}
                       >
-                        {((START_HOUR + i) % 12 || 12) +
-                          (START_HOUR + i >= 12 ? "p" : "a")}
+                        {((START_HOUR + i) % 12 || 12) + (START_HOUR + i >= 12 ? "p" : "a")}
                       </div>
                     ))}
                   </div>
 
-                  {/* Day columns */}
-                  {weekDays.map((_, dayIndex) => (
-                    <div
-                      key={dayIndex}
-                      className="relative border-l border-[var(--mh-divider)]"
-                    >
-                      {/* Horizontal hour lines */}
+                  {viewMode === "week" ? (
+                    weekDays.map((_, dayIndex) => (
+                      <div key={dayIndex} className="relative border-l border-[var(--mh-divider)]">
+                        {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                          <div key={i} className="absolute left-0 right-0 border-t border-[var(--mh-divider)]" style={{ top: `${i * HOUR_HEIGHT}px` }} />
+                        ))}
+                        {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                          <div key={`hover-${i}`} className="absolute left-0 right-0 hover:bg-[var(--mh-hover-overlay)] transition-colors" style={{ top: `${i * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }} />
+                        ))}
+                        {(filteredJobsByDay[dayIndex] ?? []).map((job) => renderJobCard(job, dayIndex))}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="relative border-l border-[var(--mh-divider)]">
                       {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-                        <div
-                          key={i}
-                          className="absolute left-0 right-0 border-t border-[var(--mh-divider)]"
-                          style={{ top: `${i * HOUR_HEIGHT}px` }}
-                        />
+                        <div key={i} className="absolute left-0 right-0 border-t border-[var(--mh-divider)]" style={{ top: `${i * HOUR_HEIGHT}px` }} />
                       ))}
-
-                      {/* Hover cell zones */}
                       {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-                        <div
-                          key={`hover-${i}`}
-                          className="absolute left-0 right-0 hover:bg-[var(--mh-hover-overlay)] transition-colors"
-                          style={{
-                            top: `${i * HOUR_HEIGHT}px`,
-                            height: `${HOUR_HEIGHT}px`,
-                          }}
-                        />
+                        <div key={`hover-${i}`} className="absolute left-0 right-0 hover:bg-[var(--mh-hover-overlay)] transition-colors" style={{ top: `${i * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }} />
                       ))}
-
-                      {/* Job cards */}
-                      {(jobsByDay[dayIndex] ?? []).map((job) =>
-                        renderJobCard(job, dayIndex)
-                      )}
+                      {selectedDayJobs.map((job) => renderJobCard(job, 0))}
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             </div>

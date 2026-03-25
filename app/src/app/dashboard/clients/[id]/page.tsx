@@ -260,6 +260,7 @@ export default function ClientDetailPage() {
 
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [creatingInvoiceJobId, setCreatingInvoiceJobId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"overview" | "jobs" | "invoices" | "notes">("overview");
 
   const handleDelete = async () => {
     if (!deleteConfirm) {
@@ -466,270 +467,189 @@ export default function ClientDetailPage() {
         </div>
       </div>
 
-      {/* Two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* LEFT column */}
-        <div className="lg:col-span-1 space-y-6">
-          {/* Service Address */}
-          <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <MapPin className="h-4 w-4 text-[var(--mh-text-faint)]" />
-              <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">
-                Service Address
-              </h3>
-            </div>
-            <p className="text-sm text-[var(--mh-text-muted)] leading-relaxed">
-              {formatAddress(primaryAddress)}
-            </p>
-          </div>
+      {/* Tab navigation */}
+      <div className="flex items-center gap-0 border-b border-[var(--mh-divider)]">
+        {([
+          { key: "overview" as const, label: "Overview" },
+          { key: "jobs" as const, label: `Jobs${jobs.length > 0 ? ` (${jobs.length})` : ""}` },
+          { key: "invoices" as const, label: `Invoices${invoices.length > 0 ? ` (${invoices.length})` : ""}` },
+          { key: "notes" as const, label: "Notes" },
+        ]).map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-4 py-2.5 text-[13px] font-semibold transition-colors border-b-2 -mb-px ${
+              activeTab === tab.key
+                ? "text-[var(--mh-text)] border-[#0071E3]"
+                : "text-[var(--mh-text-muted)] border-transparent hover:text-[var(--mh-text)]"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-          {/* Preferred Service */}
-          {client.preferred_service && (
-            <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Briefcase className="h-4 w-4 text-[var(--mh-text-faint)]" />
-                <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">
-                  Preferred Service
-                </h3>
-              </div>
-              <p className="text-sm text-[var(--mh-text-muted)] leading-relaxed">
-                {client.preferred_service}
-              </p>
-            </div>
-          )}
-
-          {/* Notes */}
-          <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <StickyNote className="h-4 w-4 text-[var(--mh-text-faint)]" />
-              <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">
-                Notes
-              </h3>
-            </div>
-            <p className="text-sm text-[var(--mh-text-muted)] leading-relaxed whitespace-pre-wrap">
-              {client.notes || "No notes yet"}
-            </p>
-          </div>
-        </div>
-
-        {/* RIGHT column */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Quick stats */}
+      {/* Tab content */}
+      {activeTab === "overview" && (
+        <div className="space-y-6">
+          {/* Stats row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { label: "Total Jobs", value: totalJobs.toString(), color: "text-[var(--mh-text)]" },
               { label: "Completed", value: completedJobs.toString(), color: "text-[#34C759]" },
-              {
-                label: "Total Invoiced",
-                value: `$${totalInvoiced.toLocaleString("en-US", { minimumFractionDigits: 0 })}`,
-                color: "text-[var(--mh-text)]",
-              },
-              {
-                label: "Outstanding",
-                value: `$${outstanding.toLocaleString("en-US", { minimumFractionDigits: 0 })}`,
-                color: outstanding > 0 ? "text-[#FF9F0A]" : "text-[var(--mh-text)]",
-              },
+              { label: "Total Invoiced", value: `$${totalInvoiced.toLocaleString("en-US", { minimumFractionDigits: 0 })}`, color: "text-[var(--mh-text)]" },
+              { label: "Outstanding", value: `$${outstanding.toLocaleString("en-US", { minimumFractionDigits: 0 })}`, color: outstanding > 0 ? "text-[#FF9F0A]" : "text-[var(--mh-text)]" },
             ].map((stat) => (
-              <div
-                key={stat.label}
-                className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-4"
-              >
-                <p className="text-[10px] font-bold tracking-[0.1em] text-[var(--mh-text-subtle)] uppercase mb-1.5">
-                  {stat.label}
-                </p>
-                <p className={`text-xl font-bold tabular-nums ${stat.color}`}>
-                  {stat.value}
-                </p>
+              <div key={stat.label} className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-4">
+                <p className="text-[10px] font-bold tracking-[0.1em] text-[var(--mh-text-subtle)] uppercase mb-1.5">{stat.label}</p>
+                <p className={`text-xl font-bold tabular-nums ${stat.color}`}>{stat.value}</p>
               </div>
             ))}
           </div>
 
-          {/* Job History */}
-          <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-[var(--mh-divider)]">
-              <Briefcase className="h-4 w-4 text-[var(--mh-text-faint)]" />
-              <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">
-                Job History
-              </h3>
-              <span className="ml-auto text-[10px] font-semibold text-[var(--mh-text-subtle)]">
-                {jobs.length} job{jobs.length !== 1 ? "s" : ""}
-              </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Service Address */}
+            <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin className="h-4 w-4 text-[var(--mh-text-faint)]" />
+                <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">Service Address</h3>
+              </div>
+              <p className="text-sm text-[var(--mh-text-muted)] leading-relaxed">{formatAddress(primaryAddress)}</p>
             </div>
 
-            {jobs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center px-6">
-                <Briefcase className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" />
-                <p className="text-sm font-semibold text-[var(--mh-text-muted)] mb-1">
-                  No jobs yet
-                </p>
-                <p className="text-xs text-[var(--mh-text-subtle)]">
-                  Book a job to get started
-                </p>
+            {/* Preferred Service */}
+            <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <Briefcase className="h-4 w-4 text-[var(--mh-text-faint)]" />
+                <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">Preferred Service</h3>
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-[var(--mh-surface-raised)]/50 border-b border-[var(--mh-divider)]">
-                      {["Date", "Service Type", "Status", "Price", "Duration", "Actions"].map(
-                        (h) => (
-                          <th
-                            key={h}
-                            className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)] whitespace-nowrap"
-                          >
-                            {h}
-                          </th>
-                        )
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--mh-divider)]">
-                    {jobs.map((job) => {
-                      const status = JOB_STATUS_CONFIG[job.status] || {
-                        label: job.status,
-                        className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]",
-                      };
-                      return (
-                        <tr
-                          key={job.id}
-                          className="hover:bg-[var(--mh-hover-overlay)] transition-colors"
-                        >
-                          <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
-                            {formatDate(job.scheduled_date)}
-                            {job.start_time && (
-                              <span className="text-[var(--mh-text-subtle)] ml-1.5">
-                                {formatTime(job.start_time)}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-5 py-4 text-xs font-medium text-[var(--mh-text-muted)]">
-                            {job.service_type || "\u2014"}
-                          </td>
-                          <td className="px-5 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${status.className}`}>
-                              {status.label}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4 text-sm font-bold text-[var(--mh-text)] tabular-nums">
-                            {job.price != null
-                              ? `$${Number(job.price).toLocaleString("en-US", { minimumFractionDigits: 0 })}`
-                              : "\u2014"}
-                          </td>
-                          <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
-                            {job.duration_minutes
-                              ? `${Math.floor(job.duration_minutes / 60)}h ${job.duration_minutes % 60}m`
-                              : "\u2014"}
-                          </td>
-                          <td className="px-5 py-4">
-                            {job.status === "completed" ? (
-                              <button
-                                onClick={() => handleCreateInvoiceFromJob(job)}
-                                disabled={creatingInvoiceJobId === job.id}
-                                className="flex items-center gap-1 text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors disabled:opacity-50"
-                              >
-                                {creatingInvoiceJobId === job.id ? (
-                                  <Loader2 className="h-3 w-3 animate-spin" />
-                                ) : (
-                                  <Receipt className="h-3 w-3" />
-                                )}
-                                {creatingInvoiceJobId === job.id ? "Creating..." : "Create Invoice"}
-                              </button>
-                            ) : job.status === "invoiced" ? (
-                              <span className="text-xs text-[#34C759] font-medium">
-                                Invoiced
-                              </span>
-                            ) : null}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          {/* Invoice History */}
-          <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-[var(--mh-divider)]">
-              <Receipt className="h-4 w-4 text-[var(--mh-text-faint)]" />
-              <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">
-                Invoice History
-              </h3>
-              <span className="ml-auto text-[10px] font-semibold text-[var(--mh-text-subtle)]">
-                {invoices.length} invoice{invoices.length !== 1 ? "s" : ""}
-              </span>
+              <p className="text-sm text-[var(--mh-text-muted)] leading-relaxed">
+                {client.preferred_service || <span className="text-[var(--mh-text-faint)]">Not set</span>}
+              </p>
             </div>
-
-            {invoices.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center px-6">
-                <Receipt className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" />
-                <p className="text-sm font-semibold text-[var(--mh-text-muted)] mb-1">
-                  No invoices yet
-                </p>
-                <p className="text-xs text-[var(--mh-text-subtle)]">
-                  Invoices will appear here after jobs are completed
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-[var(--mh-surface-raised)]/50 border-b border-[var(--mh-divider)]">
-                      {["Invoice #", "Date", "Amount", "Status", "Due Date"].map(
-                        (h) => (
-                          <th
-                            key={h}
-                            className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)] whitespace-nowrap"
-                          >
-                            {h}
-                          </th>
-                        )
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[var(--mh-divider)]">
-                    {invoices.map((invoice) => {
-                      const status = INVOICE_STATUS_CONFIG[invoice.status] || {
-                        label: invoice.status,
-                        className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]",
-                      };
-                      // Generate a readable invoice number from the id
-                      const invoiceNum = `INV-${invoice.id.slice(0, 6).toUpperCase()}`;
-                      return (
-                        <tr
-                          key={invoice.id}
-                          className="hover:bg-[var(--mh-hover-overlay)] transition-colors"
-                        >
-                          <td className="px-5 py-4 text-xs font-mono text-[var(--mh-text-muted)]">
-                            {invoiceNum}
-                          </td>
-                          <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
-                            {formatDate(invoice.created_at)}
-                          </td>
-                          <td className="px-5 py-4 text-sm font-bold text-[var(--mh-text)] tabular-nums">
-                            {invoice.total != null
-                              ? `$${Number(invoice.total).toLocaleString("en-US", { minimumFractionDigits: 0 })}`
-                              : "\u2014"}
-                          </td>
-                          <td className="px-5 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${status.className}`}>
-                              {status.label}
-                            </span>
-                          </td>
-                          <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
-                            {formatDate(invoice.due_date)}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === "jobs" && (
+        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
+          {jobs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+              <Briefcase className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" />
+              <p className="text-sm font-semibold text-[var(--mh-text-muted)] mb-1">No jobs yet</p>
+              <p className="text-xs text-[var(--mh-text-subtle)]">Book a job to get started</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[var(--mh-surface-raised)]/50 border-b border-[var(--mh-divider)]">
+                    {["Date", "Service Type", "Status", "Price", "Duration", "Actions"].map((h) => (
+                      <th key={h} className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)] whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--mh-divider)]">
+                  {jobs.map((job) => {
+                    const status = JOB_STATUS_CONFIG[job.status] || { label: job.status, className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]" };
+                    return (
+                      <tr key={job.id} className="hover:bg-[var(--mh-hover-overlay)] transition-colors">
+                        <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
+                          {formatDate(job.scheduled_date)}
+                          {job.start_time && <span className="text-[var(--mh-text-subtle)] ml-1.5">{formatTime(job.start_time)}</span>}
+                        </td>
+                        <td className="px-5 py-4 text-xs font-medium text-[var(--mh-text-muted)]">{job.service_type || "\u2014"}</td>
+                        <td className="px-5 py-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${status.className}`}>{status.label}</span>
+                        </td>
+                        <td className="px-5 py-4 text-sm font-bold text-[var(--mh-text)] tabular-nums">
+                          {job.price != null ? `$${Number(job.price).toLocaleString("en-US", { minimumFractionDigits: 0 })}` : "\u2014"}
+                        </td>
+                        <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
+                          {job.duration_minutes ? `${Math.floor(job.duration_minutes / 60)}h ${job.duration_minutes % 60}m` : "\u2014"}
+                        </td>
+                        <td className="px-5 py-4">
+                          {job.status === "completed" ? (
+                            <button onClick={() => handleCreateInvoiceFromJob(job)} disabled={creatingInvoiceJobId === job.id} className="flex items-center gap-1 text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors disabled:opacity-50">
+                              {creatingInvoiceJobId === job.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Receipt className="h-3 w-3" />}
+                              {creatingInvoiceJobId === job.id ? "Creating..." : "Create Invoice"}
+                            </button>
+                          ) : job.status === "invoiced" ? (
+                            <span className="text-xs text-[#34C759] font-medium">Invoiced</span>
+                          ) : null}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "invoices" && (
+        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
+          {invoices.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+              <Receipt className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" />
+              <p className="text-sm font-semibold text-[var(--mh-text-muted)] mb-1">No invoices yet</p>
+              <p className="text-xs text-[var(--mh-text-subtle)]">Invoices will appear here after jobs are completed</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[var(--mh-surface-raised)]/50 border-b border-[var(--mh-divider)]">
+                    {["Invoice #", "Date", "Amount", "Status", "Due Date"].map((h) => (
+                      <th key={h} className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)] whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--mh-divider)]">
+                  {invoices.map((invoice) => {
+                    const status = INVOICE_STATUS_CONFIG[invoice.status] || { label: invoice.status, className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]" };
+                    const invoiceNum = `INV-${invoice.id.slice(0, 6).toUpperCase()}`;
+                    return (
+                      <tr key={invoice.id} className="hover:bg-[var(--mh-hover-overlay)] transition-colors">
+                        <td className="px-5 py-4 text-xs font-mono text-[var(--mh-text-muted)]">{invoiceNum}</td>
+                        <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">{formatDate(invoice.created_at)}</td>
+                        <td className="px-5 py-4 text-sm font-bold text-[var(--mh-text)] tabular-nums">
+                          {invoice.total != null ? `$${Number(invoice.total).toLocaleString("en-US", { minimumFractionDigits: 0 })}` : "\u2014"}
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${status.className}`}>{status.label}</span>
+                        </td>
+                        <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">{formatDate(invoice.due_date)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "notes" && (
+        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <StickyNote className="h-4 w-4 text-[var(--mh-text-faint)]" />
+            <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">Notes</h3>
+          </div>
+          {client.notes ? (
+            <p className="text-sm text-[var(--mh-text-muted)] leading-relaxed whitespace-pre-wrap">{client.notes}</p>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <StickyNote className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" />
+              <p className="text-sm text-[var(--mh-text-muted)]">No notes yet</p>
+              <button onClick={openEditPanel} className="mt-3 text-xs font-semibold text-[#0071E3] hover:text-[#0077ED] transition-colors">
+                Add a note
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Edit Client Slide Panel */}
       <SlidePanel
