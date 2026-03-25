@@ -25,7 +25,7 @@ import {
   SecondaryButton,
 } from "@/components/dashboard/slide-panel";
 import type { Client, Invoice, Job, LineItem } from "@/lib/types";
-import { SERVICE_TYPES } from "@/lib/types";
+import { SERVICE_TYPES, DEFAULT_SERVICE_PRICES } from "@/lib/types";
 import { toast } from "sonner";
 
 const supabase = createClient();
@@ -826,7 +826,12 @@ export default function InvoicesPage() {
                 onChange={(e) => {
                   setFormServiceType(e.target.value);
                   const price = servicePrices[e.target.value];
-                  if (price != null && price > 0) setFormBasePrice(price);
+                  if (price != null && price > 0) {
+                    setFormBasePrice(price);
+                  } else {
+                    const defaultPrice = DEFAULT_SERVICE_PRICES[e.target.value];
+                    if (defaultPrice) setFormBasePrice(defaultPrice);
+                  }
                 }}
               >
                 <option value="">Select a service type...</option>

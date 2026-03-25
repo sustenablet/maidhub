@@ -30,7 +30,7 @@ import {
   SecondaryButton,
 } from "@/components/dashboard/slide-panel";
 import type { Client, Address, Job, RecurringRule } from "@/lib/types";
-import { SERVICE_TYPES } from "@/lib/types";
+import { SERVICE_TYPES, DEFAULT_SERVICE_PRICES } from "@/lib/types";
 import { toast } from "sonner";
 
 /* ── Constants ──────────────────────────────────────────────────── */
@@ -224,6 +224,11 @@ export default function SchedulePage() {
   const [formDuration, setFormDuration] = useState("60");
   const [formPrice, setFormPrice] = useState("");
   const [formNotes, setFormNotes] = useState("");
+  /* Recurring option in job form */
+  const [formIsRecurring, setFormIsRecurring] = useState(false);
+  const [formRecFrequency, setFormRecFrequency] = useState<"weekly" | "biweekly" | "monthly" | "twice_weekly" | "custom">("weekly");
+  const [formRecCustomDays, setFormRecCustomDays] = useState("14");
+  const [formRecEndDate, setFormRecEndDate] = useState("");
 
   /* Derived dates */
   const weekStart = useMemo(() => {
@@ -259,6 +264,9 @@ export default function SchedulePage() {
       setFormPrice(String(typePrice));
     } else if (defaultRateRef.current > 0) {
       setFormPrice(String(defaultRateRef.current));
+    } else {
+      const defaultPrice = DEFAULT_SERVICE_PRICES[formServiceType];
+      if (defaultPrice) setFormPrice(String(defaultPrice));
     }
   }, [formServiceType, formMode]);
 
@@ -270,6 +278,9 @@ export default function SchedulePage() {
       setRecPrice(String(typePrice));
     } else if (defaultRateRef.current > 0) {
       setRecPrice(String(defaultRateRef.current));
+    } else {
+      const defaultPrice = DEFAULT_SERVICE_PRICES[recServiceType];
+      if (defaultPrice) setRecPrice(String(defaultPrice));
     }
   }, [recServiceType]);
 
@@ -449,6 +460,10 @@ export default function SchedulePage() {
     setFormNotes("");
     setFormMode("create");
     setEditJobId(null);
+    setFormIsRecurring(false);
+    setFormRecFrequency("weekly");
+    setFormRecCustomDays("14");
+    setFormRecEndDate("");
   }
 
   function openNewJobForm() {
@@ -486,35 +501,85 @@ export default function SchedulePage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); toast.error("Not authenticated"); return; }
 
-    // Build insert payload — omit address_id if null (older DB schemas may require it)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const jobPayload: Record<string, any> = {
-      user_id: user.id,
-      client_id: formClientId,
-      scheduled_date: formDate,
-      start_time: formStartTime || null,
-      duration_minutes: parseInt(formDuration) || 60,
-      service_type: formServiceType || null,
-      price: formPrice ? parseFloat(formPrice) : null,
-      notes: formNotes || null,
-      status: "scheduled",
-    };
-    if (formAddressId) jobPayload.address_id = formAddressId;
+    if (formIsRecurring) {
+      // Create recurring rule
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rulePayload: Record<string, any> = {
+        user_id: user.id,
+        client_id: formClientId,
+        frequency: formRecFrequency === "twice_weekly" ? "custom" : formRecFrequency,
+        custom_interval_days: formRecFrequency === "twice_weekly" ? 3 : formRecFrequency === "custom" ? parseInt(formRecCustomDays) || 14 : null,
+        start_date: formDate,
+        end_date: formRecEndDate || null,
+        service_type: formServiceType || null,
+        duration_minutes: parseInt(formDuration) || 60,
+        price: formPrice ? parseFloat(formPrice) : null,
+      };
+      if (formAddressId) rulePayload.address_id = formAddressId;
+      if (formStartTime) rulePayload.start_time = formStartTime;
 
-    const { error } = await supabase.from("jobs").insert(jobPayload);
-    setSaving(false);
+      const { data: newRule, error: ruleError } = await supabase
+        .from("recurring_rules")
+        .insert(rulePayload)
+        .select()
+        .single();
 
-    if (error) {
-      console.error("Failed to create job:", error);
-      if (error.message?.includes("address_id") || error.message?.includes("violates not-null")) {
-        toast.error("Please select a service address for this job");
-      } else {
-        toast.error("Failed to create job");
+      if (ruleError) {
+        setSaving(false);
+        toast.error("Failed to create recurring schedule");
+        return;
       }
-      return;
+
+      // Create the first job linked to the rule
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const firstJobPayload: Record<string, any> = {
+        user_id: user.id,
+        client_id: formClientId,
+        recurring_rule_id: newRule.id,
+        scheduled_date: formDate,
+        duration_minutes: parseInt(formDuration) || 60,
+        service_type: formServiceType || null,
+        price: formPrice ? parseFloat(formPrice) : null,
+        notes: formNotes || null,
+        status: "scheduled",
+      };
+      if (formAddressId) firstJobPayload.address_id = formAddressId;
+      if (formStartTime) firstJobPayload.start_time = formStartTime;
+
+      await supabase.from("jobs").insert(firstJobPayload);
+      setSaving(false);
+      toast.success("Recurring schedule created");
+    } else {
+      // Single job
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const jobPayload: Record<string, any> = {
+        user_id: user.id,
+        client_id: formClientId,
+        scheduled_date: formDate,
+        start_time: formStartTime || null,
+        duration_minutes: parseInt(formDuration) || 60,
+        service_type: formServiceType || null,
+        price: formPrice ? parseFloat(formPrice) : null,
+        notes: formNotes || null,
+        status: "scheduled",
+      };
+      if (formAddressId) jobPayload.address_id = formAddressId;
+
+      const { error } = await supabase.from("jobs").insert(jobPayload);
+      setSaving(false);
+
+      if (error) {
+        console.error("Failed to create job:", error);
+        if (error.message?.includes("address_id") || error.message?.includes("violates not-null")) {
+          toast.error("Please select a service address for this job");
+        } else {
+          toast.error("Failed to create job");
+        }
+        return;
+      }
+      toast.success("Job scheduled");
     }
 
-    toast.success("Job scheduled");
     setFormOpen(false);
     resetForm();
     fetchJobs();
@@ -1606,6 +1671,102 @@ export default function SchedulePage() {
               />
             </FormField>
           </FormSection>
+
+          {formMode === "create" && (
+            <FormSection label="Recurring">
+              {/* Toggle */}
+              <button
+                type="button"
+                onClick={() => setFormIsRecurring((v) => !v)}
+                className={`flex items-center gap-3 w-full px-4 py-3 rounded-[6px] border transition-colors text-left ${
+                  formIsRecurring
+                    ? "bg-[#0071E3]/10 border-[#0071E3]/40 text-[#0071E3]"
+                    : "bg-transparent border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)]"
+                }`}
+              >
+                <Repeat className="h-4 w-4 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-[13px] font-semibold">
+                    {formIsRecurring ? "Recurring — on" : "Make this recurring"}
+                  </p>
+                  {!formIsRecurring && (
+                    <p className="text-[11px] text-[var(--mh-text-faint)] mt-0.5">
+                      Repeat this job on a schedule
+                    </p>
+                  )}
+                </div>
+                {/* pill indicator */}
+                <div
+                  className={`w-8 h-4 rounded-full transition-colors shrink-0 ${
+                    formIsRecurring ? "bg-[#0071E3]" : "bg-[var(--mh-border)]"
+                  }`}
+                >
+                  <div
+                    className={`w-3 h-3 rounded-full bg-white m-0.5 transition-transform ${
+                      formIsRecurring ? "translate-x-4" : "translate-x-0"
+                    }`}
+                  />
+                </div>
+              </button>
+
+              {formIsRecurring && (
+                <div className="space-y-3 mt-1">
+                  {/* Frequency chips */}
+                  <div>
+                    <p className="text-[11px] font-semibold text-[var(--mh-text-subtle)] uppercase tracking-[0.08em] mb-2">
+                      Frequency
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {(
+                        [
+                          { value: "weekly", label: "Every week" },
+                          { value: "biweekly", label: "Every 2 weeks" },
+                          { value: "monthly", label: "Monthly" },
+                          { value: "twice_weekly", label: "Twice a week" },
+                          { value: "custom", label: "Custom" },
+                        ] as const
+                      ).map(({ value, label }) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setFormRecFrequency(value)}
+                          className={`px-3 py-1.5 text-[12px] font-semibold rounded-full border transition-colors ${
+                            formRecFrequency === value
+                              ? "bg-[#0071E3] border-[#0071E3] text-white"
+                              : "bg-transparent border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:border-[#0071E3]/50 hover:text-[var(--mh-text)]"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Custom interval input */}
+                  {formRecFrequency === "custom" && (
+                    <FormField label="Repeat every (days)">
+                      <FormInput
+                        type="number"
+                        min="1"
+                        placeholder="14"
+                        value={formRecCustomDays}
+                        onChange={(e) => setFormRecCustomDays(e.target.value)}
+                      />
+                    </FormField>
+                  )}
+
+                  {/* End date */}
+                  <FormField label="End date (optional)">
+                    <FormInput
+                      type="date"
+                      value={formRecEndDate}
+                      onChange={(e) => setFormRecEndDate(e.target.value)}
+                    />
+                  </FormField>
+                </div>
+              )}
+            </FormSection>
+          )}
         </div>
       </SlidePanel>
 

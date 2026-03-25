@@ -111,3 +111,14 @@ export const SERVICE_TYPES = [
 ] as const;
 
 export type ServiceType = (typeof SERVICE_TYPES)[number];
+
+/** Default prices used as fallback when user hasn't configured custom pricing */
+export const DEFAULT_SERVICE_PRICES: Record<string, number> = {
+  "Regular Clean": 120,
+  "Deep Clean": 200,
+  "Move-Out Clean": 280,
+  "Move-In Clean": 280,
+  "Post-Construction": 300,
+  "One-Time Clean": 150,
+  "Office Clean": 180,
+};
