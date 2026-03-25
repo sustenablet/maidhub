@@ -504,7 +504,7 @@ export default function InvoicesPage() {
               <SlidersHorizontal className="h-3.5 w-3.5" />
               Filter
               {statusFilter !== "all" && (
-                <span className="h-1.5 w-1.5 rounded-full bg-[#18181B]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#0071E3]" />
               )}
             </button>
             {filterOpen && (

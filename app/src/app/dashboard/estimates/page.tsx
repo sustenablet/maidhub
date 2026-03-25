@@ -623,7 +623,7 @@ export default function EstimatesPage() {
                             onClick={() => openSendModal(est)}
                             className="text-xs font-semibold text-[#0071E3] hover:text-[#0071E3]/80 transition-colors"
                           >
-                            Send
+                            Mark as Sent
                           </button>
                         )}
                         {est.status === "sent" && (

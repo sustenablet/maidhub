@@ -884,7 +884,7 @@ export default function SchedulePage() {
                       <span
                         className={`text-sm font-bold mt-0.5 leading-none ${
                           isToday
-                            ? "bg-[#18181B] text-white w-7 h-7 rounded-full flex items-center justify-center"
+                            ? "bg-[#0071E3] text-white w-7 h-7 rounded-full flex items-center justify-center"
                             : "text-[#D4D4D4]"
                         }`}
                       >
@@ -1151,7 +1151,7 @@ export default function SchedulePage() {
                 className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-[6px] transition-colors ${
                   deleteConfirm
                     ? "bg-red-500/100 text-white hover:bg-red-600"
-                    : "text-red-400 hover:bg-red-500/[0.06]0/10 hover:text-red-500"
+                    : "text-red-400 hover:bg-red-500/10 hover:text-red-500"
                 }`}
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -1362,7 +1362,7 @@ export default function SchedulePage() {
                       <button
                         onClick={() => generateJobs(rule)}
                         disabled={!rule.is_active || recGenerating === rule.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-[#18181B] text-white rounded-[6px] hover:bg-[#18181B]/90 disabled:opacity-40 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-[#252525] border border-[#3A3A3A] text-[#D4D4D4] rounded-[6px] hover:bg-[#2E2E2E] disabled:opacity-40 transition-colors"
                       >
                         {recGenerating === rule.id ? (
                           <Loader2 className="h-3 w-3 animate-spin" />

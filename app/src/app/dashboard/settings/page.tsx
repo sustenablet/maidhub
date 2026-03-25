@@ -110,7 +110,7 @@ function Toggle({
       aria-checked={enabled}
       onClick={() => onChange(!enabled)}
       className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors duration-200 ${
-        enabled ? "bg-[#18181B]" : "bg-white/[0.12]"
+        enabled ? "bg-[#0071E3]" : "bg-white/[0.12]"
       }`}
     >
       <span
@@ -507,12 +507,12 @@ export default function SettingsPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-left transition-all whitespace-nowrap lg:whitespace-normal min-w-fit ${
                     isActive
-                      ? "bg-white shadow-sm border border-[#2C2C2C] text-[#D4D4D4]"
-                      : "text-[#888888] hover:text-[#888888] hover:bg-white/[0.02]"
+                      ? "bg-[#252525] border border-[#3A3A3A] text-[#D4D4D4]"
+                      : "text-[#888888] hover:text-[#D4D4D4] hover:bg-[#252525]/60"
                   }`}
                 >
                   <div className={`h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 ${
-                    isActive ? "bg-white/[0.06]" : "bg-transparent"
+                    isActive ? "bg-[#0071E3]/10" : "bg-transparent"
                   }`}>
                     <Icon className="h-4 w-4" strokeWidth={1.8} />
                   </div>
@@ -664,14 +664,14 @@ export default function SettingsPage() {
                         key={`${service}-${index}`}
                         className="flex items-center gap-3 px-3 py-2.5 bg-white/[0.015] border border-[#2C2C2C] rounded-[6px] group hover:bg-white/[0.04] transition-colors"
                       >
-                        <div className="h-1.5 w-1.5 rounded-full bg-[#18181B]/20 shrink-0" />
+                        <div className="h-1.5 w-1.5 rounded-full bg-[#555555] shrink-0" />
                         <span className="flex-1 text-[13px] text-[#D4D4D4]">
                           {service}
                         </span>
                         <button
                           type="button"
                           onClick={() => removeServiceType(index)}
-                          className="p-1 rounded text-[#555555] hover:text-red-500 hover:bg-red-500/[0.06]0/10 opacity-0 group-hover:opacity-100 transition-all"
+                          className="p-1 rounded text-[#555555] hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -689,7 +689,7 @@ export default function SettingsPage() {
                 <CardHeader title="Default Pricing" description="Defaults when creating new jobs and invoices. You can always override per-job." />
                 <CardBody className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Field label="Default Hourly Rate" icon={DollarSign} hint="Used when creating new jobs">
+                    <Field label="Default Job Rate" icon={DollarSign} hint="Used when creating new jobs">
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[13px] text-[#888888]">$</span>
                         <Input
@@ -865,17 +865,17 @@ export default function SettingsPage() {
               {subscriptionStatus === "trialing" && (
                 <Link
                   href="/dashboard/upgrade"
-                  className="flex items-center justify-between p-5 bg-[#18181B] rounded-[6px] group hover:bg-[#18181B]/95 transition-colors"
+                  className="flex items-center justify-between p-5 bg-[#0071E3]/10 border border-[#0071E3]/25 rounded-[6px] group hover:bg-[#0071E3]/15 hover:border-[#0071E3]/40 transition-colors"
                 >
                   <div>
-                    <p className="text-[14px] font-semibold text-white">
+                    <p className="text-[14px] font-semibold text-[#60AAFF]">
                       Upgrade your plan
                     </p>
-                    <p className="text-[12px] text-white/45 mt-0.5">
+                    <p className="text-[12px] text-[#888888] mt-0.5">
                       Get unlimited access to all MaidHub features
                     </p>
                   </div>
-                  <ArrowUpRight className="h-5 w-5 text-white/40 group-hover:text-white transition-colors" strokeWidth={1.8} />
+                  <ArrowUpRight className="h-5 w-5 text-[#0071E3]/50 group-hover:text-[#60AAFF] transition-colors" strokeWidth={1.8} />
                 </Link>
               )}
 
@@ -906,7 +906,7 @@ export default function SettingsPage() {
                       type="button"
                       onClick={handlePasswordChange}
                       disabled={passwordSaving || !newPassword || !confirmPassword}
-                      className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold bg-[#18181B] text-white rounded-[6px] hover:bg-[#18181B]/88 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold bg-[#252525] border border-[#3A3A3A] text-[#D4D4D4] rounded-[6px] hover:bg-[#2E2E2E] hover:border-[#444444] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {passwordSaving ? (
                         <>
@@ -922,10 +922,10 @@ export default function SettingsPage() {
               </Card>
 
               <Card>
-                <div className="px-6 py-4 border-b border-red-100">
+                <div className="px-6 py-4 border-b border-red-500/20">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-red-400" strokeWidth={1.8} />
-                    <h2 className="text-[15px] font-bold text-red-500">Danger Zone</h2>
+                    <h2 className="text-[15px] font-bold text-red-400">Danger Zone</h2>
                   </div>
                 </div>
                 <CardBody className="space-y-3">
