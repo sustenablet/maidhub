@@ -73,11 +73,6 @@ function todayStr(): string {
   return new Date().toISOString().split("T")[0];
 }
 
-const emptyLineItem = (): LineItem => ({
-  description: "",
-  quantity: 1,
-  unit_price: 0,
-});
 
 export default function InvoicesPage() {
   const searchParams = useSearchParams();
@@ -755,7 +750,6 @@ export default function InvoicesPage() {
                   value={formClientId}
                   onChange={(e) => {
                     setFormClientId(e.target.value);
-                    setFormJobId("");
                     setQuickAddOpen(false);
                   }}
                 >

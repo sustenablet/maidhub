@@ -291,23 +291,6 @@ export default function SchedulePage() {
     setJobs((data as Job[]) ?? []);
   }, [supabase, weekStart, weekEnd]);
 
-  const fetchMonthJobs = useCallback(async () => {
-    const gridStart = monthGrid[0]?.[0];
-    const gridEnd = monthGrid[5]?.[6];
-    if (!gridStart || !gridEnd) return;
-    const { data } = await supabase
-      .from("jobs")
-      .select("*, clients(*)")
-      .gte("scheduled_date", formatDate(gridStart))
-      .lte("scheduled_date", formatDate(gridEnd))
-      .order("start_time", { ascending: true });
-    setMonthJobs((data as Job[]) ?? []);
-  }, [supabase, monthGrid]);
-
-  useEffect(() => {
-    if (viewMode === "month") fetchMonthJobs();
-  }, [viewMode, fetchMonthJobs]);
-
   const fetchClients = useCallback(async () => {
     const { data, error } = await supabase
       .from("clients")
@@ -435,6 +418,23 @@ export default function SchedulePage() {
     }
     return map;
   }, [filteredMonthJobs]);
+
+  const fetchMonthJobs = useCallback(async () => {
+    const gridStart = monthGrid[0]?.[0];
+    const gridEnd = monthGrid[5]?.[6];
+    if (!gridStart || !gridEnd) return;
+    const { data } = await supabase
+      .from("jobs")
+      .select("*, clients(*)")
+      .gte("scheduled_date", formatDate(gridStart))
+      .lte("scheduled_date", formatDate(gridEnd))
+      .order("start_time", { ascending: true });
+    setMonthJobs((data as Job[]) ?? []);
+  }, [supabase, monthGrid]);
+
+  useEffect(() => {
+    if (viewMode === "month") fetchMonthJobs();
+  }, [viewMode, fetchMonthJobs]);
 
   /* ── Actions ────────────────────────────────────────────────── */
 
