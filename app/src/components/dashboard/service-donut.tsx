@@ -50,7 +50,8 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
   let cumulative = 0;
   const segments = services.map((s, i) => {
     const startAngle = cumulative;
-    const sweep = (s.value / 100) * 360;
+    // Cap at 359.99° — SVG arc is degenerate when start === end (full circle)
+    const sweep = Math.min((s.value / 100) * 360, 359.99);
     cumulative += sweep;
     return { ...s, startAngle, endAngle: startAngle + sweep, index: i };
   });
@@ -107,7 +108,7 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
                 fill="#D4D4D4"
                 style={{ fontFamily: "var(--font-sans)" }}
               >
-                ${(total / 1000).toFixed(1)}K
+                {total >= 10000 ? `$${(total / 1000).toFixed(1)}K` : `$${total.toLocaleString()}`}
               </text>
             </>
           ) : (
