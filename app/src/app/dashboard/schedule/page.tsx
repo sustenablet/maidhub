@@ -188,9 +188,11 @@ export default function SchedulePage() {
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
   const [editJobId, setEditJobId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const [viewMode, setViewMode] = useState<"week" | "day" | "list">("week");
+  const [viewMode, setViewMode] = useState<"week" | "day" | "list" | "month">("week");
   const [selectedDay, setSelectedDay] = useState<Date>(today);
   const [jobStatusFilter, setJobStatusFilter] = useState<Job["status"] | "all">("all");
+  const [monthOffset, setMonthOffset] = useState(0);
+  const [monthJobs, setMonthJobs] = useState<Job[]>([]);
 
   /* Service pricing defaults (loaded from user settings) */
   const servicePricesRef = useRef<Record<string, number>>({});
@@ -289,6 +291,23 @@ export default function SchedulePage() {
     setJobs((data as Job[]) ?? []);
   }, [supabase, weekStart, weekEnd]);
 
+  const fetchMonthJobs = useCallback(async () => {
+    const gridStart = monthGrid[0]?.[0];
+    const gridEnd = monthGrid[5]?.[6];
+    if (!gridStart || !gridEnd) return;
+    const { data } = await supabase
+      .from("jobs")
+      .select("*, clients(*)")
+      .gte("scheduled_date", formatDate(gridStart))
+      .lte("scheduled_date", formatDate(gridEnd))
+      .order("start_time", { ascending: true });
+    setMonthJobs((data as Job[]) ?? []);
+  }, [supabase, monthGrid]);
+
+  useEffect(() => {
+    if (viewMode === "month") fetchMonthJobs();
+  }, [viewMode, fetchMonthJobs]);
+
   const fetchClients = useCallback(async () => {
     const { data, error } = await supabase
       .from("clients")
@@ -380,6 +399,42 @@ export default function SchedulePage() {
       return (a.start_time || "").localeCompare(b.start_time || "");
     });
   }, [jobs, jobStatusFilter]);
+
+  // Month view
+  const monthStart = useMemo(() => {
+    const d = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [today, monthOffset]);
+
+  const monthGrid = useMemo(() => {
+    const firstCell = getMonday(monthStart);
+    const grid: Date[][] = [];
+    let cur = new Date(firstCell);
+    for (let w = 0; w < 6; w++) {
+      const row: Date[] = [];
+      for (let d = 0; d < 7; d++) {
+        row.push(new Date(cur));
+        cur = addDays(cur, 1);
+      }
+      grid.push(row);
+    }
+    return grid;
+  }, [monthStart]);
+
+  const filteredMonthJobs = useMemo(() => {
+    if (jobStatusFilter === "all") return monthJobs;
+    return monthJobs.filter(j => j.status === jobStatusFilter);
+  }, [monthJobs, jobStatusFilter]);
+
+  const monthJobsByDate = useMemo(() => {
+    const map: Record<string, Job[]> = {};
+    for (const job of filteredMonthJobs) {
+      if (!map[job.scheduled_date]) map[job.scheduled_date] = [];
+      map[job.scheduled_date].push(job);
+    }
+    return map;
+  }, [filteredMonthJobs]);
 
   /* ── Actions ────────────────────────────────────────────────── */
 
@@ -930,6 +985,7 @@ export default function SchedulePage() {
             <button
               onClick={() => {
                 if (viewMode === "day") setSelectedDay((d) => addDays(d, -1));
+                else if (viewMode === "month") setMonthOffset((o) => o - 1);
                 else setWeekOffset((o) => o - 1);
               }}
               className="p-1.5 rounded-[6px] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] transition-colors"
@@ -939,6 +995,7 @@ export default function SchedulePage() {
             <button
               onClick={() => {
                 if (viewMode === "day") setSelectedDay((d) => addDays(d, 1));
+                else if (viewMode === "month") setMonthOffset((o) => o + 1);
                 else setWeekOffset((o) => o + 1);
               }}
               className="p-1.5 rounded-[6px] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] transition-colors"
@@ -948,6 +1005,8 @@ export default function SchedulePage() {
             <span className="text-sm font-semibold text-[var(--mh-text)] ml-1">
               {viewMode === "day"
                 ? selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })
+                : viewMode === "month"
+                ? monthStart.toLocaleDateString("en-US", { month: "long", year: "numeric" })
                 : formatWeekLabel(weekStart)}
             </span>
           </div>
@@ -955,6 +1014,7 @@ export default function SchedulePage() {
             <button
               onClick={() => {
                 if (viewMode === "day") setSelectedDay(today);
+                else if (viewMode === "month") setMonthOffset(0);
                 else setWeekOffset(0);
               }}
               className="px-3 py-1.5 text-xs font-semibold text-[var(--mh-text)] bg-[var(--mh-surface-raised)] hover:bg-[var(--mh-hover-overlay)] border border-[var(--mh-border)] rounded-[6px] transition-colors"
@@ -962,7 +1022,7 @@ export default function SchedulePage() {
               Today
             </button>
             <div className="flex items-center gap-0.5 bg-[var(--mh-surface-raised)] rounded-[6px] p-0.5 border border-[var(--mh-border)]">
-              {(["week", "day", "list"] as const).map((mode) => (
+              {(["week", "day", "list", "month"] as const).map((mode) => (
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
@@ -1007,6 +1067,73 @@ export default function SchedulePage() {
         {loading ? (
           <div className="flex items-center justify-center py-32 text-[var(--mh-text-muted)] text-sm">
             Loading...
+          </div>
+        ) : viewMode === "month" ? (
+          /* ── Month View ── */
+          <div>
+            {/* Day-of-week header */}
+            <div className="grid grid-cols-7 border-b border-[var(--mh-divider)]">
+              {DAY_NAMES.map((name) => (
+                <div key={name} className="py-2 text-center text-[10px] font-bold uppercase tracking-wider text-[var(--mh-text-muted)]">
+                  {name}
+                </div>
+              ))}
+            </div>
+            {/* Calendar grid */}
+            <div className="grid grid-rows-6">
+              {monthGrid.map((week, wi) => (
+                <div key={wi} className="grid grid-cols-7 border-b border-[var(--mh-divider)] last:border-b-0">
+                  {week.map((day, di) => {
+                    const dateStr = formatDate(day);
+                    const dayJobs = monthJobsByDate[dateStr] || [];
+                    const isToday = isSameDay(day, today);
+                    const isCurrentMonth = day.getMonth() === monthStart.getMonth();
+                    const isSelected = isSameDay(day, selectedDay);
+                    return (
+                      <button
+                        key={di}
+                        onClick={() => { setSelectedDay(day); setViewMode("day"); }}
+                        className={`min-h-[90px] p-2 text-left border-r border-[var(--mh-divider)] last:border-r-0 hover:bg-[var(--mh-hover-overlay)] transition-colors flex flex-col gap-1 ${
+                          !isCurrentMonth ? "opacity-40" : ""
+                        }`}
+                      >
+                        <span className={`text-[12px] font-bold leading-none w-6 h-6 flex items-center justify-center rounded-full ${
+                          isToday
+                            ? "bg-[#0071E3] text-white"
+                            : isSelected
+                            ? "bg-[var(--mh-surface-raised)] text-[var(--mh-text)]"
+                            : "text-[var(--mh-text-muted)]"
+                        }`}>
+                          {day.getDate()}
+                        </span>
+                        <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                          {dayJobs.slice(0, 3).map((job) => {
+                            const colors = STATUS_COLORS[job.status];
+                            const clientName = job.clients
+                              ? `${job.clients.first_name} ${job.clients.last_name}`
+                              : "Job";
+                            return (
+                              <div
+                                key={job.id}
+                                onClick={(e) => { e.stopPropagation(); setSelectedJob(job); setDetailOpen(true); }}
+                                className={`px-1.5 py-0.5 rounded text-[10px] font-semibold truncate ${colors.bg} ${colors.text} border-l-2 ${colors.border} cursor-pointer`}
+                              >
+                                {clientName}
+                              </div>
+                            );
+                          })}
+                          {dayJobs.length > 3 && (
+                            <span className="text-[10px] text-[var(--mh-text-subtle)] pl-1">
+                              +{dayJobs.length - 3} more
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           </div>
         ) : viewMode === "list" ? (
           /* ── List View ── */

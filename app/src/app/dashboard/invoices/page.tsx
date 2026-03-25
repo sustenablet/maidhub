@@ -25,9 +25,23 @@ import {
   SecondaryButton,
 } from "@/components/dashboard/slide-panel";
 import type { Client, Invoice, Job, LineItem } from "@/lib/types";
+import { SERVICE_TYPES } from "@/lib/types";
 import { toast } from "sonner";
 
 const supabase = createClient();
+
+const ADDON_PRESETS = [
+  "Window Cleaning",
+  "Floor Waxing",
+  "Oven Cleaning",
+  "Refrigerator Cleaning",
+  "Laundry",
+  "Carpet Cleaning",
+  "Organization",
+  "Move-Out Clean",
+  "Deep Clean",
+  "Garage Cleaning",
+];
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -78,11 +92,13 @@ export default function InvoicesPage() {
 
   // Form state
   const [formClientId, setFormClientId] = useState("");
-  const [formJobId, setFormJobId] = useState("");
-  const [formLineItems, setFormLineItems] = useState<LineItem[]>([
-    emptyLineItem(),
-  ]);
-  const [formTaxPercent, setFormTaxPercent] = useState(0);
+  const [formServiceType, setFormServiceType] = useState("");
+  const [formBasePrice, setFormBasePrice] = useState(0);
+  const [formAddOns, setFormAddOns] = useState<{id: string; name: string; price: number}[]>([]);
+  const [addOnName, setAddOnName] = useState("");
+  const [addOnPrice, setAddOnPrice] = useState("");
+  const [serviceTypes, setServiceTypes] = useState<string[]>([...SERVICE_TYPES]);
+  const [servicePrices, setServicePrices] = useState<Record<string, number>>({});
   const [formDueDate, setFormDueDate] = useState(defaultDueDate());
   const [dueDatePreset, setDueDatePreset] = useState<"7" | "14" | "30" | "custom">("14");
   const [formNotes, setFormNotes] = useState("");
@@ -100,9 +116,6 @@ export default function InvoicesPage() {
   const [qaStreet, setQaStreet] = useState("");
   const [qaCity, setQaCity] = useState("");
   const [qaSaving, setQaSaving] = useState(false);
-
-  // Client jobs for the optional job link
-  const [clientJobs, setClientJobs] = useState<Job[]>([]);
 
   // Fetch authenticated user on mount
   useEffect(() => {
@@ -147,38 +160,18 @@ export default function InvoicesPage() {
     }
   }, [searchParams, clients]);
 
-  // Fetch completed jobs when client changes
+  // Load service types and prices from user settings
   useEffect(() => {
-    if (!formClientId || !userId) {
-      setClientJobs([]);
-      setFormJobId("");
-      return;
-    }
+    if (!userId) return;
     (async () => {
-      const { data } = await supabase
-        .from("jobs")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("client_id", formClientId)
-        .eq("status", "completed")
-        .order("scheduled_date", { ascending: false });
-      setClientJobs((data as Job[]) || []);
+      const { data } = await supabase.from("users").select("settings").eq("id", userId).single();
+      const biz = (((data?.settings || {}) as Record<string, unknown>).business || {}) as Record<string, unknown>;
+      const types = (biz.service_types as string[]) || [];
+      const prices = (biz.service_type_prices as Record<string, number>) || {};
+      if (types.length > 0) setServiceTypes(types);
+      setServicePrices(prices);
     })();
-  }, [formClientId, userId]);
-
-  // When a job is selected, auto-add a line item
-  useEffect(() => {
-    if (!formJobId) return;
-    const job = clientJobs.find((j) => j.id === formJobId);
-    if (!job) return;
-    setFormLineItems([
-      {
-        description: job.service_type || "Cleaning Service",
-        quantity: 1,
-        unit_price: job.price || 0,
-      },
-    ]);
-  }, [formJobId, clientJobs]);
+  }, [userId]);
 
   async function handleQuickAddClient() {
     if (!qaFirstName.trim() || !qaLastName.trim()) {
@@ -246,31 +239,7 @@ export default function InvoicesPage() {
     [invoices]
   );
 
-  // Line item helpers
-  const subtotal = formLineItems.reduce(
-    (sum, li) => sum + li.quantity * li.unit_price,
-    0
-  );
-  const taxAmount = subtotal * (formTaxPercent / 100);
-  const total = subtotal + taxAmount;
-
-  function updateLineItem(
-    index: number,
-    field: keyof LineItem,
-    value: string | number
-  ) {
-    setFormLineItems((prev) =>
-      prev.map((li, i) => (i === index ? { ...li, [field]: value } : li))
-    );
-  }
-
-  function removeLineItem(index: number) {
-    setFormLineItems((prev) => prev.filter((_, i) => i !== index));
-  }
-
-  function addLineItem() {
-    setFormLineItems((prev) => [...prev, emptyLineItem()]);
-  }
+  const invoiceTotal = formBasePrice + formAddOns.reduce((s, a) => s + a.price, 0);
 
   // Filter invoices
   const filtered = invoices.filter((inv) => {
@@ -297,13 +266,14 @@ export default function InvoicesPage() {
     setEditMode(false);
     setEditInvoiceId(null);
     setFormClientId("");
-    setFormJobId("");
-    setFormLineItems([emptyLineItem()]);
-    setFormTaxPercent(0);
+    setFormServiceType("");
+    setFormBasePrice(0);
+    setFormAddOns([]);
+    setAddOnName("");
+    setAddOnPrice("");
     setDueDatePreset("14");
     setFormDueDate(dueDateFromPreset("14"));
     setFormNotes("");
-    setClientJobs([]);
     setPanelOpen(true);
   }
 
@@ -312,16 +282,17 @@ export default function InvoicesPage() {
     setEditMode(true);
     setEditInvoiceId(inv.id);
     setFormClientId(inv.client_id);
-    setFormJobId(inv.job_id || "");
-    setFormLineItems(inv.line_items?.length ? [...inv.line_items] : [emptyLineItem()]);
-    // Reverse-calculate tax percent from total and line items
-    const lineSubtotal = (inv.line_items || []).reduce(
-      (sum, li) => sum + li.quantity * li.unit_price, 0
-    );
-    const taxPct = lineSubtotal > 0 && inv.total
-      ? Math.round(((inv.total - lineSubtotal) / lineSubtotal) * 10000) / 100
-      : 0;
-    setFormTaxPercent(Math.max(0, taxPct));
+    const items = inv.line_items || [];
+    const firstItem = items[0];
+    setFormServiceType(firstItem?.description || "");
+    setFormBasePrice(firstItem ? firstItem.unit_price * firstItem.quantity : 0);
+    setFormAddOns(items.slice(1).map((li, i) => ({
+      id: String(Date.now() + i),
+      name: li.description,
+      price: li.unit_price * li.quantity,
+    })));
+    setAddOnName("");
+    setAddOnPrice("");
     setDueDatePreset("custom");
     setFormDueDate(inv.due_date || defaultDueDate());
     setFormNotes(inv.notes || "");
@@ -338,20 +309,17 @@ export default function InvoicesPage() {
       toast.error("Please select a client.");
       return;
     }
-    if (
-      formLineItems.length === 0 ||
-      formLineItems.every((li) => !li.description)
-    ) {
-      toast.error("Add at least one line item.");
-      return;
-    }
     setSaving(true);
+    const saveLineItems: LineItem[] = [
+      { description: formServiceType || "Cleaning Service", quantity: 1, unit_price: formBasePrice },
+      ...formAddOns.map(a => ({ description: a.name, quantity: 1, unit_price: a.price })),
+    ];
     const { error } = await supabase.from("invoices").insert({
       user_id: userId,
       client_id: formClientId,
-      job_id: formJobId || null,
-      line_items: formLineItems,
-      total: Math.round(total * 100) / 100,
+      job_id: null,
+      line_items: saveLineItems,
+      total: Math.round(invoiceTotal * 100) / 100,
       status: "unpaid",
       due_date: formDueDate || null,
       notes: formNotes || null,
@@ -376,18 +344,17 @@ export default function InvoicesPage() {
       toast.error("Please select a client.");
       return;
     }
-    if (formLineItems.length === 0 || formLineItems.every((li) => !li.description)) {
-      toast.error("Add at least one line item.");
-      return;
-    }
     setSaving(true);
+    const updateLineItems: LineItem[] = [
+      { description: formServiceType || "Cleaning Service", quantity: 1, unit_price: formBasePrice },
+      ...formAddOns.map(a => ({ description: a.name, quantity: 1, unit_price: a.price })),
+    ];
     const { error } = await supabase
       .from("invoices")
       .update({
         client_id: formClientId,
-        job_id: formJobId || null,
-        line_items: formLineItems,
-        total: Math.round(total * 100) / 100,
+        line_items: updateLineItems,
+        total: Math.round(invoiceTotal * 100) / 100,
         due_date: formDueDate || null,
         notes: formNotes || null,
       })
@@ -858,82 +825,151 @@ export default function InvoicesPage() {
             </FormField>
           </FormSection>
 
-          <FormSection label="Line Items">
-            <div className="space-y-3">
-              {formLineItems.map((li, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      placeholder="Description"
-                      value={li.description}
-                      onChange={(e) =>
-                        updateLineItem(idx, "description", e.target.value)
-                      }
-                      className="w-full px-3 py-2.5 text-sm bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[var(--mh-text-subtle)]"
-                     
-                    />
-                  </div>
-                  <div className="w-16">
-                    <input
-                      type="number"
-                      min={1}
-                      placeholder="Qty"
-                      value={li.quantity}
-                      onChange={(e) =>
-                        updateLineItem(
-                          idx,
-                          "quantity",
-                          Math.max(1, parseInt(e.target.value) || 1)
-                        )
-                      }
-                      className="w-full px-2 py-2.5 text-sm bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all text-center"
-                     
-                    />
-                  </div>
-                  <div className="w-24">
-                    <input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      placeholder="Price"
-                      value={li.unit_price || ""}
-                      onChange={(e) =>
-                        updateLineItem(
-                          idx,
-                          "unit_price",
-                          parseFloat(e.target.value) || 0
-                        )
-                      }
-                      className="w-full px-2 py-2.5 text-sm bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all text-right"
-                     
-                    />
-                  </div>
-                  <div className="w-20 flex items-center justify-end py-2.5">
-                    <span
-                      className="text-sm font-semibold text-[var(--mh-text)]"
-                    >
-                      {formatCurrency(li.quantity * li.unit_price)}
-                    </span>
-                  </div>
+          <FormSection label="Service">
+            <FormField label="Service Type">
+              <FormSelect
+                value={formServiceType}
+                onChange={(e) => {
+                  setFormServiceType(e.target.value);
+                  const price = servicePrices[e.target.value];
+                  if (price != null && price > 0) setFormBasePrice(price);
+                }}
+              >
+                <option value="">Select a service type...</option>
+                {serviceTypes.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </FormSelect>
+            </FormField>
+            <FormField label="Price">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--mh-text-muted)] text-[13px] pointer-events-none">$</span>
+                <FormInput
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={formBasePrice || ""}
+                  onChange={(e) => setFormBasePrice(parseFloat(e.target.value) || 0)}
+                  placeholder="0.00"
+                  className="pl-7"
+                />
+              </div>
+            </FormField>
+          </FormSection>
+
+          <FormSection label="Additional Costs">
+            {/* Preset chips */}
+            <div className="flex flex-wrap gap-1.5">
+              {ADDON_PRESETS.map((preset) => {
+                const isActive = formAddOns.some((a) => a.name === preset);
+                return (
                   <button
+                    key={preset}
                     type="button"
-                    onClick={() => removeLineItem(idx)}
-                    className="p-2.5 text-[var(--mh-text-subtle)] hover:text-red-400 transition-colors"
+                    onClick={() => {
+                      if (isActive) {
+                        setFormAddOns((prev) => prev.filter((a) => a.name !== preset));
+                      } else {
+                        setFormAddOns((prev) => [...prev, { id: String(Date.now() + Math.random()), name: preset, price: 0 }]);
+                      }
+                    }}
+                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${
+                      isActive
+                        ? "bg-[#0071E3] border-[#0071E3] text-white"
+                        : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
+                    }`}
                   >
-                    <X className="h-4 w-4" />
+                    {preset}
                   </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
-            <button
-              type="button"
-              onClick={addLineItem}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors mt-1"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add Line Item
-            </button>
+
+            {/* Added add-ons with price fields */}
+            {formAddOns.length > 0 && (
+              <div className="space-y-2 pt-1">
+                {formAddOns.map((addon) => (
+                  <div key={addon.id} className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <FormInput
+                        value={addon.name}
+                        onChange={(e) =>
+                          setFormAddOns((prev) =>
+                            prev.map((a) => a.id === addon.id ? { ...a, name: e.target.value } : a)
+                          )
+                        }
+                        placeholder="Cost name"
+                      />
+                    </div>
+                    <div className="w-28 relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--mh-text-muted)] text-[13px] pointer-events-none">$</span>
+                      <input
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        value={addon.price || ""}
+                        onChange={(e) =>
+                          setFormAddOns((prev) =>
+                            prev.map((a) => a.id === addon.id ? { ...a, price: parseFloat(e.target.value) || 0 } : a)
+                          )
+                        }
+                        placeholder="0.00"
+                        className="w-full pl-6 pr-2 py-2 text-[13px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[4px] text-[var(--mh-text)] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormAddOns((prev) => prev.filter((a) => a.id !== addon.id))}
+                      className="p-1.5 text-[var(--mh-text-subtle)] hover:text-red-400 transition-colors shrink-0"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Custom add-on entry */}
+            <div className="flex items-center gap-2 pt-1 border-t border-[var(--mh-divider)]">
+              <div className="flex-1">
+                <FormInput
+                  value={addOnName}
+                  onChange={(e) => setAddOnName(e.target.value)}
+                  placeholder="Custom cost name..."
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && addOnName.trim()) {
+                      e.preventDefault();
+                      setFormAddOns((prev) => [...prev, { id: String(Date.now()), name: addOnName.trim(), price: parseFloat(addOnPrice) || 0 }]);
+                      setAddOnName(""); setAddOnPrice("");
+                    }
+                  }}
+                />
+              </div>
+              <div className="w-28 relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--mh-text-muted)] text-[13px] pointer-events-none">$</span>
+                <input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={addOnPrice}
+                  onChange={(e) => setAddOnPrice(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full pl-6 pr-2 py-2 text-[13px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[4px] text-[var(--mh-text)] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all"
+                />
+              </div>
+              <button
+                type="button"
+                disabled={!addOnName.trim()}
+                onClick={() => {
+                  if (!addOnName.trim()) return;
+                  setFormAddOns((prev) => [...prev, { id: String(Date.now()), name: addOnName.trim(), price: parseFloat(addOnPrice) || 0 }]);
+                  setAddOnName(""); setAddOnPrice("");
+                }}
+                className="px-3 py-2 text-[12px] font-semibold bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[4px] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] disabled:opacity-40 transition-colors shrink-0"
+              >
+                Add
+              </button>
+            </div>
           </FormSection>
 
           <FormSection label="Details">
@@ -994,44 +1030,22 @@ export default function InvoicesPage() {
           </FormSection>
 
           {/* Totals */}
-          <div className="border-t border-[var(--mh-divider)] pt-4 space-y-2">
-            <div className="flex justify-between text-sm">
-              <span
-                className="text-[var(--mh-text-muted)]"
-              >
-                Subtotal
-              </span>
-              <span
-                className="text-[var(--mh-text)]"
-              >
-                {formatCurrency(subtotal)}
-              </span>
-            </div>
-            {formTaxPercent > 0 && (
+          <div className="border-t border-[var(--mh-divider)] pt-4 space-y-1.5">
+            {formBasePrice > 0 && (
               <div className="flex justify-between text-sm">
-                <span
-                  className="text-[var(--mh-text-muted)]"
-                >
-                  Tax ({formTaxPercent}%)
-                </span>
-                <span
-                  className="text-[var(--mh-text)]"
-                >
-                  {formatCurrency(taxAmount)}
-                </span>
+                <span className="text-[var(--mh-text-muted)]">{formServiceType || "Service"}</span>
+                <span className="text-[var(--mh-text)]">{formatCurrency(formBasePrice)}</span>
               </div>
             )}
-            <div className="flex justify-between text-lg pt-1 border-t border-[var(--mh-divider)]">
-              <span
-                className="font-semibold text-[var(--mh-text)]"
-              >
-                Total
-              </span>
-              <span
-                className="font-bold text-[var(--mh-text)]"
-              >
-                {formatCurrency(total)}
-              </span>
+            {formAddOns.map((addon) => (
+              <div key={addon.id} className="flex justify-between text-sm">
+                <span className="text-[var(--mh-text-muted)]">{addon.name}</span>
+                <span className="text-[var(--mh-text)]">{formatCurrency(addon.price)}</span>
+              </div>
+            ))}
+            <div className="flex justify-between text-lg pt-2 border-t border-[var(--mh-divider)]">
+              <span className="font-semibold text-[var(--mh-text)]">Total</span>
+              <span className="font-bold text-[var(--mh-text)]">{formatCurrency(invoiceTotal)}</span>
             </div>
           </div>
         </div>
