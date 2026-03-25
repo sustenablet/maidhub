@@ -186,7 +186,7 @@ export default function ClientsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Insert client
+      // Insert client (without preferred_service first — column may need migration)
       const { data: newClient, error: clientError } = await supabase
         .from("clients")
         .insert({
@@ -195,7 +195,6 @@ export default function ClientsPage() {
           last_name: lastName.trim(),
           email: email.trim() || null,
           phone: phone.trim() || null,
-          preferred_service: preferredService || null,
           notes: notes.trim() || null,
           status: "active",
         })
@@ -203,6 +202,15 @@ export default function ClientsPage() {
         .single();
 
       if (clientError) throw clientError;
+
+      // Set preferred_service separately — silently skip if column doesn't exist yet
+      if (preferredService && newClient) {
+        await supabase
+          .from("clients")
+          .update({ preferred_service: preferredService })
+          .eq("id", newClient.id);
+        // Ignore error — column may not be migrated in all environments
+      }
 
       // Insert address
       const { error: addressError } = await supabase

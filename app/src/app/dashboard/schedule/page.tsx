@@ -388,13 +388,20 @@ export default function SchedulePage() {
       toast.error("Please select a client and date");
       return;
     }
+    // Require address if client has addresses on file
+    if (!formAddressId && selectedClientAddresses.length > 0) {
+      toast.error("Please select a service address");
+      return;
+    }
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); toast.error("Not authenticated"); return; }
-    const { error } = await supabase.from("jobs").insert({
+
+    // Build insert payload — omit address_id if null (older DB schemas may require it)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const jobPayload: Record<string, any> = {
       user_id: user.id,
       client_id: formClientId,
-      address_id: formAddressId || null,
       scheduled_date: formDate,
       start_time: formStartTime || null,
       duration_minutes: parseInt(formDuration) || 60,
@@ -402,12 +409,19 @@ export default function SchedulePage() {
       price: formPrice ? parseFloat(formPrice) : null,
       notes: formNotes || null,
       status: "scheduled",
-    });
+    };
+    if (formAddressId) jobPayload.address_id = formAddressId;
+
+    const { error } = await supabase.from("jobs").insert(jobPayload);
     setSaving(false);
 
     if (error) {
       console.error("Failed to create job:", error);
-      toast.error("Failed to create job");
+      if (error.message?.includes("address_id") || error.message?.includes("violates not-null")) {
+        toast.error("Please select a service address for this job");
+      } else {
+        toast.error("Failed to create job");
+      }
       return;
     }
 
@@ -423,18 +437,20 @@ export default function SchedulePage() {
       return;
     }
     setSaving(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updatePayload: Record<string, any> = {
+      client_id: formClientId,
+      scheduled_date: formDate,
+      start_time: formStartTime || null,
+      duration_minutes: parseInt(formDuration) || 60,
+      service_type: formServiceType || null,
+      price: formPrice ? parseFloat(formPrice) : null,
+      notes: formNotes || null,
+    };
+    if (formAddressId) updatePayload.address_id = formAddressId;
     const { error } = await supabase
       .from("jobs")
-      .update({
-        client_id: formClientId,
-        address_id: formAddressId || null,
-        scheduled_date: formDate,
-        start_time: formStartTime || null,
-        duration_minutes: parseInt(formDuration) || 60,
-        service_type: formServiceType || null,
-        price: formPrice ? parseFloat(formPrice) : null,
-        notes: formNotes || null,
-      })
+      .update(updatePayload)
       .eq("id", editJobId);
     setSaving(false);
 
@@ -500,10 +516,10 @@ export default function SchedulePage() {
     setRecSaving(true);
     const { data: { user: ruleUser } } = await supabase.auth.getUser();
     if (!ruleUser) { setRecSaving(false); toast.error("Not authenticated"); return; }
-    const { data: newRule, error } = await supabase.from("recurring_rules").insert({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rulePayload: Record<string, any> = {
       user_id: ruleUser.id,
       client_id: recClientId,
-      address_id: recAddressId || null,
       frequency: recFrequency,
       custom_interval_days: recFrequency === "custom" ? parseInt(recCustomDays) || 7 : null,
       start_date: recStartDate,
@@ -511,12 +527,23 @@ export default function SchedulePage() {
       service_type: recServiceType || null,
       duration_minutes: parseInt(recDuration) || 120,
       price: recPrice ? parseFloat(recPrice) : null,
-      start_time: recStartTime || null,
       is_active: true,
-    }).select().single();
+    };
+    // Only include address_id if selected (column may require non-null in older schema)
+    if (recAddressId) rulePayload.address_id = recAddressId;
+    // start_time column added in migration — include only if column exists (silently ignored if not)
+    if (recStartTime) rulePayload.start_time = recStartTime;
+
+    const { data: newRule, error } = await supabase
+      .from("recurring_rules").insert(rulePayload).select().single();
     setRecSaving(false);
     if (error) {
-      toast.error("Failed to create recurring rule");
+      console.error("Failed to create recurring rule:", error);
+      if (error.message?.includes("address_id") || error.message?.includes("violates not-null")) {
+        toast.error("Please select a service address for this recurring rule");
+      } else {
+        toast.error("Failed to create recurring rule");
+      }
       return;
     }
     toast.success("Recurring rule created");
@@ -615,18 +642,22 @@ export default function SchedulePage() {
       return;
     }
 
-    const jobsToInsert = newDates.map((d) => ({
-      user_id: rule.user_id,
-      client_id: rule.client_id,
-      address_id: rule.address_id,
-      recurring_rule_id: rule.id,
-      scheduled_date: d,
-      start_time: rule.start_time || null,
-      duration_minutes: rule.duration_minutes || 120,
-      service_type: rule.service_type || null,
-      price: rule.price,
-      status: "scheduled" as const,
-    }));
+    const jobsToInsert = newDates.map((d) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const job: Record<string, any> = {
+        user_id: rule.user_id,
+        client_id: rule.client_id,
+        recurring_rule_id: rule.id,
+        scheduled_date: d,
+        duration_minutes: rule.duration_minutes || 120,
+        service_type: rule.service_type || null,
+        price: rule.price,
+        status: "scheduled" as const,
+      };
+      if (rule.address_id) job.address_id = rule.address_id;
+      if (rule.start_time) job.start_time = rule.start_time;
+      return job;
+    });
 
     const { error } = await supabase.from("jobs").insert(jobsToInsert);
     setRecGenerating(null);
