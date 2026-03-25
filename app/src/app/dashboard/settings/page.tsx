@@ -23,19 +23,24 @@ import {
   Sun,
   Moon,
   Monitor,
+  CreditCard,
+  Check,
+  Zap,
+  Star,
 } from "lucide-react";
 import { SERVICE_TYPES } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme, type Theme } from "@/components/theme-provider";
 
-type SettingsTab = "profile" | "business" | "preferences" | "account";
+type SettingsTab = "profile" | "business" | "preferences" | "subscription" | "account";
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType; description: string }[] = [
   { id: "profile", label: "Profile", icon: User, description: "Your personal info" },
   { id: "business", label: "Business", icon: Building2, description: "Services & pricing" },
   { id: "preferences", label: "Preferences", icon: Bell, description: "Appearance & notifications" },
-  { id: "account", label: "Account", icon: Shield, description: "Plan & security" },
+  { id: "subscription", label: "Subscription", icon: CreditCard, description: "Plan & billing" },
+  { id: "account", label: "Account", icon: Shield, description: "Security & data" },
 ];
 
 /* ─── Reusable components ────────────────────────────── */
@@ -150,7 +155,7 @@ function NotifRow({
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] shadow-[0_1px_3px_rgba(0,0,0,0.4)] overflow-hidden">
+    <div className="bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] shadow-[var(--mh-shadow-card)] overflow-hidden">
       {children}
     </div>
   );
@@ -873,74 +878,188 @@ export default function SettingsPage() {
             </>
           )}
 
+          {/* ─── SUBSCRIPTION TAB ───────────────────────── */}
+          {activeTab === "subscription" && (
+            <>
+              {/* Current Plan Banner */}
+              <div className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[8px] shadow-[var(--mh-shadow-card)] overflow-hidden">
+                <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-7 w-7 rounded-[6px] bg-[#0071E3]/10 flex items-center justify-center">
+                        <Zap className="h-3.5 w-3.5 text-[#0071E3]" strokeWidth={2} />
+                      </div>
+                      <div>
+                        <p className="text-[15px] font-bold text-[var(--mh-text)]">
+                          {subscriptionStatus === "trialing" ? "Free Trial" : subscriptionPlan === "solo" ? "Solo Plan" : "Team Plan"}
+                        </p>
+                        <p className="text-[12px] text-[var(--mh-text-muted)]">
+                          {subscriptionStatus === "trialing"
+                            ? `${getTrialDaysLeft()} days remaining in your trial`
+                            : "Your plan renews monthly"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2 text-[12px] text-[var(--mh-text-muted)]">
+                        <Check className="h-3.5 w-3.5 text-[#0071E3] shrink-0" strokeWidth={2.5} />
+                        <span>Unlimited clients &amp; addresses</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[12px] text-[var(--mh-text-muted)]">
+                        <Check className="h-3.5 w-3.5 text-[#0071E3] shrink-0" strokeWidth={2.5} />
+                        <span>Full scheduling, invoicing &amp; estimates</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-3 shrink-0">
+                    {subscriptionStatus === "trialing" ? (
+                      <div className="text-right">
+                        <p className="text-[11px] text-[var(--mh-text-muted)] uppercase tracking-wider font-semibold">Current</p>
+                        <p className="text-[28px] font-bold text-[var(--mh-text)] leading-none">Free</p>
+                        <p className="text-[12px] text-[var(--mh-text-muted)] mt-1">trial period</p>
+                      </div>
+                    ) : (
+                      <div className="text-right">
+                        <p className="text-[28px] font-bold text-[var(--mh-text)] leading-none">$29</p>
+                        <p className="text-[12px] text-[var(--mh-text-muted)] mt-1">per month</p>
+                      </div>
+                    )}
+                    <button className="px-4 py-2 text-[13px] font-semibold text-[var(--mh-text)] bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] rounded-[6px] hover:bg-[var(--mh-hover-overlay)] transition-colors">
+                      Manage Plan
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Plans */}
+              <div>
+                <h3 className="text-[13px] font-bold text-[var(--mh-text)] mb-3">Available Plans</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Solo Plan */}
+                  <div className={`relative rounded-[8px] border overflow-hidden transition-all ${
+                    subscriptionStatus !== "trialing"
+                      ? "bg-[var(--mh-surface)] border-[#0071E3]/50 shadow-[0_0_0_1px_rgba(0,113,227,0.1),var(--mh-shadow-card)]"
+                      : "bg-[var(--mh-surface)] border-[var(--mh-border)] shadow-[var(--mh-shadow-card)]"
+                  }`}>
+                    {subscriptionStatus !== "trialing" && (
+                      <div className="absolute top-3 right-3">
+                        <span className="px-2 py-0.5 text-[10px] font-bold bg-[#0071E3] text-white rounded-full uppercase tracking-wider">
+                          Current
+                        </span>
+                      </div>
+                    )}
+                    <div className="px-5 py-5">
+                      <p className="text-[17px] font-bold text-[var(--mh-text)]">Solo</p>
+                      <p className="text-[12px] text-[var(--mh-text-muted)] mt-1 leading-relaxed">
+                        Everything you need to run your cleaning business independently.
+                      </p>
+                      <div className="flex items-end gap-1 mt-4 mb-5">
+                        <span className="text-[34px] font-bold text-[var(--mh-text)] leading-none">$29</span>
+                        <span className="text-[13px] text-[var(--mh-text-muted)] mb-1">/ month</span>
+                      </div>
+                      <div className="space-y-2 mb-5">
+                        {[
+                          "Unlimited clients & addresses",
+                          "Full job scheduling & calendar",
+                          "Recurring job rules",
+                          "Estimates & invoicing",
+                          "Revenue & finances overview",
+                          "Mobile-optimized interface",
+                          "Priority email support",
+                        ].map((feat) => (
+                          <div key={feat} className="flex items-center gap-2 text-[12px] text-[var(--mh-text-muted)]">
+                            <Check className="h-3.5 w-3.5 text-[#0071E3] shrink-0" strokeWidth={2.5} />
+                            {feat}
+                          </div>
+                        ))}
+                      </div>
+                      {subscriptionStatus === "trialing" ? (
+                        <button className="w-full py-2.5 text-[13px] font-semibold bg-[#0071E3] hover:bg-[#0077ED] text-white rounded-[6px] transition-colors">
+                          Upgrade to Solo
+                        </button>
+                      ) : (
+                        <button className="w-full py-2.5 text-[13px] font-semibold bg-[#0071E3]/10 text-[#0071E3] rounded-[6px] cursor-default">
+                          Current Plan
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Team Plan (Coming Soon) */}
+                  <div className="relative rounded-[8px] border border-[var(--mh-border)] bg-[var(--mh-surface)] shadow-[var(--mh-shadow-card)] overflow-hidden opacity-70">
+                    <div className="absolute top-3 right-3">
+                      <span className="px-2 py-0.5 text-[10px] font-bold bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] border border-[var(--mh-border)] rounded-full uppercase tracking-wider">
+                        Coming Soon
+                      </span>
+                    </div>
+                    <div className="px-5 py-5">
+                      <div className="flex items-center gap-2">
+                        <p className="text-[17px] font-bold text-[var(--mh-text)]">Team</p>
+                        <Star className="h-3.5 w-3.5 text-[#FF9F0A]" strokeWidth={2} />
+                      </div>
+                      <p className="text-[12px] text-[var(--mh-text-muted)] mt-1 leading-relaxed">
+                        For growing cleaning businesses with multiple employees.
+                      </p>
+                      <div className="flex items-end gap-1 mt-4 mb-5">
+                        <span className="text-[34px] font-bold text-[var(--mh-text)] leading-none">$49</span>
+                        <span className="text-[13px] text-[var(--mh-text-muted)] mb-1">/ month</span>
+                      </div>
+                      <div className="space-y-2 mb-5">
+                        {[
+                          "Everything in Solo",
+                          "Up to 5 team members",
+                          "Team scheduling & dispatch",
+                          "Per-employee job assignments",
+                          "Team performance reports",
+                          "Advanced client management",
+                          "Dedicated support",
+                        ].map((feat) => (
+                          <div key={feat} className="flex items-center gap-2 text-[12px] text-[var(--mh-text-muted)]">
+                            <Check className="h-3.5 w-3.5 text-[var(--mh-text-faint)] shrink-0" strokeWidth={2.5} />
+                            {feat}
+                          </div>
+                        ))}
+                      </div>
+                      <button disabled className="w-full py-2.5 text-[13px] font-semibold bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[var(--mh-text-muted)] rounded-[6px] cursor-not-allowed">
+                        Coming Soon
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Billing info */}
+              <div className="bg-[var(--mh-surface-sunken)] rounded-[6px] border border-[var(--mh-border)] px-5 py-4">
+                <p className="text-[12px] text-[var(--mh-text-muted)] leading-relaxed">
+                  Billing is managed securely. To update your payment method or cancel your subscription, use <span className="font-semibold text-[var(--mh-text)]">Manage Plan</span> above or contact support at <span className="font-semibold text-[var(--mh-text)]">support@maidhub.io</span>.
+                </p>
+              </div>
+            </>
+          )}
+
           {/* ─── ACCOUNT TAB ─────────────────────────────── */}
           {activeTab === "account" && (
             <>
-              <Card>
-                <CardHeader title="Subscription" />
-                <CardBody className="space-y-0">
-                  <div className="flex items-center justify-between py-3.5 border-b border-[var(--mh-divider)]">
-                    <div>
-                      <p className="text-[13px] font-semibold text-[var(--mh-text)]">Current Plan</p>
-                      <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
-                        {subscriptionPlan === "solo" ? "Solo Cleaner" : "Team"} Plan
-                      </p>
-                    </div>
-                    <span
-                      className="px-2.5 py-1 text-[10px] font-semibold bg-[var(--mh-hover-overlay)] text-[var(--mh-text-muted)] rounded-md uppercase tracking-wider"
-                    >
-                      {subscriptionStatus}
-                    </span>
-                  </div>
-
-                  {subscriptionStatus === "trialing" && (
-                    <div className="flex items-center justify-between py-3.5 border-b border-[var(--mh-divider)]">
-                      <div>
-                        <p className="text-[13px] font-semibold text-[var(--mh-text)]">Trial Period</p>
-                        <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
-                          {getTrialDaysLeft()} days remaining in your free trial
-                        </p>
-                      </div>
-                      <div className="h-8 w-8 rounded-[6px] bg-white/[0.05] flex items-center justify-center">
-                        <Clock className="h-4 w-4 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between py-3.5 border-b border-[var(--mh-divider)]">
-                    <div>
-                      <p className="text-[13px] font-semibold text-[var(--mh-text)]">Email</p>
-                      <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">{email}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between py-3.5">
-                    <div>
-                      <p className="text-[13px] font-semibold text-[var(--mh-text)]">Payment Method</p>
-                      <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
-                        {subscriptionStatus === "trialing" ? "No payment method on file" : "Managed by Square"}
-                      </p>
-                    </div>
-                  </div>
-                </CardBody>
-              </Card>
-
-              {subscriptionStatus === "trialing" && (
-                <Link
-                  href="/dashboard/upgrade"
-                  className="flex items-center justify-between p-5 bg-[#0071E3]/10 border border-[#0071E3]/25 rounded-[6px] group hover:bg-[#0071E3]/15 hover:border-[#0071E3]/40 transition-colors"
+              {/* Quick plan info */}
+              <div className="flex items-center justify-between p-4 bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] shadow-[var(--mh-shadow-card)]">
+                <div>
+                  <p className="text-[13px] font-semibold text-[var(--mh-text)]">
+                    {subscriptionStatus === "trialing" ? "Free Trial" : subscriptionPlan === "solo" ? "Solo Plan" : "Team Plan"}
+                  </p>
+                  <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
+                    {subscriptionStatus === "trialing"
+                      ? `${getTrialDaysLeft()} days remaining`
+                      : "Active subscription"}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveTab("subscription")}
+                  className="flex items-center gap-1.5 text-[12px] font-semibold text-[#0071E3] hover:text-[#0077ED] transition-colors"
                 >
-                  <div>
-                    <p className="text-[14px] font-semibold text-[#60AAFF]">
-                      Upgrade your plan
-                    </p>
-                    <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
-                      Get unlimited access to all MaidHub features
-                    </p>
-                  </div>
-                  <ArrowUpRight className="h-5 w-5 text-[#0071E3]/50 group-hover:text-[#60AAFF] transition-colors" strokeWidth={1.8} />
-                </Link>
-              )}
+                  Manage
+                  <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2} />
+                </button>
+              </div>
 
               <Card>
                 <CardHeader title="Security" />
@@ -969,7 +1088,7 @@ export default function SettingsPage() {
                       type="button"
                       onClick={handlePasswordChange}
                       disabled={passwordSaving || !newPassword || !confirmPassword}
-                      className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] text-[var(--mh-text)] rounded-[6px] hover:bg-[#2E2E2E] hover:border-[#444444] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] text-[var(--mh-text)] rounded-[6px] hover:bg-[var(--mh-hover-overlay)] hover:border-[var(--mh-border)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {passwordSaving ? (
                         <>

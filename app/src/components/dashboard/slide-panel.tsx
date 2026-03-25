@@ -56,25 +56,25 @@ export function SlidePanel({
 
       {/* Panel */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 ${width} bg-[#1A1A1A] shadow-[0_20px_60px_rgba(0,0,0,0.6),0_4px_16px_rgba(0,0,0,0.4)] transform transition-transform duration-300 ease-out flex flex-col border-l border-[#2C2C2C] ${
+        className={`fixed inset-y-0 right-0 z-50 ${width} bg-[#1A1A1A] shadow-[0_20px_60px_rgba(0,0,0,0.6),0_4px_16px_rgba(0,0,0,0.4)] transform transition-transform duration-300 ease-out flex flex-col border-l border-[var(--mh-border)] ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-4 border-b border-[#2C2C2C] shrink-0">
+        <div className="flex items-start justify-between px-6 py-4 border-b border-[var(--mh-border)] shrink-0">
           <div>
-            <h2 className="text-[16px] font-bold text-[#D4D4D4] tracking-[-0.02em]">
+            <h2 className="text-[16px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">
               {title}
             </h2>
             {subtitle && (
-              <p className="text-[12px] text-[#888888] mt-0.5">
+              <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
                 {subtitle}
               </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-white/[0.06] text-[#555555] hover:text-[#888888] transition-colors -mr-1.5 mt-0.5"
+            className="p-1.5 rounded-md hover:bg-[var(--mh-hover-overlay)] text-[var(--mh-text-subtle)] hover:text-[var(--mh-text-muted)] transition-colors -mr-1.5 mt-0.5"
           >
             <X className="h-4 w-4" />
           </button>
@@ -105,7 +105,7 @@ export function FormSection({
 }) {
   return (
     <div className="space-y-3">
-      <p className="text-[10px] font-bold tracking-[0.1em] text-[#555555] uppercase">
+      <p className="text-[10px] font-bold tracking-[0.1em] text-[var(--mh-text-subtle)] uppercase">
         {label}
       </p>
       {children}
@@ -124,7 +124,7 @@ export function FormField({
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[12px] font-semibold text-[#888888]">
+      <label className="text-[12px] font-semibold text-[var(--mh-text-muted)]">
         {label}
         {required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
@@ -139,7 +139,7 @@ export function FormInput({
   return (
     <input
       {...props}
-      className={`w-full px-3 py-2 text-[13px] bg-[#252525] border border-[#2C2C2C] rounded-[4px] text-[#D4D4D4] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[#444444] ${props.className || ""}`}
+      className={`w-full px-3 py-2 text-[13px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[4px] text-[var(--mh-text)] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[var(--mh-text-faint)] ${props.className || ""}`}
       style={props.style}
     />
   );
@@ -151,7 +151,7 @@ export function FormTextarea({
   return (
     <textarea
       {...props}
-      className={`w-full px-3 py-2 text-[13px] bg-[#252525] border border-[#2C2C2C] rounded-[4px] text-[#D4D4D4] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[#444444] resize-none ${props.className || ""}`}
+      className={`w-full px-3 py-2 text-[13px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[4px] text-[var(--mh-text)] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[var(--mh-text-faint)] resize-none ${props.className || ""}`}
       style={props.style}
     />
   );
@@ -164,7 +164,7 @@ export function FormSelect({
   return (
     <select
       {...props}
-      className={`w-full px-3 py-2 text-[13px] bg-[#252525] border border-[#2C2C2C] rounded-[4px] text-[#D4D4D4] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all ${props.className || ""}`}
+      className={`w-full px-3 py-2 text-[13px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[4px] text-[var(--mh-text)] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all ${props.className || ""}`}
       style={props.style}
     >
       {children}
@@ -178,7 +178,7 @@ export function FormActions({
   children: React.ReactNode;
 }) {
   return (
-    <div className="shrink-0 bg-[#1A1A1A] border-t border-[#2C2C2C] px-6 py-4 flex items-center justify-end gap-2.5">
+    <div className="shrink-0 bg-[#1A1A1A] border-t border-[var(--mh-border)] px-6 py-4 flex items-center justify-end gap-2.5">
       {children}
     </div>
   );
@@ -230,7 +230,7 @@ export function SecondaryButton({
   return (
     <button
       {...props}
-      className={`px-5 py-2 text-[13px] font-semibold text-[#888888] bg-transparent border border-[#2C2C2C] rounded-[4px] hover:bg-white/[0.04] hover:text-[#D4D4D4] transition-colors ${props.className || ""}`}
+      className={`px-5 py-2 text-[13px] font-semibold text-[var(--mh-text-muted)] bg-transparent border border-[var(--mh-border)] rounded-[4px] hover:bg-[var(--mh-hover-overlay)] hover:text-[var(--mh-text)] transition-colors ${props.className || ""}`}
       style={props.style}
     >
       {children}

@@ -48,7 +48,7 @@ function getIcon(category: string) {
     case "estimates":
       return { Icon: FileText, bg: "bg-purple-500/10", color: "text-purple-400" };
     default:
-      return { Icon: Bell, bg: "bg-[#252525]", color: "text-[#888888]" };
+      return { Icon: Bell, bg: "bg-[var(--mh-surface-raised)]", color: "text-[var(--mh-text-muted)]" };
   }
 }
 
@@ -267,16 +267,16 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[21px] font-semibold text-[#D4D4D4] tracking-[-0.02em]">
+          <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
             Notifications
           </h1>
-          <p className="text-sm text-[#888888] mt-0.5">
+          <p className="text-sm text-[var(--mh-text-muted)] mt-0.5">
             {loading
               ? "Loading activity…"
               : unreadCount > 0
                 ? (
                   <span>
-                    <strong className="text-[#D4D4D4]">{unreadCount}</strong> unread
+                    <strong className="text-[var(--mh-text)]">{unreadCount}</strong> unread
                   </span>
                 )
                 : "You're all caught up"}
@@ -285,7 +285,7 @@ export default function NotificationsPage() {
         {unreadCount > 0 && (
           <button
             onClick={markAllRead}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[#888888] bg-[#1E1E1E] border border-[#2C2C2C] rounded-[6px] hover:bg-[#252525] shadow-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-surface-raised)] shadow-sm transition-colors"
           >
             <Check className="h-4 w-4" />
             Mark all read
@@ -294,9 +294,9 @@ export default function NotificationsPage() {
       </div>
 
       {/* Main Card */}
-      <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] overflow-hidden">
+      <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] overflow-hidden">
         {/* Filter tabs */}
-        <div className="flex items-center gap-1 p-3 border-b border-[#252525]">
+        <div className="flex items-center gap-1 p-3 border-b border-[var(--mh-divider)]">
           {tabs.map((tab) => {
             const count =
               tab.value === "all"
@@ -310,8 +310,8 @@ export default function NotificationsPage() {
                 onClick={() => setActiveTab(tab.value)}
                 className={`px-4 py-1.5 rounded-[6px] text-xs font-semibold transition-colors ${
                   activeTab === tab.value
-                    ? "bg-white/[0.06] text-[#D4D4D4]"
-                    : "text-[#888888] hover:text-[#D4D4D4] hover:bg-white/[0.02]"
+                    ? "bg-[var(--mh-hover-overlay)] text-[var(--mh-text)]"
+                    : "text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] hover:bg-[var(--mh-hover-overlay)]"
                 }`}
               >
                 {tab.label}
@@ -328,21 +328,21 @@ export default function NotificationsPage() {
         {/* Loading */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="h-6 w-6 text-[#444444] animate-spin" />
-            <p className="text-sm text-[#888888] mt-3">
+            <Loader2 className="h-6 w-6 text-[var(--mh-text-faint)] animate-spin" />
+            <p className="text-sm text-[var(--mh-text-muted)] mt-3">
               Loading activity…
             </p>
           </div>
         ) : filtered.length === 0 ? (
           /* Empty state */
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="h-14 w-14 rounded-[6px] bg-[#252525] flex items-center justify-center mb-4">
-              <BellOff className="h-7 w-7 text-[#444444]" />
+            <div className="h-14 w-14 rounded-[6px] bg-[var(--mh-surface-raised)] flex items-center justify-center mb-4">
+              <BellOff className="h-7 w-7 text-[var(--mh-text-faint)]" />
             </div>
-            <p className="text-sm font-semibold text-[#D4D4D4]">
+            <p className="text-sm font-semibold text-[var(--mh-text)]">
               No activity yet
             </p>
-            <p className="text-xs text-[#888888] mt-1 max-w-xs">
+            <p className="text-xs text-[var(--mh-text-muted)] mt-1 max-w-xs">
               {activeTab === "all"
                 ? "Create clients, schedule jobs, and send invoices to see activity here"
                 : `No ${activeTab} activity yet`}
@@ -350,14 +350,14 @@ export default function NotificationsPage() {
           </div>
         ) : (
           /* Activity Feed */
-          <div className="divide-y divide-[#252525]">
+          <div className="divide-y divide-[var(--mh-divider)]">
             {filtered.map((item) => {
               const { Icon, bg, color } = getIcon(item.category);
               return (
                 <div
                   key={item.id}
-                  className={`flex items-start gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors cursor-pointer ${
-                    item.unread ? "bg-white/[0.02]" : ""
+                  className={`flex items-start gap-4 px-5 py-4 hover:bg-[var(--mh-hover-overlay)] transition-colors cursor-pointer ${
+                    item.unread ? "bg-[var(--mh-surface-sunken)]" : ""
                   }`}
                   onClick={() => markRead(item.id)}
                 >
@@ -372,12 +372,12 @@ export default function NotificationsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <p
-                        className={`text-sm font-semibold ${item.unread ? "text-[#D4D4D4]" : "text-[#888888]"}`}
+                        className={`text-sm font-semibold ${item.unread ? "text-[var(--mh-text)]" : "text-[var(--mh-text-muted)]"}`}
                       >
                         {item.title}
                       </p>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="flex items-center gap-1 text-xs text-[#888888] whitespace-nowrap">
+                        <span className="flex items-center gap-1 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
                           <Clock className="h-3 w-3" />
                           {item.relativeTime}
                         </span>
@@ -386,11 +386,11 @@ export default function NotificationsPage() {
                         )}
                       </div>
                     </div>
-                    <p className="text-xs text-[#888888] mt-0.5 leading-relaxed">
+                    <p className="text-xs text-[var(--mh-text-muted)] mt-0.5 leading-relaxed">
                       {item.message}
                     </p>
                     <span
-                      className="inline-flex items-center mt-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#252525] text-[#888888] capitalize"
+                      className="inline-flex items-center mt-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] capitalize"
                     >
                       {item.category}
                     </span>

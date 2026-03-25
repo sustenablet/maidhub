@@ -75,7 +75,7 @@ const STATUS_COLORS: Record<
     text: "text-[#30B0C7]",
   },
   cancelled: {
-    bg: "bg-[#2A2A2A]",
+    bg: "bg-[var(--mh-surface-raised)]",
     border: "border-[var(--mh-border-strong)]",
     text: "text-[var(--mh-text-subtle)]",
   },
@@ -796,7 +796,7 @@ export default function SchedulePage() {
         label: "Cancel",
         status: "cancelled",
         color:
-          "bg-white hover:bg-white/[0.03] text-[var(--mh-text-muted)] border border-[var(--mh-border)]",
+          "bg-[var(--mh-surface-raised)] hover:bg-[var(--mh-hover-overlay)] text-[var(--mh-text-muted)] border border-[var(--mh-border)]",
       });
     }
 
@@ -843,7 +843,7 @@ export default function SchedulePage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => { setRecurringOpen(true); fetchRecurringRules(); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[var(--mh-hover-overlay)] hover:bg-white/[0.1] text-[var(--mh-text)] text-sm font-semibold rounded-[6px] transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[var(--mh-surface-raised)] hover:bg-[var(--mh-hover-overlay)] border border-[var(--mh-border)] text-[var(--mh-text)] text-sm font-semibold rounded-[6px] transition-colors"
           >
             <Repeat className="h-4 w-4" />
             Recurring
@@ -863,13 +863,13 @@ export default function SchedulePage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setWeekOffset((o) => o - 1)}
-            className="p-1.5 rounded-[6px] hover:bg-[#2A2A2A] text-[var(--mh-text-muted)] transition-colors"
+            className="p-1.5 rounded-[6px] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             onClick={() => setWeekOffset((o) => o + 1)}
-            className="p-1.5 rounded-[6px] hover:bg-[#2A2A2A] text-[var(--mh-text-muted)] transition-colors"
+            className="p-1.5 rounded-[6px] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] transition-colors"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -881,7 +881,7 @@ export default function SchedulePage() {
         </div>
         <button
           onClick={() => setWeekOffset(0)}
-          className="px-3 py-1.5 text-xs font-semibold text-[var(--mh-text)] bg-white/[0.05] hover:bg-white/[0.08] rounded-[6px] transition-colors"
+          className="px-3 py-1.5 text-xs font-semibold text-[var(--mh-text)] bg-[var(--mh-surface-raised)] hover:bg-[var(--mh-hover-overlay)] border border-[var(--mh-border)] rounded-[6px] transition-colors"
         >
           Today
         </button>
@@ -941,7 +941,7 @@ export default function SchedulePage() {
                   <div
                     className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--mh-sidebar)]/80 backdrop-blur-[1px]"
                   >
-                    <div className="w-12 h-12 rounded-[6px] bg-[#2A2A2A] flex items-center justify-center mb-3">
+                    <div className="w-12 h-12 rounded-[6px] bg-[var(--mh-surface-raised)] flex items-center justify-center mb-3">
                       <Calendar className="h-6 w-6 text-[var(--mh-text-muted)]" />
                     </div>
                     <p className="text-sm font-semibold text-[var(--mh-text)]">
@@ -993,7 +993,7 @@ export default function SchedulePage() {
                       {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                         <div
                           key={i}
-                          className="absolute left-0 right-0 border-t border-gray-50"
+                          className="absolute left-0 right-0 border-t border-[var(--mh-divider)]"
                           style={{ top: `${i * HOUR_HEIGHT}px` }}
                         />
                       ))}
@@ -1180,7 +1180,7 @@ export default function SchedulePage() {
               {selectedJob.status !== "invoiced" && selectedJob.status !== "cancelled" && (
                 <button
                   onClick={() => openEditForm(selectedJob)}
-                  className="px-4 py-2 text-sm font-semibold rounded-[6px] transition-colors bg-[var(--mh-hover-overlay)] text-[var(--mh-text)] hover:bg-white/[0.1]"
+                  className="px-4 py-2 text-sm font-semibold rounded-[6px] transition-colors bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[var(--mh-text)] hover:bg-[var(--mh-hover-overlay)]"
                 >
                   Edit Job
                 </button>
@@ -1342,7 +1342,7 @@ export default function SchedulePage() {
         <div className="px-6 py-5 space-y-4">
           <button
             onClick={() => { setRecurringFormOpen(true); resetRecurringForm(); }}
-            className="flex items-center gap-2 w-full px-4 py-3 bg-white/[0.04] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text)] text-sm font-semibold rounded-[6px] transition-colors border border-dashed border-[#18181B]/15"
+            className="flex items-center gap-2 w-full px-4 py-3 bg-transparent hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text)] text-sm font-semibold rounded-[6px] transition-colors border border-dashed border-[var(--mh-border)]"
           >
             <Plus className="h-4 w-4" />
             New Recurring Rule
@@ -1373,8 +1373,8 @@ export default function SchedulePage() {
                     key={rule.id}
                     className={`p-4 rounded-[6px] border transition-colors ${
                       rule.is_active
-                        ? "bg-white border-[var(--mh-border)]"
-                        : "bg-gray-50 border-[var(--mh-divider)] opacity-60"
+                        ? "bg-[var(--mh-surface)] border-[var(--mh-border)]"
+                        : "bg-[var(--mh-surface-sunken)] border-[var(--mh-divider)] opacity-60"
                     }`}
                   >
                     <div className="flex items-start justify-between mb-2">
@@ -1391,7 +1391,7 @@ export default function SchedulePage() {
                         className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-colors ${
                           rule.is_active
                             ? "bg-[#34C759]/10 text-green-600"
-                            : "bg-[#2A2A2A] text-[var(--mh-text-muted)]"
+                            : "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)]"
                         }`}
                       >
                         {rule.is_active ? "Active" : "Paused"}
@@ -1401,7 +1401,7 @@ export default function SchedulePage() {
                       <button
                         onClick={() => generateJobs(rule)}
                         disabled={!rule.is_active || recGenerating === rule.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] text-[var(--mh-text)] rounded-[6px] hover:bg-[#2E2E2E] disabled:opacity-40 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] text-[var(--mh-text)] rounded-[6px] hover:bg-[var(--mh-hover-overlay)] disabled:opacity-40 transition-colors"
                       >
                         {recGenerating === rule.id ? (
                           <Loader2 className="h-3 w-3 animate-spin" />

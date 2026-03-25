@@ -22,7 +22,7 @@ export function RevenueChart({ data }: { data: RevenueDataPoint[] }) {
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[180px] text-xs text-[#555555]">
+      <div className="flex items-center justify-center h-[180px] text-xs text-[var(--mh-text-subtle)]">
         No revenue data yet
       </div>
     );

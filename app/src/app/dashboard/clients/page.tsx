@@ -76,6 +76,20 @@ export default function ClientsPage() {
   const [zip, setZip] = useState("");
   const [notes, setNotes] = useState("");
   const [preferredService, setPreferredService] = useState("");
+  const [serviceTypes, setServiceTypes] = useState<string[]>([...SERVICE_TYPES]);
+
+  useEffect(() => {
+    async function loadServiceTypes() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from("users").select("settings").eq("id", user.id).single();
+      const biz = (((data?.settings || {}) as Record<string, unknown>).business || {}) as Record<string, unknown>;
+      if (Array.isArray(biz.service_types) && biz.service_types.length > 0) {
+        setServiceTypes(biz.service_types as string[]);
+      }
+    }
+    loadServiceTypes();
+  }, [supabase]);
 
   const fetchClients = useCallback(async () => {
     try {
@@ -233,7 +247,7 @@ export default function ClientsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-[#888888] animate-pulse">
+        <p className="text-sm text-[var(--mh-text-muted)] animate-pulse">
           Loading...
         </p>
       </div>
@@ -245,10 +259,10 @@ export default function ClientsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[21px] font-semibold text-[#D4D4D4] tracking-[-0.02em]">
+          <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
             Clients
           </h1>
-          <p className="text-[12.5px] text-[#888888] mt-0.5">
+          <p className="text-[12.5px] text-[var(--mh-text-muted)] mt-0.5">
             Manage your client relationships
           </p>
         </div>
@@ -262,17 +276,17 @@ export default function ClientsPage() {
       </div>
 
       {/* Table card */}
-      <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C]">
+      <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
         {/* Toolbar */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#252525]">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--mh-divider)]">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#444444]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--mh-text-faint)]" />
             <input
               type="text"
               placeholder="Search clients..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-3 py-1.5 text-[12.5px] bg-[#252525] border border-[#2C2C2C] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 w-52 transition-all placeholder:text-[#444444] text-[#D4D4D4]"
+              className="pl-9 pr-3 py-1.5 text-[12.5px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 w-52 transition-all placeholder:text-[var(--mh-text-faint)] text-[var(--mh-text)]"
             />
           </div>
           <div className="relative">
@@ -280,8 +294,8 @@ export default function ClientsPage() {
               onClick={() => setFilterOpen(!filterOpen)}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium rounded-[6px] transition-colors ${
                 statusFilter !== "all"
-                  ? "text-[#D4D4D4] bg-white/[0.07] border border-white/15"
-                  : "text-[#888888] bg-[#252525] border border-[#2C2C2C] hover:bg-[#2C2C2C]"
+                  ? "text-[var(--mh-text)] bg-[var(--mh-surface-raised)] border border-white/15"
+                  : "text-[var(--mh-text-muted)] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] hover:bg-[var(--mh-hover-overlay)]"
               }`}
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -293,13 +307,13 @@ export default function ClientsPage() {
             {filterOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setFilterOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 w-36 bg-[#1E1E1E] rounded-[6px] shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-[#2C2C2C] py-1 z-50">
+                <div className="absolute right-0 top-full mt-1 w-36 bg-[var(--mh-surface)] rounded-[6px] shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-[var(--mh-border)] py-1 z-50">
                   {(["all", "active", "archived"] as const).map((opt) => (
                     <button
                       key={opt}
                       onClick={() => { setStatusFilter(opt); setFilterOpen(false); }}
                       className={`w-full text-left px-3 py-2 text-[12px] font-medium transition-colors ${
-                        statusFilter === opt ? "text-[#D4D4D4] bg-white/[0.05]" : "text-[#888888] hover:bg-white/[0.02]"
+                        statusFilter === opt ? "text-[var(--mh-text)] bg-[var(--mh-surface-raised)]" : "text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)]"
                       }`}
                     >
                       {opt === "all" ? "All Clients" : opt.charAt(0).toUpperCase() + opt.slice(1)}
@@ -316,10 +330,10 @@ export default function ClientsPage() {
             <div className="h-12 w-12 rounded-[6px] bg-[#0071E3]/[0.12] flex items-center justify-center mb-3">
               <UserRound className="h-6 w-6 text-[#0071E3]" strokeWidth={1.5} />
             </div>
-            <h3 className="text-[14px] font-semibold text-[#D4D4D4] mb-1.5">
+            <h3 className="text-[14px] font-semibold text-[var(--mh-text)] mb-1.5">
               No clients yet
             </h3>
-            <p className="text-[12px] text-[#888888] mb-5 max-w-xs leading-relaxed">
+            <p className="text-[12px] text-[var(--mh-text-muted)] mb-5 max-w-xs leading-relaxed">
               Keep track of your clients, their contact info, and job history all in one place.
             </p>
             <button
@@ -332,10 +346,10 @@ export default function ClientsPage() {
           </div>
         ) : noResults ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <p className="text-[13px] font-semibold text-[#D4D4D4]">
+            <p className="text-[13px] font-semibold text-[var(--mh-text)]">
               No results for &ldquo;{search}&rdquo;
             </p>
-            <p className="text-[12px] text-[#888888] mt-1">
+            <p className="text-[12px] text-[var(--mh-text-muted)] mt-1">
               Try a different name, email, or phone number
             </p>
           </div>
@@ -343,28 +357,28 @@ export default function ClientsPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#252525]">
-                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#555555] uppercase tracking-[0.06em]">
+                <tr className="border-b border-[var(--mh-divider)]">
+                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[var(--mh-text-subtle)] uppercase tracking-[0.06em]">
                     Name
                   </th>
-                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#555555] uppercase tracking-[0.06em] hidden md:table-cell">
+                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[var(--mh-text-subtle)] uppercase tracking-[0.06em] hidden md:table-cell">
                     Email
                   </th>
-                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#555555] uppercase tracking-[0.06em] hidden md:table-cell">
+                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[var(--mh-text-subtle)] uppercase tracking-[0.06em] hidden md:table-cell">
                     Phone
                   </th>
-                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#555555] uppercase tracking-[0.06em] hidden lg:table-cell">
+                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[var(--mh-text-subtle)] uppercase tracking-[0.06em] hidden lg:table-cell">
                     Address
                   </th>
-                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#555555] uppercase tracking-[0.06em] hidden xl:table-cell">
+                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[var(--mh-text-subtle)] uppercase tracking-[0.06em] hidden xl:table-cell">
                     Jobs
                   </th>
-                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[#555555] uppercase tracking-[0.06em]">
+                  <th className="text-left px-5 py-3 text-[10.5px] font-semibold text-[var(--mh-text-subtle)] uppercase tracking-[0.06em]">
                     Status
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#252525]">
+              <tbody className="divide-y divide-[var(--mh-divider)]">
                 {filtered.map((client, index) => {
                   const initials = getInitials(client.first_name, client.last_name);
                   const color = getAvatarColor(index);
@@ -372,13 +386,13 @@ export default function ClientsPage() {
                   const statusBadge =
                     client.status === "active"
                       ? "bg-[#34C759]/10 text-[#34C759] ring-1 ring-inset ring-[#34C759]/20"
-                      : "bg-[#252525] text-[#888888] ring-1 ring-inset ring-[#2C2C2C]";
+                      : "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]";
 
                   return (
                     <tr
                       key={client.id}
                       onClick={() => router.push(`/dashboard/clients/${client.id}`)}
-                      className="hover:bg-white/[0.02] transition-colors cursor-pointer"
+                      className="hover:bg-[var(--mh-hover-overlay)] transition-colors cursor-pointer"
                     >
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
@@ -386,10 +400,10 @@ export default function ClientsPage() {
                             {initials}
                           </div>
                           <div>
-                            <p className="text-[13px] font-semibold text-[#D4D4D4]">
+                            <p className="text-[13px] font-semibold text-[var(--mh-text)]">
                               {client.first_name} {client.last_name}
                             </p>
-                            <p className="text-[11px] text-[#888888] md:hidden">
+                            <p className="text-[11px] text-[var(--mh-text-muted)] md:hidden">
                               {client.email}
                             </p>
                           </div>
@@ -397,25 +411,25 @@ export default function ClientsPage() {
                       </td>
                       <td className="px-5 py-3.5 hidden md:table-cell">
                         <div className="flex items-center gap-1.5">
-                          <Mail className="h-3 w-3 text-[#444444] shrink-0" />
-                          <span className="text-[12px] text-[#888888]">
+                          <Mail className="h-3 w-3 text-[var(--mh-text-faint)] shrink-0" />
+                          <span className="text-[12px] text-[var(--mh-text-muted)]">
                             {client.email || "\u2014"}
                           </span>
                         </div>
                       </td>
                       <td className="px-5 py-3.5 hidden md:table-cell">
                         <div className="flex items-center gap-1.5">
-                          <Phone className="h-3 w-3 text-[#444444] shrink-0" />
-                          <span className="text-[12px] text-[#888888]">
+                          <Phone className="h-3 w-3 text-[var(--mh-text-faint)] shrink-0" />
+                          <span className="text-[12px] text-[var(--mh-text-muted)]">
                             {client.phone || "\u2014"}
                           </span>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5 text-[12px] text-[#888888] hidden lg:table-cell">
+                      <td className="px-5 py-3.5 text-[12px] text-[var(--mh-text-muted)] hidden lg:table-cell">
                         {formatAddress(primaryAddress) || "\u2014"}
                       </td>
                       <td className="px-5 py-3.5 hidden xl:table-cell">
-                        <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-white/[0.06] text-[#D4D4D4] text-[10px] font-bold">
+                        <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-[var(--mh-hover-overlay)] text-[var(--mh-text)] text-[10px] font-bold">
                           {client.jobs_count}
                         </span>
                       </td>
@@ -493,7 +507,7 @@ export default function ClientsPage() {
                 onChange={(e) => setPreferredService(e.target.value)}
               >
                 <option value="">Select a service type...</option>
-                {SERVICE_TYPES.map((type) => (
+                {serviceTypes.map((type) => (
                   <option key={type} value={type}>
                     {type}
                   </option>

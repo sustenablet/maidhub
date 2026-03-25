@@ -105,7 +105,7 @@ export default async function FinancesPage() {
   const statusConfig: Record<string, { className: string; label: string }> = {
     paid: { className: "bg-[#34C759]/10 text-[#34C759] ring-1 ring-inset ring-[#34C759]/20", label: "Paid" },
     unpaid: { className: "bg-[#FF9F0A]/10 text-[#FF9F0A] ring-1 ring-inset ring-[#FF9F0A]/20", label: "Unpaid" },
-    void: { className: "bg-[#252525] text-[#888888] ring-1 ring-inset ring-[#2C2C2C]", label: "Void" },
+    void: { className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]", label: "Void" },
   };
 
   return (
@@ -113,24 +113,24 @@ export default async function FinancesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[21px] font-semibold text-[#D4D4D4] tracking-[-0.02em]">
+          <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
             Finances
           </h1>
-          <p className="text-[13px] text-[#888888] mt-0.5">
+          <p className="text-[13px] text-[var(--mh-text-muted)] mt-0.5">
             Overview of your revenue, invoices, and estimates
           </p>
         </div>
         <div className="hidden sm:flex items-center gap-2">
           <Link
             href="/dashboard/invoices"
-            className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold text-[#888888] bg-[#1E1E1E] border border-[#2C2C2C] rounded-[6px] hover:bg-[#252525] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-surface-raised)] transition-colors"
           >
             <Receipt className="h-3.5 w-3.5" strokeWidth={1.8} />
             Invoices
           </Link>
           <Link
             href="/dashboard/estimates"
-            className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold text-[#888888] bg-[#1E1E1E] border border-[#2C2C2C] rounded-[6px] hover:bg-[#252525] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-surface-raised)] transition-colors"
           >
             <FileText className="h-3.5 w-3.5" strokeWidth={1.8} />
             Estimates
@@ -170,14 +170,14 @@ export default async function FinancesPage() {
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Left: Recent transactions */}
-        <div className="lg:col-span-2 bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] shadow-[0_1px_3px_rgba(0,0,0,0.4)] overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#252525]">
-            <h2 className="text-[14px] font-bold text-[#D4D4D4]">
+        <div className="lg:col-span-2 bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] shadow-[0_1px_3px_rgba(0,0,0,0.4)] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--mh-divider)]">
+            <h2 className="text-[14px] font-bold text-[var(--mh-text)]">
               Recent Transactions
             </h2>
             <Link
               href="/dashboard/invoices"
-              className="flex items-center gap-1 text-[12px] font-semibold text-[#555555] hover:text-[#D4D4D4] transition-colors"
+              className="flex items-center gap-1 text-[12px] font-semibold text-[var(--mh-text-subtle)] hover:text-[var(--mh-text)] transition-colors"
             >
               View All
               <ArrowRight className="h-3 w-3" strokeWidth={2} />
@@ -186,13 +186,13 @@ export default async function FinancesPage() {
 
           {recentInvoices.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-              <div className="h-12 w-12 rounded-[6px] bg-white/[0.04] flex items-center justify-center mb-3">
-                <Receipt className="h-6 w-6 text-[#444444]" strokeWidth={1.5} />
+              <div className="h-12 w-12 rounded-[6px] bg-[var(--mh-surface-raised)] flex items-center justify-center mb-3">
+                <Receipt className="h-6 w-6 text-[var(--mh-text-faint)]" strokeWidth={1.5} />
               </div>
-              <p className="text-[13px] font-semibold text-[#888888]">
+              <p className="text-[13px] font-semibold text-[var(--mh-text-muted)]">
                 No transactions yet
               </p>
-              <p className="text-[12px] text-[#555555] mt-1 max-w-xs">
+              <p className="text-[12px] text-[var(--mh-text-subtle)] mt-1 max-w-xs">
                 Create your first invoice to start tracking revenue
               </p>
               <Link
@@ -204,7 +204,7 @@ export default async function FinancesPage() {
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-[#252525]">
+            <div className="divide-y divide-[var(--mh-divider)]">
               {recentInvoices.map((inv: {
                 id: string;
                 total: number | null;
@@ -220,9 +220,9 @@ export default async function FinancesPage() {
                 const config = statusConfig[inv.status] || statusConfig.unpaid;
 
                 return (
-                  <div key={inv.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-white/[0.02] transition-colors">
+                  <div key={inv.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-[var(--mh-hover-overlay)] transition-colors">
                     <div className={`h-8 w-8 rounded-[6px] flex items-center justify-center shrink-0 ${
-                      inv.status === "paid" ? "bg-[#34C759]/10" : inv.status === "unpaid" ? "bg-[#FF9F0A]/10" : "bg-[#252525]"
+                      inv.status === "paid" ? "bg-[#34C759]/10" : inv.status === "unpaid" ? "bg-[#FF9F0A]/10" : "bg-[var(--mh-surface-raised)]"
                     }`}>
                       {inv.status === "paid" ? (
                         <CheckCircle2 className="h-4 w-4 text-[#34C759]" strokeWidth={1.8} />
@@ -232,10 +232,10 @@ export default async function FinancesPage() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-[#D4D4D4] truncate">
+                      <p className="text-[13px] font-semibold text-[var(--mh-text)] truncate">
                         {clientName}
                       </p>
-                      <p className="text-[11px] text-[#555555]">
+                      <p className="text-[11px] text-[var(--mh-text-subtle)]">
                         {timeAgo(inv.created_at)}
                         {inv.due_date && inv.status === "unpaid" && (
                           <> &middot; Due {formatDate(inv.due_date)}</>
@@ -243,7 +243,7 @@ export default async function FinancesPage() {
                       </p>
                     </div>
 
-                    <span className="text-[14px] font-bold text-[#D4D4D4] tabular-nums shrink-0">
+                    <span className="text-[14px] font-bold text-[var(--mh-text)] tabular-nums shrink-0">
                       {inv.total != null ? formatCurrency(Number(inv.total)) : "-"}
                     </span>
 
@@ -262,8 +262,8 @@ export default async function FinancesPage() {
         {/* Right: Summary panel */}
         <div className="space-y-4">
           {/* Payment Status */}
-          <div className="bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] shadow-[0_1px_3px_rgba(0,0,0,0.4)] p-5">
-            <h3 className="text-[13px] font-bold text-[#D4D4D4] mb-4">
+          <div className="bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] shadow-[0_1px_3px_rgba(0,0,0,0.4)] p-5">
+            <h3 className="text-[13px] font-bold text-[var(--mh-text)] mb-4">
               Invoice Status
             </h3>
             <div className="space-y-3">
@@ -288,7 +288,7 @@ export default async function FinancesPage() {
             </div>
 
             {invoiceCount === 0 && (
-              <p className="text-[12px] text-[#444444] text-center py-4">
+              <p className="text-[12px] text-[var(--mh-text-faint)] text-center py-4">
                 No invoices yet
               </p>
             )}
@@ -319,24 +319,24 @@ export default async function FinancesPage() {
           )}
 
           {/* Open Estimates */}
-          <div className="bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] shadow-[0_1px_3px_rgba(0,0,0,0.4)] p-5">
+          <div className="bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] shadow-[0_1px_3px_rgba(0,0,0,0.4)] p-5">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[13px] font-bold text-[#D4D4D4]">
+              <h3 className="text-[13px] font-bold text-[var(--mh-text)]">
                 Open Estimates
               </h3>
               <Link
                 href="/dashboard/estimates"
-                className="text-[11px] font-semibold text-[#555555] hover:text-[#D4D4D4] transition-colors"
+                className="text-[11px] font-semibold text-[var(--mh-text-subtle)] hover:text-[var(--mh-text)] transition-colors"
               >
                 View All
               </Link>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-[24px] font-normal text-[#D4D4D4] tabular-nums">
+              <span className="text-[24px] font-normal text-[var(--mh-text)] tabular-nums">
                 {formatCurrency(totalEstimatesValue)}
               </span>
             </div>
-            <p className="text-[12px] text-[#555555] mt-1">
+            <p className="text-[12px] text-[var(--mh-text-subtle)] mt-1">
               {openEstimates.length} estimate{openEstimates.length !== 1 ? "s" : ""} pending response
             </p>
           </div>
@@ -345,32 +345,32 @@ export default async function FinancesPage() {
           <div className="space-y-2">
             <Link
               href="/dashboard/invoices"
-              className="flex items-center justify-between p-3.5 bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] hover:border-[#2C2C2C] hover:bg-[#252525] hover:shadow-[0_2px_6px_rgba(0,0,0,0.4)] transition-all group"
+              className="flex items-center justify-between p-3.5 bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] hover:border-[var(--mh-border)] hover:bg-[var(--mh-surface-raised)] hover:shadow-[0_2px_6px_rgba(0,0,0,0.4)] transition-all group"
             >
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-[6px] bg-white/[0.04] flex items-center justify-center">
-                  <Receipt className="h-4 w-4 text-[#888888]" strokeWidth={1.8} />
+                <div className="h-8 w-8 rounded-[6px] bg-[var(--mh-surface-raised)] flex items-center justify-center">
+                  <Receipt className="h-4 w-4 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
                 </div>
-                <span className="text-[13px] font-semibold text-[#888888]">
+                <span className="text-[13px] font-semibold text-[var(--mh-text-muted)]">
                   Create Invoice
                 </span>
               </div>
-              <ArrowRight className="h-3.5 w-3.5 text-[#444444] group-hover:text-[#888888] transition-colors" strokeWidth={1.8} />
+              <ArrowRight className="h-3.5 w-3.5 text-[var(--mh-text-faint)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={1.8} />
             </Link>
 
             <Link
               href="/dashboard/estimates"
-              className="flex items-center justify-between p-3.5 bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] hover:bg-[#252525] hover:shadow-[0_2px_6px_rgba(0,0,0,0.4)] transition-all group"
+              className="flex items-center justify-between p-3.5 bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] hover:bg-[var(--mh-surface-raised)] hover:shadow-[0_2px_6px_rgba(0,0,0,0.4)] transition-all group"
             >
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-[6px] bg-white/[0.04] flex items-center justify-center">
-                  <FileText className="h-4 w-4 text-[#888888]" strokeWidth={1.8} />
+                <div className="h-8 w-8 rounded-[6px] bg-[var(--mh-surface-raised)] flex items-center justify-center">
+                  <FileText className="h-4 w-4 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
                 </div>
-                <span className="text-[13px] font-semibold text-[#888888]">
+                <span className="text-[13px] font-semibold text-[var(--mh-text-muted)]">
                   New Estimate
                 </span>
               </div>
-              <ArrowRight className="h-3.5 w-3.5 text-[#444444] group-hover:text-[#888888] transition-colors" strokeWidth={1.8} />
+              <ArrowRight className="h-3.5 w-3.5 text-[var(--mh-text-faint)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={1.8} />
             </Link>
           </div>
         </div>
@@ -395,26 +395,26 @@ function StatCard({
   alert?: boolean;
 }) {
   return (
-    <div className="bg-[#1E1E1E] rounded-[6px] border border-[#2C2C2C] shadow-[0_1px_3px_rgba(0,0,0,0.4)] p-4">
+    <div className="bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] shadow-[0_1px_3px_rgba(0,0,0,0.4)] p-4">
       <div className="flex items-center justify-between mb-3">
         <div className={`h-8 w-8 rounded-[6px] flex items-center justify-center ${
-          alert ? "bg-red-500/100/10" : "bg-white/[0.04]"
+          alert ? "bg-red-500/10" : "bg-[var(--mh-surface-raised)]"
         }`}>
-          <Icon className={`h-4 w-4 ${alert ? "text-red-400" : "text-[#888888]"}`} strokeWidth={1.8} />
+          <Icon className={`h-4 w-4 ${alert ? "text-red-400" : "text-[var(--mh-text-muted)]"}`} strokeWidth={1.8} />
         </div>
         {alert && (
           <AlertCircle className="h-3.5 w-3.5 text-red-400" strokeWidth={1.8} />
         )}
       </div>
-      <p className="text-[20px] font-normal text-[#D4D4D4] tabular-nums">
+      <p className="text-[20px] font-normal text-[var(--mh-text)] tabular-nums">
         {value}
       </p>
       <div className="flex items-center justify-between mt-1">
-        <p className="text-[11px] text-[#555555] font-medium">
+        <p className="text-[11px] text-[var(--mh-text-subtle)] font-medium">
           {label}
         </p>
         {detail && (
-          <p className="text-[10px] text-[#444444]">
+          <p className="text-[10px] text-[var(--mh-text-faint)]">
             {detail}
           </p>
         )}
@@ -438,14 +438,14 @@ function StatusRow({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-[12px] text-[#888888] font-medium">
+        <span className="text-[12px] text-[var(--mh-text-muted)] font-medium">
           {label}
         </span>
-        <span className="text-[12px] text-[#555555] tabular-nums">
+        <span className="text-[12px] text-[var(--mh-text-subtle)] tabular-nums">
           {count}
         </span>
       </div>
-      <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+      <div className="h-1.5 bg-[var(--mh-hover-overlay)] rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full ${color} transition-all duration-500`}
           style={{ width: `${pct}%` }}

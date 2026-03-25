@@ -38,13 +38,13 @@ const JOB_STATUS_CONFIG: Record<string, { label: string; className: string }> = 
   in_progress: { label: "In Progress", className: "bg-[#FF9F0A]/10 text-[#FF9F0A] ring-1 ring-inset ring-[#FF9F0A]/20" },
   completed: { label: "Completed", className: "bg-[#34C759]/10 text-[#34C759] ring-1 ring-inset ring-[#34C759]/20" },
   invoiced: { label: "Invoiced", className: "bg-[#0071E3]/10 text-[#0071E3] ring-1 ring-inset ring-[#0071E3]/20" },
-  cancelled: { label: "Cancelled", className: "bg-[#252525] text-[#888888] ring-1 ring-inset ring-[#2C2C2C]" },
+  cancelled: { label: "Cancelled", className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]" },
 };
 
 const INVOICE_STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   unpaid: { label: "Unpaid", className: "bg-[#FF9F0A]/10 text-[#FF9F0A] ring-1 ring-inset ring-[#FF9F0A]/20" },
   paid: { label: "Paid", className: "bg-[#34C759]/10 text-[#34C759] ring-1 ring-inset ring-[#34C759]/20" },
-  void: { label: "Void", className: "bg-[#252525] text-[#888888] ring-1 ring-inset ring-[#2C2C2C]" },
+  void: { label: "Void", className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]" },
 };
 
 function formatDate(dateStr: string | null) {
@@ -341,7 +341,7 @@ export default function ClientDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-sm text-[#888888] animate-pulse">
+        <p className="text-sm text-[var(--mh-text-muted)] animate-pulse">
           Loading...
         </p>
       </div>
@@ -351,12 +351,12 @@ export default function ClientDetailPage() {
   if (!client) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-center">
-        <p className="text-sm font-semibold text-[#D4D4D4] mb-2">
+        <p className="text-sm font-semibold text-[var(--mh-text)] mb-2">
           Client not found
         </p>
         <button
           onClick={() => router.push("/dashboard/clients")}
-          className="text-sm text-[#888888] hover:text-[#D4D4D4] font-medium"
+          className="text-sm text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] font-medium"
         >
           Back to clients
         </button>
@@ -369,31 +369,31 @@ export default function ClientDetailPage() {
   const statusBadge =
     client.status === "active"
       ? "bg-[#34C759]/10 text-[#34C759] ring-1 ring-inset ring-[#34C759]/20"
-      : "bg-[#252525] text-[#888888] ring-1 ring-inset ring-[#2C2C2C]";
+      : "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]";
 
   return (
     <div className="space-y-6">
       {/* Back link */}
       <button
         onClick={() => router.push("/dashboard/clients")}
-        className="flex items-center gap-1.5 text-sm text-[#888888] hover:text-[#D4D4D4] transition-colors"
+        className="flex items-center gap-1.5 text-sm text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Clients
       </button>
 
       {/* Client header card */}
-      <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] p-6">
+      <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-6">
         <div className="flex flex-col sm:flex-row sm:items-start gap-5">
           {/* Avatar */}
-          <div className="h-16 w-16 rounded-full bg-white/[0.06] text-[#D4D4D4] flex items-center justify-center text-xl font-bold shrink-0">
+          <div className="h-16 w-16 rounded-full bg-[var(--mh-hover-overlay)] text-[var(--mh-text)] flex items-center justify-center text-xl font-bold shrink-0">
             {initials}
           </div>
 
           {/* Info */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
-              <h1 className="text-[21px] font-semibold text-[#D4D4D4] tracking-[-0.02em]">
+              <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
                 {client.first_name} {client.last_name}
               </h1>
               <span className={`inline-flex items-center self-start px-2.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${statusBadge}`}>
@@ -401,21 +401,21 @@ export default function ClientDetailPage() {
               </span>
             </div>
 
-            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-[#888888]">
+            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-[var(--mh-text-muted)]">
               {client.email && (
                 <div className="flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5 text-[#444444]" />
+                  <Mail className="h-3.5 w-3.5 text-[var(--mh-text-faint)]" />
                   {client.email}
                 </div>
               )}
               {client.phone && (
                 <div className="flex items-center gap-1.5">
-                  <Phone className="h-3.5 w-3.5 text-[#444444]" />
+                  <Phone className="h-3.5 w-3.5 text-[var(--mh-text-faint)]" />
                   {client.phone}
                 </div>
               )}
               <div className="flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 text-[#444444]" />
+                <Calendar className="h-3.5 w-3.5 text-[var(--mh-text-faint)]" />
                 Client since {formatDate(client.created_at)}
               </div>
             </div>
@@ -425,14 +425,14 @@ export default function ClientDetailPage() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={openEditPanel}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-[#888888] bg-[#1E1E1E] border border-[#2C2C2C] rounded-[6px] hover:bg-[#252525] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-surface-raised)] transition-colors"
             >
               <Edit2 className="h-3.5 w-3.5" />
               Edit
             </button>
             <button
               onClick={handleArchive}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-[#888888] bg-[#1E1E1E] border border-[#2C2C2C] rounded-[6px] hover:bg-[#252525] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-surface-raised)] transition-colors"
             >
               <Archive className="h-3.5 w-3.5" />
               {client.status === "active" ? "Archive" : "Reactivate"}
@@ -442,7 +442,7 @@ export default function ClientDetailPage() {
               className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-[6px] transition-colors ${
                 deleteConfirm
                   ? "bg-red-500/100 text-white hover:bg-red-600"
-                  : "text-red-400 bg-[#1E1E1E] border border-[#2C2C2C] hover:bg-red-500/10 hover:text-red-400"
+                  : "text-red-400 bg-[var(--mh-surface)] border border-[var(--mh-border)] hover:bg-red-500/10 hover:text-red-400"
               }`}
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -450,7 +450,7 @@ export default function ClientDetailPage() {
             </button>
             <button
               onClick={() => router.push(`/dashboard/invoices?clientId=${clientId}`)}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-[#888888] bg-[#1E1E1E] border border-[#2C2C2C] rounded-[6px] hover:bg-[#252525] transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-surface-raised)] transition-colors"
             >
               <Receipt className="h-3.5 w-3.5" />
               Create Invoice
@@ -471,42 +471,42 @@ export default function ClientDetailPage() {
         {/* LEFT column */}
         <div className="lg:col-span-1 space-y-6">
           {/* Service Address */}
-          <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] p-5">
+          <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
             <div className="flex items-center gap-2 mb-3">
-              <MapPin className="h-4 w-4 text-[#444444]" />
-              <h3 className="text-xs font-bold tracking-[0.08em] text-[#555555] uppercase">
+              <MapPin className="h-4 w-4 text-[var(--mh-text-faint)]" />
+              <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">
                 Service Address
               </h3>
             </div>
-            <p className="text-sm text-[#888888] leading-relaxed">
+            <p className="text-sm text-[var(--mh-text-muted)] leading-relaxed">
               {formatAddress(primaryAddress)}
             </p>
           </div>
 
           {/* Preferred Service */}
           {client.preferred_service && (
-            <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] p-5">
+            <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
               <div className="flex items-center gap-2 mb-3">
-                <Briefcase className="h-4 w-4 text-[#444444]" />
-                <h3 className="text-xs font-bold tracking-[0.08em] text-[#555555] uppercase">
+                <Briefcase className="h-4 w-4 text-[var(--mh-text-faint)]" />
+                <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">
                   Preferred Service
                 </h3>
               </div>
-              <p className="text-sm text-[#888888] leading-relaxed">
+              <p className="text-sm text-[var(--mh-text-muted)] leading-relaxed">
                 {client.preferred_service}
               </p>
             </div>
           )}
 
           {/* Notes */}
-          <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] p-5">
+          <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
             <div className="flex items-center gap-2 mb-3">
-              <StickyNote className="h-4 w-4 text-[#444444]" />
-              <h3 className="text-xs font-bold tracking-[0.08em] text-[#555555] uppercase">
+              <StickyNote className="h-4 w-4 text-[var(--mh-text-faint)]" />
+              <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">
                 Notes
               </h3>
             </div>
-            <p className="text-sm text-[#888888] leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-[var(--mh-text-muted)] leading-relaxed whitespace-pre-wrap">
               {client.notes || "No notes yet"}
             </p>
           </div>
@@ -517,24 +517,24 @@ export default function ClientDetailPage() {
           {/* Quick stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { label: "Total Jobs", value: totalJobs.toString(), color: "text-[#D4D4D4]" },
+              { label: "Total Jobs", value: totalJobs.toString(), color: "text-[var(--mh-text)]" },
               { label: "Completed", value: completedJobs.toString(), color: "text-[#34C759]" },
               {
                 label: "Total Invoiced",
                 value: `$${totalInvoiced.toLocaleString("en-US", { minimumFractionDigits: 0 })}`,
-                color: "text-[#D4D4D4]",
+                color: "text-[var(--mh-text)]",
               },
               {
                 label: "Outstanding",
                 value: `$${outstanding.toLocaleString("en-US", { minimumFractionDigits: 0 })}`,
-                color: outstanding > 0 ? "text-[#FF9F0A]" : "text-[#D4D4D4]",
+                color: outstanding > 0 ? "text-[#FF9F0A]" : "text-[var(--mh-text)]",
               },
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] p-4"
+                className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-4"
               >
-                <p className="text-[10px] font-bold tracking-[0.1em] text-[#555555] uppercase mb-1.5">
+                <p className="text-[10px] font-bold tracking-[0.1em] text-[var(--mh-text-subtle)] uppercase mb-1.5">
                   {stat.label}
                 </p>
                 <p className={`text-xl font-bold tabular-nums ${stat.color}`}>
@@ -545,24 +545,24 @@ export default function ClientDetailPage() {
           </div>
 
           {/* Job History */}
-          <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C]">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-[#252525]">
-              <Briefcase className="h-4 w-4 text-[#444444]" />
-              <h3 className="text-xs font-bold tracking-[0.08em] text-[#555555] uppercase">
+          <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-[var(--mh-divider)]">
+              <Briefcase className="h-4 w-4 text-[var(--mh-text-faint)]" />
+              <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">
                 Job History
               </h3>
-              <span className="ml-auto text-[10px] font-semibold text-[#555555]">
+              <span className="ml-auto text-[10px] font-semibold text-[var(--mh-text-subtle)]">
                 {jobs.length} job{jobs.length !== 1 ? "s" : ""}
               </span>
             </div>
 
             {jobs.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center px-6">
-                <Briefcase className="h-8 w-8 text-[#444444] mb-3" />
-                <p className="text-sm font-semibold text-[#888888] mb-1">
+                <Briefcase className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" />
+                <p className="text-sm font-semibold text-[var(--mh-text-muted)] mb-1">
                   No jobs yet
                 </p>
-                <p className="text-xs text-[#555555]">
+                <p className="text-xs text-[var(--mh-text-subtle)]">
                   Book a job to get started
                 </p>
               </div>
@@ -570,12 +570,12 @@ export default function ClientDetailPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-[#252525]/50 border-b border-[#252525]">
+                    <tr className="bg-[var(--mh-surface-raised)]/50 border-b border-[var(--mh-divider)]">
                       {["Date", "Service Type", "Status", "Price", "Duration", "Actions"].map(
                         (h) => (
                           <th
                             key={h}
-                            className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888] whitespace-nowrap"
+                            className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)] whitespace-nowrap"
                           >
                             {h}
                           </th>
@@ -583,26 +583,26 @@ export default function ClientDetailPage() {
                       )}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#252525]">
+                  <tbody className="divide-y divide-[var(--mh-divider)]">
                     {jobs.map((job) => {
                       const status = JOB_STATUS_CONFIG[job.status] || {
                         label: job.status,
-                        className: "bg-[#252525] text-[#888888] ring-1 ring-inset ring-[#2C2C2C]",
+                        className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]",
                       };
                       return (
                         <tr
                           key={job.id}
-                          className="hover:bg-white/[0.02] transition-colors"
+                          className="hover:bg-[var(--mh-hover-overlay)] transition-colors"
                         >
-                          <td className="px-5 py-4 text-xs text-[#888888] whitespace-nowrap">
+                          <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
                             {formatDate(job.scheduled_date)}
                             {job.start_time && (
-                              <span className="text-[#555555] ml-1.5">
+                              <span className="text-[var(--mh-text-subtle)] ml-1.5">
                                 {formatTime(job.start_time)}
                               </span>
                             )}
                           </td>
-                          <td className="px-5 py-4 text-xs font-medium text-[#888888]">
+                          <td className="px-5 py-4 text-xs font-medium text-[var(--mh-text-muted)]">
                             {job.service_type || "\u2014"}
                           </td>
                           <td className="px-5 py-4">
@@ -610,12 +610,12 @@ export default function ClientDetailPage() {
                               {status.label}
                             </span>
                           </td>
-                          <td className="px-5 py-4 text-sm font-bold text-[#D4D4D4] tabular-nums">
+                          <td className="px-5 py-4 text-sm font-bold text-[var(--mh-text)] tabular-nums">
                             {job.price != null
                               ? `$${Number(job.price).toLocaleString("en-US", { minimumFractionDigits: 0 })}`
                               : "\u2014"}
                           </td>
-                          <td className="px-5 py-4 text-xs text-[#888888] whitespace-nowrap">
+                          <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
                             {job.duration_minutes
                               ? `${Math.floor(job.duration_minutes / 60)}h ${job.duration_minutes % 60}m`
                               : "\u2014"}
@@ -625,7 +625,7 @@ export default function ClientDetailPage() {
                               <button
                                 onClick={() => handleCreateInvoiceFromJob(job)}
                                 disabled={creatingInvoiceJobId === job.id}
-                                className="flex items-center gap-1 text-xs font-semibold text-[#888888] hover:text-[#D4D4D4] transition-colors disabled:opacity-50"
+                                className="flex items-center gap-1 text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors disabled:opacity-50"
                               >
                                 {creatingInvoiceJobId === job.id ? (
                                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -650,24 +650,24 @@ export default function ClientDetailPage() {
           </div>
 
           {/* Invoice History */}
-          <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C]">
-            <div className="flex items-center gap-2 px-5 py-4 border-b border-[#252525]">
-              <Receipt className="h-4 w-4 text-[#444444]" />
-              <h3 className="text-xs font-bold tracking-[0.08em] text-[#555555] uppercase">
+          <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
+            <div className="flex items-center gap-2 px-5 py-4 border-b border-[var(--mh-divider)]">
+              <Receipt className="h-4 w-4 text-[var(--mh-text-faint)]" />
+              <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">
                 Invoice History
               </h3>
-              <span className="ml-auto text-[10px] font-semibold text-[#555555]">
+              <span className="ml-auto text-[10px] font-semibold text-[var(--mh-text-subtle)]">
                 {invoices.length} invoice{invoices.length !== 1 ? "s" : ""}
               </span>
             </div>
 
             {invoices.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center px-6">
-                <Receipt className="h-8 w-8 text-[#444444] mb-3" />
-                <p className="text-sm font-semibold text-[#888888] mb-1">
+                <Receipt className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" />
+                <p className="text-sm font-semibold text-[var(--mh-text-muted)] mb-1">
                   No invoices yet
                 </p>
-                <p className="text-xs text-[#555555]">
+                <p className="text-xs text-[var(--mh-text-subtle)]">
                   Invoices will appear here after jobs are completed
                 </p>
               </div>
@@ -675,12 +675,12 @@ export default function ClientDetailPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-[#252525]/50 border-b border-[#252525]">
+                    <tr className="bg-[var(--mh-surface-raised)]/50 border-b border-[var(--mh-divider)]">
                       {["Invoice #", "Date", "Amount", "Status", "Due Date"].map(
                         (h) => (
                           <th
                             key={h}
-                            className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888] whitespace-nowrap"
+                            className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)] whitespace-nowrap"
                           >
                             {h}
                           </th>
@@ -688,26 +688,26 @@ export default function ClientDetailPage() {
                       )}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#252525]">
+                  <tbody className="divide-y divide-[var(--mh-divider)]">
                     {invoices.map((invoice) => {
                       const status = INVOICE_STATUS_CONFIG[invoice.status] || {
                         label: invoice.status,
-                        className: "bg-[#252525] text-[#888888] ring-1 ring-inset ring-[#2C2C2C]",
+                        className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]",
                       };
                       // Generate a readable invoice number from the id
                       const invoiceNum = `INV-${invoice.id.slice(0, 6).toUpperCase()}`;
                       return (
                         <tr
                           key={invoice.id}
-                          className="hover:bg-white/[0.02] transition-colors"
+                          className="hover:bg-[var(--mh-hover-overlay)] transition-colors"
                         >
-                          <td className="px-5 py-4 text-xs font-mono text-[#888888]">
+                          <td className="px-5 py-4 text-xs font-mono text-[var(--mh-text-muted)]">
                             {invoiceNum}
                           </td>
-                          <td className="px-5 py-4 text-xs text-[#888888] whitespace-nowrap">
+                          <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
                             {formatDate(invoice.created_at)}
                           </td>
-                          <td className="px-5 py-4 text-sm font-bold text-[#D4D4D4] tabular-nums">
+                          <td className="px-5 py-4 text-sm font-bold text-[var(--mh-text)] tabular-nums">
                             {invoice.total != null
                               ? `$${Number(invoice.total).toLocaleString("en-US", { minimumFractionDigits: 0 })}`
                               : "\u2014"}
@@ -717,7 +717,7 @@ export default function ClientDetailPage() {
                               {status.label}
                             </span>
                           </td>
-                          <td className="px-5 py-4 text-xs text-[#888888] whitespace-nowrap">
+                          <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
                             {formatDate(invoice.due_date)}
                           </td>
                         </tr>

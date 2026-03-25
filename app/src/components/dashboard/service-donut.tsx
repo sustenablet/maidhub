@@ -41,7 +41,7 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
 
   if (services.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[180px] text-xs text-[#555555]">
+      <div className="flex items-center justify-center h-[180px] text-xs text-[var(--mh-text-subtle)]">
         No service data yet
       </div>
     );
@@ -151,7 +151,7 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
               style={{ backgroundColor: s.color, opacity: hovered === i ? 1 : 0.8 }}
             />
             <span
-              className="text-[11px] text-[#555555] leading-tight"
+              className="text-[11px] text-[var(--mh-text-subtle)] leading-tight"
               style={{
                 color: hovered === i ? "#D4D4D4" : undefined,
               }}

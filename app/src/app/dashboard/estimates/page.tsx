@@ -431,11 +431,11 @@ export default function EstimatesPage() {
 
   const statusBadge = (status: Estimate["status"]) => {
     const styles: Record<string, string> = {
-      draft: "bg-[#2A2A2A] text-[#888888] ring-1 ring-inset ring-[#2C2C2C]",
+      draft: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[var(--mh-border)]",
       sent: "bg-[#0071E3]/10 text-[#0071E3] ring-1 ring-inset ring-[#0071E3]/20",
       accepted: "bg-[#34C759]/10 text-[#34C759] ring-1 ring-inset ring-[#34C759]/20",
       declined: "bg-red-500/100/10 text-red-400 ring-1 ring-inset ring-red-500/20",
-      expired: "bg-[#252525] text-[#888888]",
+      expired: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)]",
     };
     return styles[status] || "";
   };
@@ -453,10 +453,10 @@ export default function EstimatesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[21px] font-semibold text-[#D4D4D4] tracking-[-0.02em]">
+          <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
             Estimates
           </h1>
-          <p className="text-sm text-[#888888] mt-0.5">
+          <p className="text-sm text-[var(--mh-text-muted)] mt-0.5">
             Create quotes and convert to jobs
           </p>
         </div>
@@ -470,17 +470,17 @@ export default function EstimatesPage() {
       </div>
 
       {/* Estimate Table */}
-      <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C]">
+      <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
         {/* Toolbar */}
-        <div className="flex items-center justify-between p-5 border-b border-[#252525]">
+        <div className="flex items-center justify-between p-5 border-b border-[var(--mh-divider)]">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#444444]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--mh-text-faint)]" />
             <input
               type="text"
               placeholder="Search estimates..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-3 py-2 text-xs bg-[#252525] border border-[#2C2C2C] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 w-52 transition-all text-[#D4D4D4] placeholder:text-[#444444]"
+              className="pl-9 pr-3 py-2 text-xs bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 w-52 transition-all text-[var(--mh-text)] placeholder:text-[var(--mh-text-faint)]"
             />
           </div>
           <div className="relative">
@@ -488,8 +488,8 @@ export default function EstimatesPage() {
               onClick={() => setFilterOpen(!filterOpen)}
               className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-[6px] transition-colors ${
                 statusFilter !== "all"
-                  ? "text-[#D4D4D4] bg-white/[0.08] border border-white/20"
-                  : "text-[#888888] bg-[#252525] border border-[#2C2C2C] hover:bg-[#2A2A2A]"
+                  ? "text-[var(--mh-text)] bg-[var(--mh-accent-tint)] border border-[#0071E3]/30"
+                  : "text-[var(--mh-text-muted)] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] hover:bg-[var(--mh-hover-overlay)]"
               }`}
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -501,13 +501,13 @@ export default function EstimatesPage() {
             {filterOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setFilterOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 w-36 bg-[#1E1E1E] rounded-[6px] shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-[#2C2C2C] py-1 z-50">
+                <div className="absolute right-0 top-full mt-1 w-36 bg-[var(--mh-surface)] rounded-[6px] shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-[var(--mh-border)] py-1 z-50">
                   {(["all", "draft", "sent", "accepted", "declined"] as const).map((opt) => (
                     <button
                       key={opt}
                       onClick={() => { setStatusFilter(opt); setFilterOpen(false); }}
                       className={`w-full text-left px-3 py-2 text-xs font-medium capitalize transition-colors ${
-                        statusFilter === opt ? "text-[#D4D4D4] bg-white/[0.05]" : "text-[#888888] hover:bg-white/[0.02]"
+                        statusFilter === opt ? "text-[var(--mh-text)] bg-[var(--mh-surface-raised)]" : "text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)]"
                       }`}
                     >
                       {opt === "all" ? "All Estimates" : opt}
@@ -524,10 +524,10 @@ export default function EstimatesPage() {
             <div className="h-16 w-16 rounded-[6px] bg-[#0071E3]/[0.12] flex items-center justify-center mb-4">
               <FileText className="h-8 w-8 text-[#0071E3]" />
             </div>
-            <h3 className="text-base font-semibold text-[#D4D4D4] mb-2">
+            <h3 className="text-base font-semibold text-[var(--mh-text)] mb-2">
               No estimates yet
             </h3>
-            <p className="text-sm text-[#888888] mb-6 max-w-xs leading-relaxed">
+            <p className="text-sm text-[var(--mh-text-muted)] mb-6 max-w-xs leading-relaxed">
               Create estimates for potential clients and convert accepted ones
               into jobs.
             </p>
@@ -541,10 +541,10 @@ export default function EstimatesPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-sm font-semibold text-[#D4D4D4]">
+            <p className="text-sm font-semibold text-[var(--mh-text)]">
               No results for &ldquo;{search}&rdquo;
             </p>
-            <p className="text-xs text-[#888888] mt-1">
+            <p className="text-xs text-[var(--mh-text-muted)] mt-1">
               Try a different search term
             </p>
           </div>
@@ -552,55 +552,55 @@ export default function EstimatesPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-[#252525]/50 border-b border-[#252525]">
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888]">
+                <tr className="bg-[var(--mh-surface-raised)]/50 border-b border-[var(--mh-divider)]">
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)]">
                     Estimate #
                   </th>
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888]">
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)]">
                     Client
                   </th>
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888] hidden md:table-cell">
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)] hidden md:table-cell">
                     Service
                   </th>
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888]">
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)]">
                     Amount
                   </th>
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888] hidden lg:table-cell">
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)] hidden lg:table-cell">
                     Date
                   </th>
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888]">
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)]">
                     Status
                   </th>
                   <th className="px-5 py-3 w-40" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#252525]">
+              <tbody className="divide-y divide-[var(--mh-divider)]">
                 {filtered.map((est) => (
                   <tr
                     key={est.id}
-                    className="hover:bg-white/[0.02] transition-colors"
+                    className="hover:bg-[var(--mh-hover-overlay)] transition-colors"
                   >
                     <td className="px-5 py-4">
-                      <span className="text-sm font-medium text-[#D4D4D4] font-mono">
+                      <span className="text-sm font-medium text-[var(--mh-text)] font-mono">
                         {estimateNumber(est.id)}
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <span className="text-sm text-[#888888]">
+                      <span className="text-sm text-[var(--mh-text-muted)]">
                         {est.clients
                           ? `${est.clients.first_name} ${est.clients.last_name}`
                           : "-"}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-xs text-[#888888] hidden md:table-cell">
+                    <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] hidden md:table-cell">
                       {est.line_items?.[0]?.description || "-"}
                     </td>
                     <td className="px-5 py-4">
-                      <span className="text-sm font-bold text-[#D4D4D4]">
+                      <span className="text-sm font-bold text-[var(--mh-text)]">
                         {formatCurrency(est.total || 0)}
                       </span>
                     </td>
-                    <td className="px-5 py-4 text-xs text-[#888888] whitespace-nowrap hidden lg:table-cell">
+                    <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap hidden lg:table-cell">
                       {formatDate(est.created_at?.split("T")[0] || null)}
                     </td>
                     <td className="px-5 py-4">
@@ -613,7 +613,7 @@ export default function EstimatesPage() {
                         {(est.status === "draft" || est.status === "sent") && (
                           <button
                             onClick={() => openEdit(est)}
-                            className="text-xs font-semibold text-[#888888] hover:text-[#D4D4D4] transition-colors"
+                            className="text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
                           >
                             Edit
                           </button>
@@ -636,7 +636,7 @@ export default function EstimatesPage() {
                             </button>
                             <button
                               onClick={() => updateStatus(est, "declined")}
-                              className="text-xs font-semibold text-[#888888] hover:text-[#D4D4D4] transition-colors"
+                              className="text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
                             >
                               Decline
                             </button>
@@ -646,14 +646,14 @@ export default function EstimatesPage() {
                           <>
                             <button
                               onClick={() => openConvert(est)}
-                              className="flex items-center gap-1 text-xs font-semibold text-[#888888] hover:text-[#D4D4D4] transition-colors"
+                              className="flex items-center gap-1 text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
                             >
                               Convert to Job
                               <ArrowRight className="h-3 w-3" />
                             </button>
                             <button
                               onClick={() => openConvertToInvoice(est)}
-                              className="flex items-center gap-1 text-xs font-semibold text-[#888888] hover:text-[#D4D4D4] transition-colors"
+                              className="flex items-center gap-1 text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
                             >
                               Invoice
                               <Receipt className="h-3 w-3" />
@@ -665,7 +665,7 @@ export default function EstimatesPage() {
                           className={`text-xs font-semibold transition-colors ${
                             deleteConfirmId === est.id
                               ? "text-red-400"
-                              : "text-[#444444] hover:text-red-400"
+                              : "text-[var(--mh-text-faint)] hover:text-red-400"
                           }`}
                         >
                           {deleteConfirmId === est.id ? "Confirm?" : "Delete"}
@@ -727,7 +727,7 @@ export default function EstimatesPage() {
                       onChange={(e) =>
                         updateLineItem(idx, "description", e.target.value)
                       }
-                      className="w-full px-3 py-2.5 text-sm bg-[#252525] border border-[#2C2C2C] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[#444444] text-[#D4D4D4]"
+                      className="w-full px-3 py-2.5 text-sm bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[var(--mh-text-faint)] text-[var(--mh-text)]"
                     />
                   </div>
                   <div className="w-16">
@@ -743,7 +743,7 @@ export default function EstimatesPage() {
                           Math.max(1, parseInt(e.target.value) || 1)
                         )
                       }
-                      className="w-full px-2 py-2.5 text-sm bg-[#252525] border border-[#2C2C2C] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all text-center text-[#D4D4D4]"
+                      className="w-full px-2 py-2.5 text-sm bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all text-center text-[var(--mh-text)]"
                     />
                   </div>
                   <div className="w-24">
@@ -760,18 +760,18 @@ export default function EstimatesPage() {
                           parseFloat(e.target.value) || 0
                         )
                       }
-                      className="w-full px-2 py-2.5 text-sm bg-[#252525] border border-[#2C2C2C] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all text-right text-[#D4D4D4]"
+                      className="w-full px-2 py-2.5 text-sm bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all text-right text-[var(--mh-text)]"
                     />
                   </div>
                   <div className="w-20 flex items-center justify-end py-2.5">
-                    <span className="text-sm font-semibold text-[#888888]">
+                    <span className="text-sm font-semibold text-[var(--mh-text-muted)]">
                       {formatCurrency(li.quantity * li.unit_price)}
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={() => removeLineItem(idx)}
-                    className="p-2.5 text-[#444444] hover:text-red-400 transition-colors"
+                    className="p-2.5 text-[var(--mh-text-faint)] hover:text-red-400 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -781,7 +781,7 @@ export default function EstimatesPage() {
             <button
               type="button"
               onClick={addLineItem}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[#888888] hover:text-[#D4D4D4] transition-colors mt-1"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors mt-1"
             >
               <Plus className="h-3.5 w-3.5" />
               Add Line Item
@@ -800,12 +800,12 @@ export default function EstimatesPage() {
           </FormSection>
 
           {/* Total */}
-          <div className="border-t border-[#252525] pt-4">
+          <div className="border-t border-[var(--mh-divider)] pt-4">
             <div className="flex justify-between text-lg">
-              <span className="font-semibold text-[#D4D4D4]">
+              <span className="font-semibold text-[var(--mh-text)]">
                 Total
               </span>
-              <span className="font-bold text-[#D4D4D4]">
+              <span className="font-bold text-[var(--mh-text)]">
                 {formatCurrency(subtotal)}
               </span>
             </div>
@@ -958,27 +958,27 @@ export default function EstimatesPage() {
               {convertInvoiceEstimate?.line_items?.map((li, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between py-2 px-3 bg-[#252525] rounded-[6px]"
+                  className="flex items-center justify-between py-2 px-3 bg-[var(--mh-surface-raised)] rounded-[6px]"
                 >
                   <div className="flex-1">
-                    <span className="text-sm text-[#888888]">
+                    <span className="text-sm text-[var(--mh-text-muted)]">
                       {li.description || "Untitled item"}
                     </span>
-                    <span className="text-xs text-[#555555] ml-2">
+                    <span className="text-xs text-[var(--mh-text-subtle)] ml-2">
                       x{li.quantity}
                     </span>
                   </div>
-                  <span className="text-sm font-semibold text-[#888888]">
+                  <span className="text-sm font-semibold text-[var(--mh-text-muted)]">
                     {formatCurrency(li.quantity * li.unit_price)}
                   </span>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between pt-3 border-t border-[#252525]">
-              <span className="text-sm font-semibold text-[#D4D4D4]">
+            <div className="flex justify-between pt-3 border-t border-[var(--mh-divider)]">
+              <span className="text-sm font-semibold text-[var(--mh-text)]">
                 Subtotal
               </span>
-              <span className="text-sm font-bold text-[#D4D4D4]">
+              <span className="text-sm font-bold text-[var(--mh-text)]">
                 {formatCurrency(convertInvoiceEstimate?.total || 0)}
               </span>
             </div>
@@ -997,10 +997,10 @@ export default function EstimatesPage() {
               />
             </FormField>
             <div className="flex justify-between pt-2">
-              <span className="text-lg font-semibold text-[#D4D4D4]">
+              <span className="text-lg font-semibold text-[var(--mh-text)]">
                 Total
               </span>
-              <span className="text-lg font-bold text-[#D4D4D4]">
+              <span className="text-lg font-bold text-[var(--mh-text)]">
                 {formatCurrency(
                   ((convertInvoiceEstimate?.total || 0) *
                     (1 + invoiceTaxPercent / 100))
@@ -1031,51 +1031,51 @@ export default function EstimatesPage() {
 
       {/* Send Estimate Modal */}
       {sendModalEstimate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={() => setSendModalEstimate(null)}>
-          <div className="bg-[#1E1E1E] border border-[#2C2C2C] rounded-[8px] shadow-[0_8px_40px_rgba(0,0,0,0.6)] w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-            <div className="px-6 py-5 border-b border-[#2C2C2C] flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--mh-overlay-scrim)] px-4" onClick={() => setSendModalEstimate(null)}>
+          <div className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[8px] shadow-[0_8px_40px_rgba(0,0,0,0.6)] w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-[var(--mh-border)] flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="h-8 w-8 rounded-full bg-[#0071E3]/10 flex items-center justify-center">
                   <Send className="h-4 w-4 text-[#0071E3]" strokeWidth={1.8} />
                 </div>
                 <div>
-                  <h2 className="text-[14px] font-bold text-[#D4D4D4]">Send Estimate</h2>
-                  <p className="text-[12px] text-[#555555]">{estimateNumber(sendModalEstimate.id)}</p>
+                  <h2 className="text-[14px] font-bold text-[var(--mh-text)]">Send Estimate</h2>
+                  <p className="text-[12px] text-[var(--mh-text-subtle)]">{estimateNumber(sendModalEstimate.id)}</p>
                 </div>
               </div>
-              <button onClick={() => setSendModalEstimate(null)} className="text-[#555555] hover:text-[#D4D4D4] transition-colors">
+              <button onClick={() => setSendModalEstimate(null)} className="text-[var(--mh-text-subtle)] hover:text-[var(--mh-text)] transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
             <div className="px-6 py-5 space-y-4">
-              <div className="bg-[#252525] rounded-[6px] px-4 py-3 space-y-1.5">
-                <p className="text-[11px] font-semibold text-[#555555] uppercase tracking-wider">To</p>
-                <p className="text-[13px] font-semibold text-[#D4D4D4]">
+              <div className="bg-[var(--mh-surface-raised)] rounded-[6px] px-4 py-3 space-y-1.5">
+                <p className="text-[11px] font-semibold text-[var(--mh-text-subtle)] uppercase tracking-wider">To</p>
+                <p className="text-[13px] font-semibold text-[var(--mh-text)]">
                   {sendModalEstimate.clients ? `${sendModalEstimate.clients.first_name} ${sendModalEstimate.clients.last_name}` : "—"}
                 </p>
                 {sendModalEstimate.clients?.email ? (
-                  <p className="text-[12px] text-[#888888]">{sendModalEstimate.clients.email}</p>
+                  <p className="text-[12px] text-[var(--mh-text-muted)]">{sendModalEstimate.clients.email}</p>
                 ) : (
                   <p className="text-[12px] text-[#FF9F0A]">No email on file — add one to the client profile.</p>
                 )}
               </div>
-              <div className="bg-[#252525] rounded-[6px] px-4 py-3 space-y-2">
+              <div className="bg-[var(--mh-surface-raised)] rounded-[6px] px-4 py-3 space-y-2">
                 {(sendModalEstimate.line_items || []).map((li, i) => (
                   <div key={i} className="flex items-center justify-between">
-                    <span className="text-[13px] text-[#888888]">{li.description} <span className="text-[#555555]">×{li.quantity}</span></span>
-                    <span className="text-[13px] font-semibold text-[#D4D4D4]">{formatCurrency(li.quantity * li.unit_price)}</span>
+                    <span className="text-[13px] text-[var(--mh-text-muted)]">{li.description} <span className="text-[var(--mh-text-subtle)]">×{li.quantity}</span></span>
+                    <span className="text-[13px] font-semibold text-[var(--mh-text)]">{formatCurrency(li.quantity * li.unit_price)}</span>
                   </div>
                 ))}
-                <div className="flex items-center justify-between pt-2 border-t border-[#2C2C2C]">
-                  <span className="text-[13px] font-bold text-[#D4D4D4]">Total</span>
-                  <span className="text-[13px] font-bold text-[#D4D4D4]">{formatCurrency(sendModalEstimate.total || 0)}</span>
+                <div className="flex items-center justify-between pt-2 border-t border-[var(--mh-border)]">
+                  <span className="text-[13px] font-bold text-[var(--mh-text)]">Total</span>
+                  <span className="text-[13px] font-bold text-[var(--mh-text)]">{formatCurrency(sendModalEstimate.total || 0)}</span>
                 </div>
               </div>
-              <p className="text-[12px] text-[#555555] leading-relaxed">
+              <p className="text-[12px] text-[var(--mh-text-subtle)] leading-relaxed">
                 This will open your email client with a pre-filled message. The estimate has been marked as <span className="text-[#0071E3]">Sent</span>.
               </p>
             </div>
-            <div className="px-6 py-4 border-t border-[#2C2C2C] flex items-center gap-3">
+            <div className="px-6 py-4 border-t border-[var(--mh-border)] flex items-center gap-3">
               <a
                 href={buildMailto(sendModalEstimate)}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0071E3] hover:bg-[#0077ED] text-white text-[13px] font-semibold rounded-[6px] transition-colors"
@@ -1089,7 +1089,7 @@ export default function EstimatesPage() {
                   setSendCopied(true);
                   setTimeout(() => setSendCopied(false), 2000);
                 }}
-                className="flex items-center gap-1.5 px-4 py-2.5 border border-[#2C2C2C] text-[#888888] hover:text-[#D4D4D4] hover:border-[#3A3A3A] text-[13px] font-semibold rounded-[6px] transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2.5 border border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] hover:border-[var(--mh-border-strong)] text-[13px] font-semibold rounded-[6px] transition-colors"
               >
                 {sendCopied ? <Check className="h-3.5 w-3.5 text-[#34C759]" /> : <Copy className="h-3.5 w-3.5" />}
                 {sendCopied ? "Copied!" : "Copy Email"}

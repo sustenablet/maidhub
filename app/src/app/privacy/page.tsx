@@ -98,11 +98,11 @@ export default function PrivacyPage() {
             <div className="h-7 w-7 rounded-[5px] bg-[#0071E3] flex items-center justify-center">
               <span className="text-white font-bold text-[13px] leading-none">M</span>
             </div>
-            <span className="text-[#D4D4D4] font-bold text-[15px] tracking-[-0.02em]">MaidHub</span>
+            <span className="text-[var(--mh-text)] font-bold text-[15px] tracking-[-0.02em]">MaidHub</span>
           </Link>
           <Link
             href="/login"
-            className="text-[13px] font-medium text-[#555555] hover:text-[#D4D4D4] transition-colors"
+            className="text-[13px] font-medium text-[var(--mh-text-subtle)] hover:text-[var(--mh-text)] transition-colors"
           >
             Sign in →
           </Link>
@@ -113,21 +113,21 @@ export default function PrivacyPage() {
         {/* Hero */}
         <div className="mb-12">
           <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#0071E3] mb-4">Legal</p>
-          <h1 className="text-[40px] font-bold text-[#D4D4D4] tracking-[-0.04em] leading-none mb-3">
+          <h1 className="text-[40px] font-bold text-[var(--mh-text)] tracking-[-0.04em] leading-none mb-3">
             Privacy Policy
           </h1>
-          <p className="text-[14px] text-[#555555]">Last updated: March 2026</p>
+          <p className="text-[14px] text-[var(--mh-text-subtle)]">Last updated: March 2026</p>
         </div>
 
         {/* Sections */}
         <div className="space-y-1">
           {sections.map((s) => (
-            <div key={s.num} className="group border border-[#1E1E1E] rounded-[6px] bg-[#141414] px-7 py-6 hover:border-[#2C2C2C] transition-colors">
+            <div key={s.num} className="group border border-[#1E1E1E] rounded-[6px] bg-[var(--mh-sidebar)] px-7 py-6 hover:border-[var(--mh-border)] transition-colors">
               <div className="flex items-baseline gap-4 mb-4">
-                <span className="text-[11px] font-bold text-[#333333] tabular-nums shrink-0">{s.num}</span>
-                <h2 className="text-[15px] font-bold text-[#D4D4D4] tracking-[-0.02em]">{s.title}</h2>
+                <span className="text-[11px] font-bold text-[var(--mh-icon-dim)] tabular-nums shrink-0">{s.num}</span>
+                <h2 className="text-[15px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">{s.title}</h2>
               </div>
-              <div className="pl-8 space-y-3 text-[13px] text-[#888888] leading-relaxed">
+              <div className="pl-8 space-y-3 text-[13px] text-[var(--mh-text-muted)] leading-relaxed">
                 {s.body?.map((p, i) => <p key={i}>{p}</p>)}
                 {s.bullets && (
                   <ul className="space-y-2">
@@ -145,16 +145,16 @@ export default function PrivacyPage() {
           ))}
 
           {/* Contact */}
-          <div className="border border-[#1E1E1E] rounded-[6px] bg-[#141414] px-7 py-6 hover:border-[#2C2C2C] transition-colors">
+          <div className="border border-[#1E1E1E] rounded-[6px] bg-[var(--mh-sidebar)] px-7 py-6 hover:border-[var(--mh-border)] transition-colors">
             <div className="flex items-baseline gap-4 mb-4">
-              <span className="text-[11px] font-bold text-[#333333] tabular-nums shrink-0">10</span>
-              <h2 className="text-[15px] font-bold text-[#D4D4D4] tracking-[-0.02em]">Contact</h2>
+              <span className="text-[11px] font-bold text-[var(--mh-icon-dim)] tabular-nums shrink-0">10</span>
+              <h2 className="text-[15px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">Contact</h2>
             </div>
-            <div className="pl-8 space-y-3 text-[13px] text-[#888888] leading-relaxed">
+            <div className="pl-8 space-y-3 text-[13px] text-[var(--mh-text-muted)] leading-relaxed">
               <p>If you have questions about this Privacy Policy or your data, contact us at:</p>
               <div className="inline-flex items-center gap-3 mt-2 px-4 py-3 bg-[#0071E3]/10 border border-[#0071E3]/20 rounded-[6px]">
-                <span className="font-bold text-[#D4D4D4]">MaidHub Support</span>
-                <span className="text-[#444444]">·</span>
+                <span className="font-bold text-[var(--mh-text)]">MaidHub Support</span>
+                <span className="text-[var(--mh-text-faint)]">·</span>
                 <a href="mailto:support@maidhub.io" className="text-[#0071E3] hover:underline">support@maidhub.io</a>
               </div>
             </div>
@@ -162,11 +162,11 @@ export default function PrivacyPage() {
         </div>
 
         {/* Footer */}
-        <div className="mt-10 pt-6 border-t border-[#1E1E1E] flex items-center justify-between text-[12px] text-[#444444]">
+        <div className="mt-10 pt-6 border-t border-[#1E1E1E] flex items-center justify-between text-[12px] text-[var(--mh-text-faint)]">
           <span>© {new Date().getFullYear()} MaidHub</span>
           <div className="flex items-center gap-4">
-            <Link href="/terms" className="hover:text-[#888888] transition-colors">Terms of Service</Link>
-            <Link href="/login" className="hover:text-[#888888] transition-colors">Sign in</Link>
+            <Link href="/terms" className="hover:text-[var(--mh-text-muted)] transition-colors">Terms of Service</Link>
+            <Link href="/login" className="hover:text-[var(--mh-text-muted)] transition-colors">Sign in</Link>
           </div>
         </div>
       </main>

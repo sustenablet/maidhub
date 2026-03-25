@@ -10,6 +10,7 @@ import {
   X,
   Loader2,
   Trash2,
+  UserPlus,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -89,6 +90,16 @@ export default function InvoicesPage() {
   const [editInvoiceId, setEditInvoiceId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
+  // Quick-add client state
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [qaFirstName, setQaFirstName] = useState("");
+  const [qaLastName, setQaLastName] = useState("");
+  const [qaPhone, setQaPhone] = useState("");
+  const [qaEmail, setQaEmail] = useState("");
+  const [qaStreet, setQaStreet] = useState("");
+  const [qaCity, setQaCity] = useState("");
+  const [qaSaving, setQaSaving] = useState(false);
+
   // Client jobs for the optional job link
   const [clientJobs, setClientJobs] = useState<Job[]>([]);
 
@@ -167,6 +178,52 @@ export default function InvoicesPage() {
       },
     ]);
   }, [formJobId, clientJobs]);
+
+  async function handleQuickAddClient() {
+    if (!qaFirstName.trim() || !qaLastName.trim()) {
+      toast.error("First and last name are required");
+      return;
+    }
+    setQaSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+      const { data: newClient, error: clientError } = await supabase
+        .from("clients")
+        .insert({
+          user_id: user.id,
+          first_name: qaFirstName.trim(),
+          last_name: qaLastName.trim(),
+          email: qaEmail.trim() || null,
+          phone: qaPhone.trim() || null,
+          status: "active",
+        })
+        .select()
+        .single();
+      if (clientError) throw clientError;
+      if (qaStreet.trim()) {
+        await supabase.from("addresses").insert({
+          client_id: newClient.id,
+          user_id: user.id,
+          street: qaStreet.trim(),
+          city: qaCity.trim() || null,
+        });
+      }
+      // Refresh clients list and auto-select new client
+      const { data: updatedClients } = await supabase
+        .from("clients").select("*").eq("user_id", user.id).eq("status", "active").order("first_name");
+      if (updatedClients) setClients(updatedClients as Client[]);
+      setFormClientId(newClient.id);
+      setQuickAddOpen(false);
+      setQaFirstName(""); setQaLastName(""); setQaPhone(""); setQaEmail(""); setQaStreet(""); setQaCity("");
+      toast.success(`${qaFirstName} ${qaLastName} added`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create client");
+    } finally {
+      setQaSaving(false);
+    }
+  }
 
   // Summary calculations
   const summaryTotalInvoiced = useMemo(
@@ -399,7 +456,7 @@ export default function InvoicesPage() {
     const styles: Record<string, string> = {
       unpaid: "bg-[#FF9F0A]/10 text-[#FF9F0A] ring-1 ring-inset ring-[#FF9F0A]/20",
       paid: "bg-[#34C759]/10 text-[#34C759] ring-1 ring-inset ring-[#34C759]/20",
-      void: "bg-[#2A2A2A] text-[#888888] ring-1 ring-inset ring-gray-200",
+      void: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[var(--mh-border)]",
     };
     return styles[status] || "";
   };
@@ -418,12 +475,12 @@ export default function InvoicesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1
-            className="text-[21px] font-semibold text-[#D4D4D4] tracking-[-0.02em]"
+            className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]"
           >
             Invoices
           </h1>
           <p
-            className="text-sm text-[#888888] mt-0.5"
+            className="text-sm text-[var(--mh-text-muted)] mt-0.5"
           >
             Track billing and payments
           </p>
@@ -439,21 +496,21 @@ export default function InvoicesPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] p-5">
+        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
           <p
-            className="text-xs font-semibold text-[#888888] uppercase tracking-wider"
+            className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider"
           >
             Total Invoiced
           </p>
           <p
-            className="text-2xl font-bold text-[#D4D4D4] mt-1"
+            className="text-2xl font-bold text-[var(--mh-text)] mt-1"
           >
             {formatCurrency(summaryTotalInvoiced)}
           </p>
         </div>
-        <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] p-5">
+        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
           <p
-            className="text-xs font-semibold text-[#888888] uppercase tracking-wider"
+            className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider"
           >
             Collected
           </p>
@@ -463,9 +520,9 @@ export default function InvoicesPage() {
             {formatCurrency(summaryCollected)}
           </p>
         </div>
-        <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C] p-5">
+        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
           <p
-            className="text-xs font-semibold text-[#888888] uppercase tracking-wider"
+            className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider"
           >
             Outstanding
           </p>
@@ -478,9 +535,9 @@ export default function InvoicesPage() {
       </div>
 
       {/* Invoice Table */}
-      <div className="bg-[#1E1E1E] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[#2C2C2C]">
+      <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
         {/* Toolbar */}
-        <div className="flex items-center justify-between p-5 border-b border-[#252525]">
+        <div className="flex items-center justify-between p-5 border-b border-[var(--mh-divider)]">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-350" />
             <input
@@ -488,7 +545,7 @@ export default function InvoicesPage() {
               placeholder="Search invoices..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-3 py-2 text-xs bg-[#252525] border border-[#2C2C2C] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 w-52 transition-all"
+              className="pl-9 pr-3 py-2 text-xs bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 w-52 transition-all"
              
             />
           </div>
@@ -497,8 +554,8 @@ export default function InvoicesPage() {
               onClick={() => setFilterOpen(!filterOpen)}
               className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-[6px] transition-colors ${
                 statusFilter !== "all"
-                  ? "text-[#D4D4D4] bg-white/[0.08] border border-[#18181B]/20"
-                  : "text-[#888888] bg-[#252525] border border-[#2C2C2C] hover:bg-[#2A2A2A]"
+                  ? "text-[var(--mh-text)] bg-[var(--mh-accent-tint)] border border-[#0071E3]/30"
+                  : "text-[var(--mh-text-muted)] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] hover:bg-[var(--mh-hover-overlay)]"
               }`}
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -510,13 +567,13 @@ export default function InvoicesPage() {
             {filterOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setFilterOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 w-36 bg-[#1E1E1E] rounded-[6px] shadow-lg border border-[#252525] py-1 z-50">
+                <div className="absolute right-0 top-full mt-1 w-36 bg-[var(--mh-surface)] rounded-[6px] shadow-lg border border-[var(--mh-divider)] py-1 z-50">
                   {(["all", "unpaid", "paid", "void"] as const).map((opt) => (
                     <button
                       key={opt}
                       onClick={() => { setStatusFilter(opt); setFilterOpen(false); }}
                       className={`w-full text-left px-3 py-2 text-xs font-medium capitalize transition-colors ${
-                        statusFilter === opt ? "text-[#D4D4D4] bg-white/[0.04]" : "text-[#888888] hover:bg-white/[0.03]"
+                        statusFilter === opt ? "text-[var(--mh-text)] bg-[var(--mh-surface-raised)]" : "text-[var(--mh-text-muted)] hover:bg-[var(--mh-hover-overlay)]"
                       }`}
                     >
                       {opt === "all" ? "All Invoices" : opt}
@@ -534,12 +591,12 @@ export default function InvoicesPage() {
               <Receipt className="h-8 w-8 text-[#0071E3]" />
             </div>
             <h3
-              className="text-base font-semibold text-[#D4D4D4] mb-2"
+              className="text-base font-semibold text-[var(--mh-text)] mb-2"
             >
               No invoices yet
             </h3>
             <p
-              className="text-sm text-[#888888] mb-6 max-w-xs leading-relaxed"
+              className="text-sm text-[var(--mh-text-muted)] mb-6 max-w-xs leading-relaxed"
             >
               Create your first invoice to start tracking payments and keeping
               your finances organized.
@@ -555,12 +612,12 @@ export default function InvoicesPage() {
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p
-              className="text-sm font-semibold text-[#D4D4D4]"
+              className="text-sm font-semibold text-[var(--mh-text)]"
             >
               No results for &ldquo;{search}&rdquo;
             </p>
             <p
-              className="text-xs text-[#888888] mt-1"
+              className="text-xs text-[var(--mh-text-muted)] mt-1"
             >
               Try a different search term
             </p>
@@ -569,54 +626,54 @@ export default function InvoicesPage() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-white/[0.02] border-b border-[#252525]">
+                <tr className="bg-[var(--mh-surface-sunken)] border-b border-[var(--mh-divider)]">
                   <th
-                    className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888]"
+                    className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)]"
                   >
                     Invoice #
                   </th>
                   <th
-                    className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888]"
+                    className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)]"
                   >
                     Client
                   </th>
                   <th
-                    className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888]"
+                    className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)]"
                   >
                     Amount
                   </th>
                   <th
-                    className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888] hidden md:table-cell"
+                    className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)] hidden md:table-cell"
                   >
                     Issue Date
                   </th>
                   <th
-                    className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888] hidden lg:table-cell"
+                    className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)] hidden lg:table-cell"
                   >
                     Due Date
                   </th>
                   <th
-                    className="text-left px-5 py-3 text-[11px] font-semibold text-[#888888]"
+                    className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)]"
                   >
                     Status
                   </th>
                   <th className="px-5 py-3 w-28" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#252525]">
+              <tbody className="divide-y divide-[var(--mh-divider)]">
                 {filtered.map((inv) => (
                   <tr
                     key={inv.id}
-                    className="hover:bg-white/[0.02] transition-colors"
+                    className="hover:bg-[var(--mh-hover-overlay)] transition-colors"
                   >
                     <td className="px-5 py-4">
-                      <span className="text-sm font-medium text-[#D4D4D4] font-mono">
+                      <span className="text-sm font-medium text-[var(--mh-text)] font-mono">
                         {invoiceNumber(inv.id)}
                       </span>
                     </td>
                     <td className="px-5 py-4">
                       <span
-                        className="text-sm text-[#D4D4D4]"
+                        className="text-sm text-[var(--mh-text)]"
                       >
                         {inv.clients
                           ? `${inv.clients.first_name} ${inv.clients.last_name}`
@@ -630,18 +687,18 @@ export default function InvoicesPage() {
                     </td>
                     <td className="px-5 py-4">
                       <span
-                        className="text-sm font-bold text-[#D4D4D4]"
+                        className="text-sm font-bold text-[var(--mh-text)]"
                       >
                         {formatCurrency(inv.total || 0)}
                       </span>
                     </td>
                     <td
-                      className="px-5 py-4 text-xs text-[#888888] whitespace-nowrap hidden md:table-cell"
+                      className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap hidden md:table-cell"
                     >
                       {formatDate(inv.created_at?.split("T")[0] || null)}
                     </td>
                     <td
-                      className="px-5 py-4 text-xs text-[#888888] whitespace-nowrap hidden lg:table-cell"
+                      className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap hidden lg:table-cell"
                     >
                       {formatDate(inv.due_date)}
                     </td>
@@ -658,19 +715,19 @@ export default function InvoicesPage() {
                           <>
                             <button
                               onClick={() => openEdit(inv)}
-                              className="text-xs font-semibold text-[#888888] hover:text-[#D4D4D4] transition-colors"
+                              className="text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
                             >
                               Edit
                             </button>
                             <button
                               onClick={() => markPaid(inv)}
-                              className="text-xs font-semibold text-[#888888] hover:text-[#D4D4D4] transition-colors"
+                              className="text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
                             >
                               Mark Paid
                             </button>
                             <button
                               onClick={() => voidInvoice(inv)}
-                              className="text-xs font-semibold text-[#888888] hover:text-[#888888] transition-colors"
+                              className="text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text-muted)] transition-colors"
                             >
                               Void
                             </button>
@@ -679,7 +736,7 @@ export default function InvoicesPage() {
                               className={`text-xs font-semibold transition-colors ${
                                 deleteConfirmId === inv.id
                                   ? "text-red-500"
-                                  : "text-[#555555] hover:text-red-400"
+                                  : "text-[var(--mh-text-subtle)] hover:text-red-400"
                               }`}
                             >
                               {deleteConfirmId === inv.id ? "Confirm?" : "Delete"}
@@ -717,20 +774,78 @@ export default function InvoicesPage() {
         <div className="px-6 py-6 space-y-6">
           <FormSection label="Client & Job">
             <FormField label="Client" required>
-              <FormSelect
-                value={formClientId}
-                onChange={(e) => {
-                  setFormClientId(e.target.value);
-                  setFormJobId("");
-                }}
-              >
-                <option value="">Select a client</option>
-                {clients.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.first_name} {c.last_name}
-                  </option>
-                ))}
-              </FormSelect>
+              <div className="space-y-2">
+                <FormSelect
+                  value={formClientId}
+                  onChange={(e) => {
+                    setFormClientId(e.target.value);
+                    setFormJobId("");
+                    setQuickAddOpen(false);
+                  }}
+                >
+                  <option value="">Select a client</option>
+                  {clients.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.first_name} {c.last_name}
+                    </option>
+                  ))}
+                </FormSelect>
+                <button
+                  type="button"
+                  onClick={() => setQuickAddOpen((v) => !v)}
+                  className="flex items-center gap-1.5 text-[12px] font-medium text-[#0071E3] hover:text-[#0077ED] transition-colors"
+                >
+                  <UserPlus className="h-3.5 w-3.5" strokeWidth={2} />
+                  {quickAddOpen ? "Cancel" : "New client"}
+                </button>
+                {quickAddOpen && (
+                  <div className="p-4 bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)] rounded-[6px] space-y-3">
+                    <p className="text-[12px] font-semibold text-[var(--mh-text)]">Quick Add Client</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <FormInput
+                        placeholder="First name *"
+                        value={qaFirstName}
+                        onChange={(e) => setQaFirstName(e.target.value)}
+                      />
+                      <FormInput
+                        placeholder="Last name *"
+                        value={qaLastName}
+                        onChange={(e) => setQaLastName(e.target.value)}
+                      />
+                    </div>
+                    <FormInput
+                      placeholder="Phone"
+                      value={qaPhone}
+                      onChange={(e) => setQaPhone(e.target.value)}
+                    />
+                    <FormInput
+                      placeholder="Email"
+                      type="email"
+                      value={qaEmail}
+                      onChange={(e) => setQaEmail(e.target.value)}
+                    />
+                    <FormInput
+                      placeholder="Street address"
+                      value={qaStreet}
+                      onChange={(e) => setQaStreet(e.target.value)}
+                    />
+                    <FormInput
+                      placeholder="City"
+                      value={qaCity}
+                      onChange={(e) => setQaCity(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      disabled={qaSaving || !qaFirstName.trim() || !qaLastName.trim()}
+                      onClick={handleQuickAddClient}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold bg-[#0071E3] hover:bg-[#0077ED] text-white rounded-[6px] transition-colors disabled:opacity-50"
+                    >
+                      {qaSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+                      Add Client
+                    </button>
+                  </div>
+                )}
+              </div>
             </FormField>
             {formClientId && (
               <FormField label="Link to Job (optional)">
@@ -763,7 +878,7 @@ export default function InvoicesPage() {
                       onChange={(e) =>
                         updateLineItem(idx, "description", e.target.value)
                       }
-                      className="w-full px-3 py-2.5 text-sm bg-[#252525] border border-[#2C2C2C] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[#555555]"
+                      className="w-full px-3 py-2.5 text-sm bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[var(--mh-text-subtle)]"
                      
                     />
                   </div>
@@ -780,7 +895,7 @@ export default function InvoicesPage() {
                           Math.max(1, parseInt(e.target.value) || 1)
                         )
                       }
-                      className="w-full px-2 py-2.5 text-sm bg-[#252525] border border-[#2C2C2C] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all text-center"
+                      className="w-full px-2 py-2.5 text-sm bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all text-center"
                      
                     />
                   </div>
@@ -798,13 +913,13 @@ export default function InvoicesPage() {
                           parseFloat(e.target.value) || 0
                         )
                       }
-                      className="w-full px-2 py-2.5 text-sm bg-[#252525] border border-[#2C2C2C] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all text-right"
+                      className="w-full px-2 py-2.5 text-sm bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all text-right"
                      
                     />
                   </div>
                   <div className="w-20 flex items-center justify-end py-2.5">
                     <span
-                      className="text-sm font-semibold text-[#D4D4D4]"
+                      className="text-sm font-semibold text-[var(--mh-text)]"
                     >
                       {formatCurrency(li.quantity * li.unit_price)}
                     </span>
@@ -812,7 +927,7 @@ export default function InvoicesPage() {
                   <button
                     type="button"
                     onClick={() => removeLineItem(idx)}
-                    className="p-2.5 text-[#555555] hover:text-red-400 transition-colors"
+                    className="p-2.5 text-[var(--mh-text-subtle)] hover:text-red-400 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -822,7 +937,7 @@ export default function InvoicesPage() {
             <button
               type="button"
               onClick={addLineItem}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[#888888] hover:text-[#D4D4D4] transition-colors mt-1"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors mt-1"
             >
               <Plus className="h-3.5 w-3.5" />
               Add Line Item
@@ -862,15 +977,15 @@ export default function InvoicesPage() {
           </FormSection>
 
           {/* Totals */}
-          <div className="border-t border-[#252525] pt-4 space-y-2">
+          <div className="border-t border-[var(--mh-divider)] pt-4 space-y-2">
             <div className="flex justify-between text-sm">
               <span
-                className="text-[#888888]"
+                className="text-[var(--mh-text-muted)]"
               >
                 Subtotal
               </span>
               <span
-                className="text-[#D4D4D4]"
+                className="text-[var(--mh-text)]"
               >
                 {formatCurrency(subtotal)}
               </span>
@@ -878,25 +993,25 @@ export default function InvoicesPage() {
             {formTaxPercent > 0 && (
               <div className="flex justify-between text-sm">
                 <span
-                  className="text-[#888888]"
+                  className="text-[var(--mh-text-muted)]"
                 >
                   Tax ({formTaxPercent}%)
                 </span>
                 <span
-                  className="text-[#D4D4D4]"
+                  className="text-[var(--mh-text)]"
                 >
                   {formatCurrency(taxAmount)}
                 </span>
               </div>
             )}
-            <div className="flex justify-between text-lg pt-1 border-t border-[#252525]">
+            <div className="flex justify-between text-lg pt-1 border-t border-[var(--mh-divider)]">
               <span
-                className="font-semibold text-[#D4D4D4]"
+                className="font-semibold text-[var(--mh-text)]"
               >
                 Total
               </span>
               <span
-                className="font-bold text-[#D4D4D4]"
+                className="font-bold text-[var(--mh-text)]"
               >
                 {formatCurrency(total)}
               </span>
