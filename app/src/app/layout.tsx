@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { DM_Sans } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -14,6 +14,23 @@ export const metadata: Metadata = {
   title: "MaidHub — Solo Cleaner OS",
   description:
     "The back-office command center for solo cleaning business owners. Manage clients, schedule jobs, send invoices.",
+  metadataBase: new URL("https://app.maidhub.io"),
+  openGraph: {
+    title: "MaidHub — Solo Cleaner OS",
+    description: "Manage clients, schedule jobs, and send invoices. Built for solo cleaners.",
+    siteName: "MaidHub",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "MaidHub — Solo Cleaner OS",
+    description: "Manage clients, schedule jobs, and send invoices. Built for solo cleaners.",
+  },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -23,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} antialiased`}>
+      <body className={`${inter.variable} antialiased`}>
         {children}
         <Toaster theme="dark" />
       </body>

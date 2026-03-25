@@ -9,6 +9,8 @@ interface SlidePanelProps {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
+  /** Renders below the scroll area (e.g. Cancel / Save) so actions stay visible. */
+  footer?: React.ReactNode;
   width?: string;
 }
 
@@ -18,6 +20,7 @@ export function SlidePanel({
   title,
   subtitle,
   children,
+  footer,
   width = "w-full max-w-lg",
 }: SlidePanelProps) {
   useEffect(() => {
@@ -78,7 +81,14 @@ export function SlidePanel({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        {footer != null ? (
+          <div className="flex flex-1 flex-col min-h-0">
+            <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+            {footer}
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto">{children}</div>
+        )}
       </div>
     </>
   );
@@ -168,7 +178,7 @@ export function FormActions({
   children: React.ReactNode;
 }) {
   return (
-    <div className="sticky bottom-0 bg-[#1A1A1A] border-t border-[#2C2C2C] px-6 py-4 flex items-center justify-end gap-2.5">
+    <div className="shrink-0 bg-[#1A1A1A] border-t border-[#2C2C2C] px-6 py-4 flex items-center justify-end gap-2.5">
       {children}
     </div>
   );

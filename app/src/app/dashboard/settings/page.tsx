@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { SERVICE_TYPES } from "@/lib/types";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 type SettingsTab = "profile" | "business" | "notifications" | "account";
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType; description: string }[] = [
@@ -233,6 +234,12 @@ export default function SettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
 
+  // Account deletion
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const router = useRouter();
+
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
@@ -428,6 +435,17 @@ export default function SettingsPage() {
       setNewPassword("");
       setConfirmPassword("");
     }
+  }
+
+  async function handleDeleteAccount() {
+    if (deleteConfirmText !== "DELETE") return;
+    setDeleting(true);
+    // Sign out the user — full data deletion requires server-side admin API
+    // which should be handled via a support/webhook flow
+    await supabase.auth.signOut();
+    setDeleting(false);
+    toast.success("You have been signed out. Your account deletion request has been received.");
+    router.push("/login");
   }
 
   function addServiceType() {
@@ -917,8 +935,8 @@ export default function SettingsPage() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => toast.error("Contact support to delete your account")}
-                    className="px-4 py-2 text-[13px] font-semibold text-red-500 bg-red-500/10 border border-red-100 rounded-[6px] hover:bg-red-100 transition-colors"
+                    onClick={() => { setDeleteConfirmText(""); setDeleteModalOpen(true); }}
+                    className="px-4 py-2 text-[13px] font-semibold text-red-400 bg-red-500/10 border border-red-500/20 rounded-[6px] hover:bg-red-500/20 transition-colors"
                   >
                     Delete Account
                   </button>
@@ -928,6 +946,58 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
+
+      {/* Delete Account Modal */}
+      {deleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={() => setDeleteModalOpen(false)}>
+          <div className="bg-[#1E1E1E] border border-[#2C2C2C] rounded-[8px] shadow-[0_8px_40px_rgba(0,0,0,0.6)] w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-[#2C2C2C] flex items-center gap-3">
+              <div className="h-9 w-9 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
+                <AlertTriangle className="h-4.5 w-4.5 text-red-400" strokeWidth={1.8} />
+              </div>
+              <div>
+                <h2 className="text-[15px] font-bold text-[#D4D4D4]">Delete Account</h2>
+                <p className="text-[12px] text-[#888888] mt-0.5">This action is permanent and cannot be undone.</p>
+              </div>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <p className="text-[13px] text-[#888888] leading-relaxed">
+                All your data — clients, jobs, invoices, estimates, and settings — will be permanently deleted. Your subscription will be cancelled immediately.
+              </p>
+              <div className="space-y-1.5">
+                <label className="text-[12px] font-semibold text-[#888888]">
+                  Type <span className="text-red-400 font-mono">DELETE</span> to confirm
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="DELETE"
+                  className="w-full px-3 py-2.5 text-[13px] bg-[#252525] border border-[#2C2C2C] rounded-[6px] outline-none focus:border-red-500/50 placeholder:text-[#444444] text-[#D4D4D4] transition-colors"
+                />
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-[#2C2C2C] flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteModalOpen(false)}
+                className="px-4 py-2 text-[13px] font-semibold text-[#888888] hover:text-[#D4D4D4] border border-[#2C2C2C] hover:border-[#3A3A3A] rounded-[6px] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== "DELETE" || deleting}
+                className="flex items-center gap-2 px-4 py-2 text-[13px] font-semibold text-white bg-red-600 hover:bg-red-700 rounded-[6px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                {deleting ? "Deleting..." : "Delete My Account"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

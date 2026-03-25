@@ -55,29 +55,29 @@ const STATUS_COLORS: Record<
   { bg: string; border: string; text: string }
 > = {
   scheduled: {
-    bg: "bg-teal-100",
-    border: "border-teal-300",
-    text: "text-teal-800",
+    bg: "bg-[#0071E3]/15",
+    border: "border-[#0071E3]/60",
+    text: "text-[#60AAFF]",
   },
   in_progress: {
-    bg: "bg-amber-100",
-    border: "border-amber-300",
-    text: "text-amber-800",
+    bg: "bg-[#FF9F0A]/15",
+    border: "border-[#FF9F0A]/60",
+    text: "text-[#FF9F0A]",
   },
   completed: {
-    bg: "bg-green-100",
-    border: "border-green-300",
-    text: "text-green-800",
+    bg: "bg-[#34C759]/15",
+    border: "border-[#34C759]/60",
+    text: "text-[#34C759]",
   },
   invoiced: {
-    bg: "bg-blue-100",
-    border: "border-blue-300",
-    text: "text-blue-800",
+    bg: "bg-[#30B0C7]/15",
+    border: "border-[#30B0C7]/60",
+    text: "text-[#30B0C7]",
   },
   cancelled: {
     bg: "bg-[#2A2A2A]",
-    border: "border-gray-300",
-    text: "text-[#888888]",
+    border: "border-[#3A3A3A]",
+    text: "text-[#555555]",
   },
 };
 
@@ -350,7 +350,10 @@ export default function SchedulePage() {
       return;
     }
     setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setSaving(false); toast.error("Not authenticated"); return; }
     const { error } = await supabase.from("jobs").insert({
+      user_id: user.id,
       client_id: formClientId,
       address_id: formAddressId || null,
       scheduled_date: formDate,
@@ -456,7 +459,10 @@ export default function SchedulePage() {
       return;
     }
     setRecSaving(true);
-    const { error } = await supabase.from("recurring_rules").insert({
+    const { data: { user: ruleUser } } = await supabase.auth.getUser();
+    if (!ruleUser) { setRecSaving(false); toast.error("Not authenticated"); return; }
+    const { data: newRule, error } = await supabase.from("recurring_rules").insert({
+      user_id: ruleUser.id,
       client_id: recClientId,
       address_id: recAddressId || null,
       frequency: recFrequency,
@@ -468,7 +474,7 @@ export default function SchedulePage() {
       price: recPrice ? parseFloat(recPrice) : null,
       start_time: recStartTime || null,
       is_active: true,
-    });
+    }).select().single();
     setRecSaving(false);
     if (error) {
       toast.error("Failed to create recurring rule");
@@ -478,18 +484,23 @@ export default function SchedulePage() {
     setRecurringFormOpen(false);
     resetRecurringForm();
     fetchRecurringRules();
+    // Auto-generate the next 4 upcoming jobs immediately
+    if (newRule) generateJobs(newRule as RecurringRule);
   }
 
   async function toggleRuleActive(rule: RecurringRule) {
+    const activating = !rule.is_active;
     const { error } = await supabase
       .from("recurring_rules")
-      .update({ is_active: !rule.is_active })
+      .update({ is_active: activating })
       .eq("id", rule.id);
     if (error) {
       toast.error("Failed to update rule");
       return;
     }
     fetchRecurringRules();
+    // Auto-generate jobs when re-activating a rule
+    if (activating) generateJobs({ ...rule, is_active: true });
   }
 
   async function deleteRule(ruleId: string) {
@@ -566,6 +577,7 @@ export default function SchedulePage() {
     }
 
     const jobsToInsert = newDates.map((d) => ({
+      user_id: rule.user_id,
       client_id: rule.client_id,
       address_id: rule.address_id,
       recurring_rule_id: rule.id,
@@ -1157,6 +1169,16 @@ export default function SchedulePage() {
         onClose={() => { setFormOpen(false); resetForm(); }}
         title={formMode === "edit" ? "Edit Job" : "New Job"}
         subtitle={formMode === "edit" ? "Update job details" : "Schedule a cleaning appointment"}
+        footer={
+          <FormActions>
+            <SecondaryButton onClick={() => { setFormOpen(false); resetForm(); }}>
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton loading={saving} onClick={formMode === "edit" ? handleUpdateJob : handleCreateJob}>
+              {formMode === "edit" ? "Update Job" : "Schedule Job"}
+            </PrimaryButton>
+          </FormActions>
+        }
       >
         <div className="px-6 py-5 space-y-6">
           <FormSection label="Client & Location">
@@ -1268,15 +1290,6 @@ export default function SchedulePage() {
             </FormField>
           </FormSection>
         </div>
-
-        <FormActions>
-          <SecondaryButton onClick={() => { setFormOpen(false); resetForm(); }}>
-            Cancel
-          </SecondaryButton>
-          <PrimaryButton loading={saving} onClick={formMode === "edit" ? handleUpdateJob : handleCreateJob}>
-            {formMode === "edit" ? "Update Job" : "Schedule Job"}
-          </PrimaryButton>
-        </FormActions>
       </SlidePanel>
 
       {/* ── Recurring Rules Panel ──────────────────────────────── */}
@@ -1379,6 +1392,16 @@ export default function SchedulePage() {
         onClose={() => setRecurringFormOpen(false)}
         title="New Recurring Rule"
         subtitle="Set up a repeating cleaning schedule"
+        footer={
+          <FormActions>
+            <SecondaryButton onClick={() => setRecurringFormOpen(false)}>
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton loading={recSaving} onClick={handleCreateRule}>
+              Create Rule
+            </PrimaryButton>
+          </FormActions>
+        }
       >
         <div className="px-6 py-5 space-y-6">
           <FormSection label="Client & Location">
@@ -1499,15 +1522,6 @@ export default function SchedulePage() {
             </FormField>
           </FormSection>
         </div>
-
-        <FormActions>
-          <SecondaryButton onClick={() => setRecurringFormOpen(false)}>
-            Cancel
-          </SecondaryButton>
-          <PrimaryButton loading={recSaving} onClick={handleCreateRule}>
-            Create Rule
-          </PrimaryButton>
-        </FormActions>
       </SlidePanel>
     </div>
   );

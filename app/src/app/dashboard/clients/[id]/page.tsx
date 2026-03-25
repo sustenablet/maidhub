@@ -442,7 +442,7 @@ export default function ClientDetailPage() {
               className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-[6px] transition-colors ${
                 deleteConfirm
                   ? "bg-red-500/100 text-white hover:bg-red-600"
-                  : "text-red-400 bg-[#1E1E1E] border border-[#2C2C2C] hover:bg-red-500/[0.06]0/100/[0.06] hover:text-red-400"
+                  : "text-red-400 bg-[#1E1E1E] border border-[#2C2C2C] hover:bg-red-500/10 hover:text-red-400"
               }`}
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -737,6 +737,16 @@ export default function ClientDetailPage() {
         onClose={() => setEditOpen(false)}
         title="Edit Client"
         subtitle={`${client.first_name} ${client.last_name}`}
+        footer={
+          <FormActions>
+            <SecondaryButton onClick={() => setEditOpen(false)}>
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton loading={saving} onClick={handleUpdate}>
+              Save Changes
+            </PrimaryButton>
+          </FormActions>
+        }
       >
         <div className="px-6 py-6 space-y-6">
           <FormSection label="Contact Info">
@@ -834,15 +844,6 @@ export default function ClientDetailPage() {
             </FormField>
           </FormSection>
         </div>
-
-        <FormActions>
-          <SecondaryButton onClick={() => setEditOpen(false)}>
-            Cancel
-          </SecondaryButton>
-          <PrimaryButton loading={saving} onClick={handleUpdate}>
-            Save Changes
-          </PrimaryButton>
-        </FormActions>
       </SlidePanel>
     </div>
   );

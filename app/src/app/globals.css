@@ -110,11 +110,16 @@
 }
 
 /* Base */
+html {
+  font-size: 17px;
+}
+
 body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   background-color: var(--mh-bg);
   color: var(--mh-text);
+  letter-spacing: 0.005em;
 }
 
 /* Card */

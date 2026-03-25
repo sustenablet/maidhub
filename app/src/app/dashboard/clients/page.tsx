@@ -439,6 +439,16 @@ export default function ClientsPage() {
         onClose={() => setPanelOpen(false)}
         title="Add Client"
         subtitle="Add a new client to your roster"
+        footer={
+          <FormActions>
+            <SecondaryButton onClick={() => setPanelOpen(false)}>
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton loading={saving} onClick={handleSave}>
+              Save Client
+            </PrimaryButton>
+          </FormActions>
+        }
       >
         <div className="px-6 py-6 space-y-6">
           <FormSection label="Contact Info">
@@ -536,15 +546,6 @@ export default function ClientsPage() {
             </FormField>
           </FormSection>
         </div>
-
-        <FormActions>
-          <SecondaryButton onClick={() => setPanelOpen(false)}>
-            Cancel
-          </SecondaryButton>
-          <PrimaryButton loading={saving} onClick={handleSave}>
-            Save Client
-          </PrimaryButton>
-        </FormActions>
       </SlidePanel>
     </div>
   );

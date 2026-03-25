@@ -703,6 +703,16 @@ export default function InvoicesPage() {
         title={editMode ? "Edit Invoice" : "New Invoice"}
         subtitle={editMode ? "Update invoice details" : "Create and send a new invoice"}
         width="w-full max-w-xl"
+        footer={
+          <FormActions>
+            <SecondaryButton onClick={() => { setPanelOpen(false); setEditMode(false); setEditInvoiceId(null); }}>
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton loading={saving} onClick={editMode ? handleUpdate : handleSave}>
+              {editMode ? "Update Invoice" : "Create Invoice"}
+            </PrimaryButton>
+          </FormActions>
+        }
       >
         <div className="px-6 py-6 space-y-6">
           <FormSection label="Client & Job">
@@ -893,15 +903,6 @@ export default function InvoicesPage() {
             </div>
           </div>
         </div>
-
-        <FormActions>
-          <SecondaryButton onClick={() => { setPanelOpen(false); setEditMode(false); setEditInvoiceId(null); }}>
-            Cancel
-          </SecondaryButton>
-          <PrimaryButton loading={saving} onClick={editMode ? handleUpdate : handleSave}>
-            {editMode ? "Update Invoice" : "Create Invoice"}
-          </PrimaryButton>
-        </FormActions>
       </SlidePanel>
     </div>
   );

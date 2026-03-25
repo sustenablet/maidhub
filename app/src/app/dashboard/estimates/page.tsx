@@ -11,6 +11,9 @@ import {
   ArrowRight,
   Trash2,
   Receipt,
+  Send,
+  Copy,
+  Check,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -89,6 +92,10 @@ export default function EstimatesPage() {
   const [jobNotes, setJobNotes] = useState("");
   const [clientAddresses, setClientAddresses] = useState<Address[]>([]);
   const [savingJob, setSavingJob] = useState(false);
+
+  // Send estimate modal
+  const [sendModalEstimate, setSendModalEstimate] = useState<Estimate | null>(null);
+  const [sendCopied, setSendCopied] = useState(false);
 
   // Convert to invoice panel
   const [convertInvoiceOpen, setConvertInvoiceOpen] = useState(false);
@@ -291,6 +298,26 @@ export default function EstimatesPage() {
     };
     toast.success(labels[newStatus] || "Status updated.");
     fetchData();
+  }
+
+  // Send estimate modal
+  async function openSendModal(est: Estimate) {
+    await updateStatus(est, "sent");
+    setSendModalEstimate(est);
+    setSendCopied(false);
+  }
+
+  function buildMailto(est: Estimate): string {
+    const client = est.clients;
+    const to = client?.email || "";
+    const subject = encodeURIComponent(`Estimate from MaidHub — ${estimateNumber(est.id)}`);
+    const lineList = (est.line_items || [])
+      .map((li) => `  • ${li.description} (x${li.quantity}) — $${(li.quantity * li.unit_price).toFixed(2)}`)
+      .join("\n");
+    const body = encodeURIComponent(
+      `Hi ${client?.first_name || "there"},\n\nPlease find your estimate below:\n\n${lineList}\n\nTotal: $${(est.total || 0).toFixed(2)}\n${est.notes ? `\nNotes: ${est.notes}\n` : ""}\nLet me know if you have any questions!\n\nThank you,`
+    );
+    return `mailto:${to}?subject=${subject}&body=${body}`;
   }
 
   // Convert to job
@@ -593,7 +620,7 @@ export default function EstimatesPage() {
                         )}
                         {est.status === "draft" && (
                           <button
-                            onClick={() => updateStatus(est, "sent")}
+                            onClick={() => openSendModal(est)}
                             className="text-xs font-semibold text-[#0071E3] hover:text-[#0071E3]/80 transition-colors"
                           >
                             Send
@@ -660,6 +687,16 @@ export default function EstimatesPage() {
         title={editMode ? "Edit Estimate" : "New Estimate"}
         subtitle={editMode ? "Update estimate details" : "Create a quote for a client"}
         width="w-full max-w-xl"
+        footer={
+          <FormActions>
+            <SecondaryButton onClick={() => { setCreateOpen(false); setEditMode(false); setEditEstimateId(null); }}>
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton loading={saving} onClick={editMode ? handleUpdate : handleSave}>
+              {editMode ? "Update Estimate" : "Create Estimate"}
+            </PrimaryButton>
+          </FormActions>
+        }
       >
         <div className="px-6 py-6 space-y-6">
           <FormSection label="Client">
@@ -774,15 +811,6 @@ export default function EstimatesPage() {
             </div>
           </div>
         </div>
-
-        <FormActions>
-          <SecondaryButton onClick={() => { setCreateOpen(false); setEditMode(false); setEditEstimateId(null); }}>
-            Cancel
-          </SecondaryButton>
-          <PrimaryButton loading={saving} onClick={editMode ? handleUpdate : handleSave}>
-            {editMode ? "Update Estimate" : "Create Estimate"}
-          </PrimaryButton>
-        </FormActions>
       </SlidePanel>
 
       {/* Convert to Job Panel */}
@@ -796,6 +824,16 @@ export default function EstimatesPage() {
             : "Schedule a job from this estimate"
         }
         width="w-full max-w-lg"
+        footer={
+          <FormActions>
+            <SecondaryButton onClick={() => setConvertOpen(false)}>
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton loading={savingJob} onClick={handleConvertSave}>
+              Create Job
+            </PrimaryButton>
+          </FormActions>
+        }
       >
         <div className="px-6 py-6 space-y-6">
           <FormSection label="Job Details">
@@ -890,15 +928,6 @@ export default function EstimatesPage() {
             </FormField>
           </FormSection>
         </div>
-
-        <FormActions>
-          <SecondaryButton onClick={() => setConvertOpen(false)}>
-            Cancel
-          </SecondaryButton>
-          <PrimaryButton loading={savingJob} onClick={handleConvertSave}>
-            Create Job
-          </PrimaryButton>
-        </FormActions>
       </SlidePanel>
 
       {/* Convert to Invoice Panel */}
@@ -912,6 +941,16 @@ export default function EstimatesPage() {
             : "Create an invoice from this estimate"
         }
         width="w-full max-w-lg"
+        footer={
+          <FormActions>
+            <SecondaryButton onClick={() => setConvertInvoiceOpen(false)}>
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton loading={savingInvoice} onClick={handleConvertToInvoice}>
+              Create Invoice
+            </PrimaryButton>
+          </FormActions>
+        }
       >
         <div className="px-6 py-6 space-y-6">
           <FormSection label="Line Items">
@@ -988,16 +1027,77 @@ export default function EstimatesPage() {
             </FormField>
           </FormSection>
         </div>
-
-        <FormActions>
-          <SecondaryButton onClick={() => setConvertInvoiceOpen(false)}>
-            Cancel
-          </SecondaryButton>
-          <PrimaryButton loading={savingInvoice} onClick={handleConvertToInvoice}>
-            Create Invoice
-          </PrimaryButton>
-        </FormActions>
       </SlidePanel>
+
+      {/* Send Estimate Modal */}
+      {sendModalEstimate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={() => setSendModalEstimate(null)}>
+          <div className="bg-[#1E1E1E] border border-[#2C2C2C] rounded-[8px] shadow-[0_8px_40px_rgba(0,0,0,0.6)] w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-[#2C2C2C] flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-full bg-[#0071E3]/10 flex items-center justify-center">
+                  <Send className="h-4 w-4 text-[#0071E3]" strokeWidth={1.8} />
+                </div>
+                <div>
+                  <h2 className="text-[14px] font-bold text-[#D4D4D4]">Send Estimate</h2>
+                  <p className="text-[12px] text-[#555555]">{estimateNumber(sendModalEstimate.id)}</p>
+                </div>
+              </div>
+              <button onClick={() => setSendModalEstimate(null)} className="text-[#555555] hover:text-[#D4D4D4] transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <div className="bg-[#252525] rounded-[6px] px-4 py-3 space-y-1.5">
+                <p className="text-[11px] font-semibold text-[#555555] uppercase tracking-wider">To</p>
+                <p className="text-[13px] font-semibold text-[#D4D4D4]">
+                  {sendModalEstimate.clients ? `${sendModalEstimate.clients.first_name} ${sendModalEstimate.clients.last_name}` : "—"}
+                </p>
+                {sendModalEstimate.clients?.email ? (
+                  <p className="text-[12px] text-[#888888]">{sendModalEstimate.clients.email}</p>
+                ) : (
+                  <p className="text-[12px] text-[#FF9F0A]">No email on file — add one to the client profile.</p>
+                )}
+              </div>
+              <div className="bg-[#252525] rounded-[6px] px-4 py-3 space-y-2">
+                {(sendModalEstimate.line_items || []).map((li, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <span className="text-[13px] text-[#888888]">{li.description} <span className="text-[#555555]">×{li.quantity}</span></span>
+                    <span className="text-[13px] font-semibold text-[#D4D4D4]">{formatCurrency(li.quantity * li.unit_price)}</span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between pt-2 border-t border-[#2C2C2C]">
+                  <span className="text-[13px] font-bold text-[#D4D4D4]">Total</span>
+                  <span className="text-[13px] font-bold text-[#D4D4D4]">{formatCurrency(sendModalEstimate.total || 0)}</span>
+                </div>
+              </div>
+              <p className="text-[12px] text-[#555555] leading-relaxed">
+                This will open your email client with a pre-filled message. The estimate has been marked as <span className="text-[#0071E3]">Sent</span>.
+              </p>
+            </div>
+            <div className="px-6 py-4 border-t border-[#2C2C2C] flex items-center gap-3">
+              <a
+                href={buildMailto(sendModalEstimate)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0071E3] hover:bg-[#0077ED] text-white text-[13px] font-semibold rounded-[6px] transition-colors"
+              >
+                <Send className="h-3.5 w-3.5" strokeWidth={2} />
+                Open Email Client
+              </a>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(sendModalEstimate.clients?.email || "");
+                  setSendCopied(true);
+                  setTimeout(() => setSendCopied(false), 2000);
+                }}
+                className="flex items-center gap-1.5 px-4 py-2.5 border border-[#2C2C2C] text-[#888888] hover:text-[#D4D4D4] hover:border-[#3A3A3A] text-[13px] font-semibold rounded-[6px] transition-colors"
+              >
+                {sendCopied ? <Check className="h-3.5 w-3.5 text-[#34C759]" /> : <Copy className="h-3.5 w-3.5" />}
+                {sendCopied ? "Copied!" : "Copy Email"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
