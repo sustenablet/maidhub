@@ -59,7 +59,7 @@ export default async function DashboardPage() {
     supabase.from("jobs").select("*, clients(first_name, last_name)").eq("user_id", user!.id).order("updated_at", { ascending: false }).limit(30),
     supabase.from("invoices").select("*, clients(first_name, last_name)").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(5),
     supabase.from("invoices").select("total, payment_date").eq("user_id", user!.id).eq("status", "paid").gte("payment_date", new Date(Date.now() - 180 * 86400000).toISOString().split("T")[0]),
-    supabase.from("jobs").select("service_type, price").eq("user_id", user!.id),
+    supabase.from("jobs").select("service_type, price").eq("user_id", user!.id).in("status", ["completed", "invoiced"]),
     supabase.from("jobs").select("id, scheduled_date, start_time, service_type, price, status, duration_minutes, clients(first_name, last_name)").eq("user_id", user!.id).gte("scheduled_date", mondayStr).lte("scheduled_date", sundayStr).order("scheduled_date").order("start_time"),
     supabase.from("invoices").select("total").eq("user_id", user!.id).eq("status", "paid").gte("payment_date", thisMonthStart),
     supabase.from("invoices").select("total").eq("user_id", user!.id).eq("status", "paid").gte("payment_date", lastMonthStart).lte("payment_date", lastMonthEnd),

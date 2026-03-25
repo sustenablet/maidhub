@@ -25,7 +25,7 @@ export function ServiceDonutSection({ services, total, totalJobs }: ServiceDonut
       <div className="bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] overflow-hidden flex flex-col">
         <div className="px-5 py-4 border-b border-[var(--mh-divider)]">
           <h2 className="text-[14px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">Services</h2>
-          <p className="text-[11px] text-[var(--mh-text-subtle)] mt-0.5">Revenue by type</p>
+          <p className="text-[11px] text-[var(--mh-text-subtle)] mt-0.5">Earned revenue by type</p>
         </div>
         <div className="p-5 flex-1 flex items-center justify-center">
           <ServiceDonut services={services} total={total} />

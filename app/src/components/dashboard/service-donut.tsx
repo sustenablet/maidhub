@@ -41,8 +41,15 @@ export function ServiceDonut({ services, total }: { services: ServiceDataPoint[]
 
   if (services.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[180px] text-xs text-[var(--mh-text-subtle)]">
-        No service data yet
+      <div className="flex flex-col items-center justify-center h-[180px] gap-2 text-center px-4">
+        <div className="h-9 w-9 rounded-full bg-[var(--mh-surface-raised)] flex items-center justify-center">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="6" stroke="#555" strokeWidth="1.5" />
+            <circle cx="8" cy="8" r="3" stroke="#555" strokeWidth="1.5" />
+          </svg>
+        </div>
+        <p className="text-[11px] font-semibold text-[var(--mh-text-subtle)]">No completed jobs yet</p>
+        <p className="text-[10px] text-[var(--mh-text-faint)] leading-relaxed">Revenue by service type will appear here once jobs are marked complete</p>
       </div>
     );
   }
