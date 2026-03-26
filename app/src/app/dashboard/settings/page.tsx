@@ -35,6 +35,18 @@ import { useRouter } from "next/navigation";
 import { useTheme, type Theme } from "@/components/theme-provider";
 
 type SettingsTab = "profile" | "business" | "preferences" | "subscription" | "account";
+const DEFAULT_ADDITIONAL_COST_TYPES = [
+  "Window Cleaning",
+  "Floor Waxing",
+  "Oven Cleaning",
+  "Refrigerator Cleaning",
+  "Laundry",
+  "Carpet Cleaning",
+  "Organization",
+  "Pet Hair Removal",
+  "Restocking Supplies",
+  "Garage Cleaning",
+];
 
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType; description: string }[] = [
   { id: "profile", label: "Profile", icon: User, description: "Your personal info" },
@@ -222,6 +234,8 @@ export default function SettingsPage() {
   const [serviceTypes, setServiceTypes] = useState<string[]>([...SERVICE_TYPES]);
   const [servicePrices, setServicePrices] = useState<Record<string, string>>({});
   const [newService, setNewService] = useState("");
+  const [additionalCostTypes, setAdditionalCostTypes] = useState<string[]>(DEFAULT_ADDITIONAL_COST_TYPES);
+  const [newAdditionalCost, setNewAdditionalCost] = useState("");
   const [editingPriceFor, setEditingPriceFor] = useState<string | null>(null);
   const [defaultRate, setDefaultRate] = useState("50");
   const [taxRate, setTaxRate] = useState("0");
@@ -282,6 +296,9 @@ export default function SettingsPage() {
         // Business settings
         if (Array.isArray(biz.service_types) && biz.service_types.length > 0) {
           setServiceTypes(biz.service_types as string[]);
+        }
+        if (Array.isArray(biz.additional_cost_types) && biz.additional_cost_types.length > 0) {
+          setAdditionalCostTypes(biz.additional_cost_types as string[]);
         }
         // Pre-fill with DEFAULT_SERVICE_PRICES as baseline, then overlay saved prices
         const defaultPrices = Object.fromEntries(
@@ -368,6 +385,7 @@ export default function SettingsPage() {
 
     const bizSettings = {
       service_types: serviceTypes,
+      additional_cost_types: additionalCostTypes,
       service_type_prices: Object.fromEntries(
         Object.entries(servicePrices)
           .filter(([, v]) => v !== "" && !isNaN(parseFloat(v)))
@@ -483,6 +501,24 @@ export default function SettingsPage() {
   function removeServiceType(index: number) {
     const removed = serviceTypes[index];
     setServiceTypes((prev) => prev.filter((_, i) => i !== index));
+    toast.success(`Removed "${removed}"`);
+  }
+
+  function addAdditionalCostType() {
+    const trimmed = newAdditionalCost.trim();
+    if (!trimmed) return;
+    if (additionalCostTypes.includes(trimmed)) {
+      toast.error("Already exists");
+      return;
+    }
+    setAdditionalCostTypes((prev) => [...prev, trimmed]);
+    setNewAdditionalCost("");
+    toast.success(`Added "${trimmed}"`);
+  }
+
+  function removeAdditionalCostType(index: number) {
+    const removed = additionalCostTypes[index];
+    setAdditionalCostTypes((prev) => prev.filter((_, i) => i !== index));
     toast.success(`Removed "${removed}"`);
   }
 
@@ -746,6 +782,50 @@ export default function SettingsPage() {
                   <p className="text-[11px] text-[var(--mh-text-subtle)]">
                     {serviceTypes.length} service type{serviceTypes.length !== 1 ? "s" : ""} · Prices auto-fill when scheduling and are always overridable per job
                   </p>
+
+                  <div className="pt-3 border-t border-[var(--mh-divider)] space-y-3">
+                    <SectionHeader title="Additional Cost Presets" description="These appear in New Invoice under Additional Costs." />
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input
+                        value={newAdditionalCost}
+                        onChange={(e) => setNewAdditionalCost(e.target.value)}
+                        placeholder="Add an additional cost preset..."
+                        className="flex-1 min-w-0"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addAdditionalCostType();
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={addAdditionalCostType}
+                        className="flex items-center justify-center gap-1.5 px-4 py-2.5 sm:py-2 bg-[#0071E3] hover:bg-[#0077ED]/90 text-white text-[13px] font-semibold rounded-[8px] sm:rounded-[6px] transition-colors shrink-0"
+                      >
+                        <Plus className="h-3.5 w-3.5" strokeWidth={2} />
+                        Add
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {additionalCostTypes.map((cost, index) => (
+                        <div key={`${cost}-${index}`} className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)]">
+                          <span className="text-[12px] text-[var(--mh-text)]">{cost}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeAdditionalCostType(index)}
+                            className="text-[var(--mh-text-subtle)] hover:text-red-500 transition-colors"
+                            aria-label={`Remove ${cost}`}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-[var(--mh-text-subtle)]">
+                      {additionalCostTypes.length} preset{additionalCostTypes.length !== 1 ? "s" : ""} available in invoice additional costs.
+                    </p>
+                  </div>
                 </CardBody>
                 <CardFooter>
                   <SaveButton loading={businessSaving} onClick={handleBusinessSave} />

@@ -34,7 +34,7 @@ import { toast } from "sonner";
 
 const supabase = createClient();
 
-const ADDON_PRESETS = [
+const ADDON_PRESETS_DEFAULT = [
   "Window Cleaning",
   "Floor Waxing",
   "Oven Cleaning",
@@ -42,8 +42,8 @@ const ADDON_PRESETS = [
   "Laundry",
   "Carpet Cleaning",
   "Organization",
-  "Move-Out Clean",
-  "Deep Clean",
+  "Pet Hair Removal",
+  "Restocking Supplies",
   "Garage Cleaning",
 ];
 
@@ -96,6 +96,7 @@ export default function InvoicesPage() {
   const [formAddOns, setFormAddOns] = useState<{id: string; name: string; price: number}[]>([]);
   const [addOnName, setAddOnName] = useState("");
   const [addOnPrice, setAddOnPrice] = useState("");
+  const [addOnPresets, setAddOnPresets] = useState<string[]>(ADDON_PRESETS_DEFAULT);
   const [serviceTypes, setServiceTypes] = useState<string[]>([...SERVICE_TYPES]);
   const [servicePrices, setServicePrices] = useState<Record<string, number>>({});
   const [formDueDate, setFormDueDate] = useState(defaultDueDate());
@@ -169,8 +170,10 @@ export default function InvoicesPage() {
       const { data } = await supabase.from("users").select("settings").eq("id", userId).single();
       const biz = (((data?.settings || {}) as Record<string, unknown>).business || {}) as Record<string, unknown>;
       const types = (biz.service_types as string[]) || [];
+      const additionalCosts = (biz.additional_cost_types as string[]) || [];
       const prices = (biz.service_type_prices as Record<string, number>) || {};
       if (types.length > 0) setServiceTypes(types);
+      if (additionalCosts.length > 0) setAddOnPresets(additionalCosts);
       setServicePrices(prices);
     })();
   }, [userId]);
@@ -1024,7 +1027,7 @@ export default function InvoicesPage() {
           <FormSection label="Additional Costs">
             {/* Preset chips */}
             <div className="flex flex-wrap gap-1.5">
-              {ADDON_PRESETS.map((preset) => {
+              {addOnPresets.map((preset) => {
                 const isActive = formAddOns.some((a) => a.name === preset);
                 return (
                   <button
