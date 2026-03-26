@@ -178,16 +178,29 @@ function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
+function isInvoicePaid(job: Job): boolean {
+  if (job.status !== "invoiced") return false;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const invoices = (job as any).invoices;
+  return Array.isArray(invoices)
+    ? invoices.some((inv: { status: string }) => inv.status === "paid")
+    : invoices?.status === "paid";
+}
+
 function getStatusLabel(job: Job): string {
-  if (job.status === "invoiced") {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const invoices = (job as any).invoices;
-    const isPaid = Array.isArray(invoices)
-      ? invoices.some((inv: { status: string }) => inv.status === "paid")
-      : invoices?.status === "paid";
-    if (isPaid) return "Invoice Paid";
-  }
+  if (isInvoicePaid(job)) return "Invoice Paid";
   return job.status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function getStatusColors(job: Job): { bg: string; border: string; text: string } {
+  if (isInvoicePaid(job)) return { bg: "bg-[#34C759]/15", border: "border-[#34C759]/60", text: "text-[#34C759]" };
+  return STATUS_COLORS[job.status];
+}
+
+const PAID_DONE_STATUSES = ["completed", "invoiced"];
+
+function isPaidDone(job: Job): boolean {
+  return PAID_DONE_STATUSES.includes(job.status);
 }
 
 /* ── Component ──────────────────────────────────────────────────── */
@@ -218,7 +231,7 @@ export default function SchedulePage() {
   const [selectedDay, setSelectedDay] = useState<Date>(today);
   const [jobStatusFilter, setJobStatusFilter] = useState<Job["status"] | "all">("all");
   const [typeFilter, setTypeFilter] = useState<"all" | "recurring" | "one_time">("all");
-  const [showFilter, setShowFilter] = useState<"active" | "all" | "done">("active");
+  const [showFilter, setShowFilter] = useState<"active" | "all" | "done">("all");
   const [showJobs, setShowJobs] = useState(true);
   const [showInvoices, setShowInvoices] = useState(true);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -1001,7 +1014,7 @@ export default function SchedulePage() {
     const duration = job.duration_minutes ?? 60;
     const top = (hour - START_HOUR) * HOUR_HEIGHT + (minute / 60) * HOUR_HEIGHT;
     const height = Math.max((duration / 60) * HOUR_HEIGHT, 24);
-    const colors = STATUS_COLORS[job.status];
+    const colors = getStatusColors(job);
     const clientName = job.clients
       ? `${job.clients.first_name} ${job.clients.last_name}`
       : "Unknown";
@@ -1146,7 +1159,7 @@ export default function SchedulePage() {
             const activeCount =
               (jobStatusFilter !== "all" ? 1 : 0) +
               (typeFilter !== "all" ? 1 : 0) +
-              (showFilter !== "active" ? 1 : 0) +
+              (showFilter !== "all" ? 1 : 0) +
               (!showJobs ? 1 : 0) +
               (!showInvoices ? 1 : 0);
             return (
@@ -1169,9 +1182,9 @@ export default function SchedulePage() {
             );
           })()}
           {/* Active filter pills */}
-          {showFilter !== "active" && (
-            <button onClick={() => setShowFilter("active")} className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] active:opacity-70">
-              {showFilter === "done" ? "Done only" : "All incl. done"}
+          {showFilter !== "all" && (
+            <button onClick={() => setShowFilter("all")} className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] active:opacity-70">
+              {showFilter === "done" ? "Done only" : "Active only"}
               <X className="h-3 w-3" strokeWidth={2.5} />
             </button>
           )}
@@ -1208,9 +1221,9 @@ export default function SchedulePage() {
             <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--mh-divider)]">
               <p className="text-[15px] font-bold text-[var(--mh-text)]">Filters</p>
               <div className="flex items-center gap-2">
-                {(jobStatusFilter !== "all" || typeFilter !== "all" || showFilter !== "active" || !showJobs || !showInvoices) && (
+                {(jobStatusFilter !== "all" || typeFilter !== "all" || showFilter !== "all" || !showJobs || !showInvoices) && (
                   <button
-                    onClick={() => { setJobStatusFilter("all"); setTypeFilter("all"); setShowFilter("active"); setShowJobs(true); setShowInvoices(true); }}
+                    onClick={() => { setJobStatusFilter("all"); setTypeFilter("all"); setShowFilter("all"); setShowJobs(true); setShowInvoices(true); }}
                     className="text-[12px] font-semibold text-[#0071E3]"
                   >
                     Reset
@@ -1433,7 +1446,7 @@ export default function SchedulePage() {
           <div className="space-y-2">
             {/* Job cards */}
             {showJobs && selectedDayJobs.map((job) => {
-              const colors = STATUS_COLORS[job.status];
+              const colors = getStatusColors(job);
               const clientName = job.clients
                 ? `${job.clients.first_name} ${job.clients.last_name}`
                 : "Unknown Client";
@@ -1457,8 +1470,8 @@ export default function SchedulePage() {
                   </div>
                   <div className="text-right shrink-0">
                     {job.price != null && (
-                      <p className="text-[16px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">
-                        ${Number(job.price).toLocaleString()}
+                      <p className={`text-[16px] font-bold tracking-[-0.02em] ${isPaidDone(job) ? "text-[#34C759]" : "text-[var(--mh-text)]"}`}>
+                        {isPaidDone(job) ? "+" : ""}${Number(job.price).toLocaleString()}
                       </p>
                     )}
                     <ChevronRight className="h-4 w-4 text-[var(--mh-text-faint)] ml-auto mt-1" />
@@ -1577,7 +1590,7 @@ export default function SchedulePage() {
               const activeCount =
                 (jobStatusFilter !== "all" ? 1 : 0) +
                 (typeFilter !== "all" ? 1 : 0) +
-                (showFilter !== "active" ? 1 : 0) +
+                (showFilter !== "all" ? 1 : 0) +
                 (!showJobs ? 1 : 0) +
                 (!showInvoices ? 1 : 0);
               return (
@@ -1608,9 +1621,9 @@ export default function SchedulePage() {
                   {/* Header */}
                   <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--mh-divider)]">
                     <p className="text-[13px] font-bold text-[var(--mh-text)]">Filters</p>
-                    {(jobStatusFilter !== "all" || typeFilter !== "all" || showFilter !== "active" || !showJobs || !showInvoices) && (
+                    {(jobStatusFilter !== "all" || typeFilter !== "all" || showFilter !== "all" || !showJobs || !showInvoices) && (
                       <button
-                        onClick={() => { setJobStatusFilter("all"); setTypeFilter("all"); setShowFilter("active"); setShowJobs(true); setShowInvoices(true); }}
+                        onClick={() => { setJobStatusFilter("all"); setTypeFilter("all"); setShowFilter("all"); setShowJobs(true); setShowInvoices(true); }}
                         className="text-[11px] font-semibold text-[#0071E3] hover:underline"
                       >
                         Reset all
@@ -1692,9 +1705,9 @@ export default function SchedulePage() {
           </div>
 
           {/* Active filter pills */}
-          {showFilter !== "active" && (
-            <button onClick={() => setShowFilter("active")} className="flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors">
-              {showFilter === "done" ? "Done only" : "All incl. done"}
+          {showFilter !== "all" && (
+            <button onClick={() => setShowFilter("all")} className="flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors">
+              {showFilter === "done" ? "Done only" : "Active only"}
               <X className="h-3 w-3" strokeWidth={2.5} />
             </button>
           )}
@@ -1759,7 +1772,7 @@ export default function SchedulePage() {
                         </span>
                         <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                           {dayJobs.slice(0, 3).map((job) => {
-                            const colors = STATUS_COLORS[job.status];
+                            const colors = getStatusColors(job);
                             const clientName = job.clients
                               ? `${job.clients.first_name} ${job.clients.last_name}`
                               : "Job";
@@ -1788,64 +1801,103 @@ export default function SchedulePage() {
           </div>
         ) : viewMode === "list" ? (
           /* ── List View ── */
-          <div className="divide-y divide-[var(--mh-divider)]">
-            {listViewJobs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-                <Calendar className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" />
-                <p className="text-sm font-semibold text-[var(--mh-text)]">No jobs this week</p>
-                <p className="text-xs text-[var(--mh-text-muted)] mt-1 mb-4">Schedule a job to see it appear here</p>
-                <button onClick={openNewJobForm} className="flex items-center gap-2 px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED]/90 text-white text-sm font-semibold rounded-[6px] transition-colors">
-                  <Plus className="h-4 w-4" />
-                  New Job
-                </button>
-              </div>
-            ) : Object.entries(
-                listViewJobs.reduce<Record<string, Job[]>>((acc, job) => {
-                  if (!acc[job.scheduled_date]) acc[job.scheduled_date] = [];
-                  acc[job.scheduled_date].push(job);
-                  return acc;
-                }, {})
-              ).map(([date, dayJobs]) => {
-                const d = new Date(date + "T00:00:00");
-                const isToday = isSameDay(d, today);
-                return (
-                  <div key={date}>
-                    <div className={`px-5 py-2 text-[11px] font-bold tracking-[0.06em] uppercase bg-[var(--mh-surface-raised)]/50 ${isToday ? "text-[#0071E3]" : "text-[var(--mh-text-subtle)]"}`}>
-                      {isToday ? "Today — " : ""}{d.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
-                    </div>
-                    {dayJobs.map((job) => {
-                      const colors = STATUS_COLORS[job.status];
-                      const clientName = job.clients ? `${job.clients.first_name} ${job.clients.last_name}` : "Unknown";
-                      return (
-                        <button
-                          key={job.id}
-                          onClick={() => { setSelectedJob(job); setDetailOpen(true); }}
-                          className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-[var(--mh-hover-overlay)] transition-colors text-left"
-                        >
-                          <div className={`w-1 self-stretch rounded-full ${colors.bg} ${colors.border} border-l-[3px]`} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[13px] font-semibold text-[var(--mh-text)] truncate">{clientName}</p>
-                            <p className="text-[11px] text-[var(--mh-text-muted)] mt-0.5">
-                              {job.service_type || "Service"}
-                              {job.start_time ? ` · ${formatTimeDisplay(job.start_time)}` : ""}
-                              {job.duration_minutes ? ` · ${job.duration_minutes >= 60 ? `${Math.floor(job.duration_minutes / 60)}h${job.duration_minutes % 60 ? ` ${job.duration_minutes % 60}m` : ""}` : `${job.duration_minutes}m`}` : ""}
-                            </p>
-                          </div>
-                          <div className="text-right shrink-0 space-y-0.5">
-                            {job.price != null && (
-                              <p className="text-[13px] font-bold text-[var(--mh-text)]">${Number(job.price).toLocaleString()}</p>
-                            )}
-                            <span className={`text-[10px] font-semibold ${colors.text}`}>
-                              {getStatusLabel(job)}
-                            </span>
-                          </div>
-                        </button>
-                      );
-                    })}
+          (() => {
+            // Merge jobs and due invoices into a single date-keyed map
+            const dateMap: Record<string, { jobs: Job[]; invoices: DueInvoice[] }> = {};
+            for (const job of listViewJobs) {
+              if (!dateMap[job.scheduled_date]) dateMap[job.scheduled_date] = { jobs: [], invoices: [] };
+              dateMap[job.scheduled_date].jobs.push(job);
+            }
+            if (showInvoices) {
+              for (const inv of dueInvoices) {
+                if (!dateMap[inv.due_date]) dateMap[inv.due_date] = { jobs: [], invoices: [] };
+                dateMap[inv.due_date].invoices.push(inv);
+              }
+            }
+            const sortedDates = Object.keys(dateMap).sort();
+            return (
+              <div className="divide-y divide-[var(--mh-divider)]">
+                {sortedDates.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                    <Calendar className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" />
+                    <p className="text-sm font-semibold text-[var(--mh-text)]">Nothing this week</p>
+                    <p className="text-xs text-[var(--mh-text-muted)] mt-1 mb-4">Schedule a job to see it appear here</p>
+                    <button onClick={openNewJobForm} className="flex items-center gap-2 px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED]/90 text-white text-sm font-semibold rounded-[6px] transition-colors">
+                      <Plus className="h-4 w-4" />
+                      New Job
+                    </button>
                   </div>
-                );
-              })}
-          </div>
+                ) : sortedDates.map((date) => {
+                  const { jobs: dayJobs, invoices: dayInvs } = dateMap[date];
+                  const d = new Date(date + "T00:00:00");
+                  const isToday = isSameDay(d, today);
+                  const todayDateStr = new Date().toISOString().split("T")[0];
+                  return (
+                    <div key={date}>
+                      <div className={`px-5 py-2 text-[11px] font-bold tracking-[0.06em] uppercase bg-[var(--mh-surface-raised)]/50 ${isToday ? "text-[#0071E3]" : "text-[var(--mh-text-subtle)]"}`}>
+                        {isToday ? "Today — " : ""}{d.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
+                      </div>
+                      {showJobs && dayJobs.map((job) => {
+                        const colors = getStatusColors(job);
+                        const clientName = job.clients ? `${job.clients.first_name} ${job.clients.last_name}` : "Unknown";
+                        const isPaidDone = job.status === "invoiced" || job.status === "completed" || job.status === "cancelled";
+                        return (
+                          <button
+                            key={job.id}
+                            onClick={() => { setSelectedJob(job); setDetailOpen(true); }}
+                            className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-[var(--mh-hover-overlay)] transition-colors text-left"
+                          >
+                            <div className={`w-1 self-stretch rounded-full ${colors.bg} ${colors.border} border-l-[3px]`} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-semibold text-[var(--mh-text)] truncate">{clientName}</p>
+                              <p className="text-[11px] text-[var(--mh-text-muted)] mt-0.5">
+                                {job.service_type || "Service"}
+                                {job.start_time ? ` · ${formatTimeDisplay(job.start_time)}` : ""}
+                                {job.duration_minutes ? ` · ${job.duration_minutes >= 60 ? `${Math.floor(job.duration_minutes / 60)}h${job.duration_minutes % 60 ? ` ${job.duration_minutes % 60}m` : ""}` : `${job.duration_minutes}m`}` : ""}
+                              </p>
+                            </div>
+                            <div className="text-right shrink-0 space-y-0.5">
+                              {job.price != null && (
+                                <p className={`text-[13px] font-bold ${isPaidDone ? "text-[#34C759]" : "text-[var(--mh-text)]"}`}>
+                                  {isPaidDone ? "+" : ""}${Number(job.price).toLocaleString()}
+                                </p>
+                              )}
+                              <span className={`text-[10px] font-semibold ${colors.text}`}>
+                                {getStatusLabel(job)}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                      {dayInvs.map((inv) => {
+                        const clientName = inv.clients ? `${inv.clients.first_name} ${inv.clients.last_name}` : "Client";
+                        const isOverdue = inv.due_date < todayDateStr;
+                        return (
+                          <div key={inv.id} className={`flex items-center gap-4 px-5 py-3.5 ${isOverdue ? "bg-red-500/5" : "bg-[#FF9F0A]/5"}`}>
+                            <div className={`w-1 self-stretch rounded-full border-l-[3px] ${isOverdue ? "border-red-400" : "border-[#FF9F0A]"}`} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-semibold text-[var(--mh-text)] truncate">{clientName}</p>
+                              <p className="text-[11px] text-[var(--mh-text-muted)] mt-0.5">Invoice due</p>
+                            </div>
+                            <div className="text-right shrink-0 space-y-0.5">
+                              {inv.total != null && (
+                                <p className={`text-[13px] font-bold ${isOverdue ? "text-red-400" : "text-[#FF9F0A]"}`}>
+                                  ${Number(inv.total).toLocaleString()}
+                                </p>
+                              )}
+                              <span className={`text-[10px] font-semibold ${isOverdue ? "text-red-400" : "text-[#FF9F0A]"}`}>
+                                {isOverdue ? "Overdue" : "Due Today"}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()
         ) : (
           /* ── Week / Day View ── */
           <div className="overflow-x-auto">
@@ -1948,6 +2000,44 @@ export default function SchedulePage() {
                 </div>
               </div>
             </div>
+
+            {/* Due invoices strip — day view */}
+            {viewMode === "day" && showInvoices && (() => {
+              const todayDateStr = new Date().toISOString().split("T")[0];
+              const dayInvs = dueInvoices.filter(inv => {
+                const [y, m, d] = inv.due_date.split("-").map(Number);
+                return isSameDay(new Date(y, m - 1, d), selectedDay);
+              });
+              if (dayInvs.length === 0) return null;
+              return (
+                <div className="border-t border-[var(--mh-divider)] divide-y divide-[var(--mh-divider)]">
+                  <div className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.07em] text-[var(--mh-text-faint)] bg-[var(--mh-surface-raised)]/50">
+                    Due Invoices
+                  </div>
+                  {dayInvs.map(inv => {
+                    const clientName = inv.clients ? `${inv.clients.first_name} ${inv.clients.last_name}` : "Client";
+                    const isOverdue = inv.due_date < todayDateStr;
+                    return (
+                      <div key={inv.id} className={`flex items-center gap-4 px-5 py-3 ${isOverdue ? "bg-red-500/5" : "bg-[#FF9F0A]/5"}`}>
+                        <div className={`w-1 self-stretch rounded-full border-l-[3px] ${isOverdue ? "border-red-400" : "border-[#FF9F0A]"}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-semibold text-[var(--mh-text)] truncate">{clientName}</p>
+                          <p className="text-[11px] text-[var(--mh-text-muted)]">Invoice due</p>
+                        </div>
+                        {inv.total != null && (
+                          <p className={`text-[13px] font-bold shrink-0 ${isOverdue ? "text-red-400" : "text-[#FF9F0A]"}`}>
+                            ${Number(inv.total).toLocaleString()}
+                          </p>
+                        )}
+                        <span className={`text-[10px] font-semibold shrink-0 ${isOverdue ? "text-red-400" : "text-[#FF9F0A]"}`}>
+                          {isOverdue ? "Overdue" : "Due Today"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
@@ -1976,8 +2066,8 @@ export default function SchedulePage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <span
                   className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold ${
-                    STATUS_COLORS[selectedJob.status].bg
-                  } ${STATUS_COLORS[selectedJob.status].text}`}
+                    getStatusColors(selectedJob).bg
+                  } ${getStatusColors(selectedJob).text}`}
                 >
                   {getStatusLabel(selectedJob)}
                 </span>
