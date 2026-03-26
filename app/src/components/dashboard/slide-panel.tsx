@@ -46,7 +46,7 @@ export function SlidePanel({
     <>
       {/* Overlay */}
       <div
-        className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px] transition-opacity duration-300 ${
+        className={`fixed inset-0 z-[80] bg-black/50 backdrop-blur-[2px] transition-opacity duration-300 ${
           open
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -56,7 +56,7 @@ export function SlidePanel({
 
       {/* Panel */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 ${width} bg-[var(--mh-surface)] shadow-[var(--mh-shadow-panel)] transform transition-transform duration-300 ease-out flex flex-col border-l border-[var(--mh-border)] overflow-x-hidden ${
+        className={`fixed inset-y-0 right-0 z-[90] ${width} bg-[var(--mh-surface)] shadow-[var(--mh-shadow-panel)] transform transition-transform duration-300 ease-out flex flex-col border-l border-[var(--mh-border)] overflow-x-hidden ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
