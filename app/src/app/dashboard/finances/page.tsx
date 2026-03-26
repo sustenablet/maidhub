@@ -111,14 +111,10 @@ export default async function FinancesPage() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="hidden md:flex items-center justify-between">
         <div>
-          <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
-            Finances
-          </h1>
-          <p className="text-[13px] text-[var(--mh-text-muted)] mt-0.5">
-            Overview of your revenue, invoices, and estimates
-          </p>
+          <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">Finances</h1>
+          <p className="text-[13px] text-[var(--mh-text-muted)] mt-0.5">Overview of your revenue, invoices, and estimates</p>
         </div>
         <div className="hidden sm:flex items-center gap-2">
           <Link

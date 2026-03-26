@@ -164,7 +164,7 @@ function Card({ children }: { children: React.ReactNode }) {
 
 function CardHeader({ title, description }: { title: string; description?: string }) {
   return (
-    <div className="px-6 py-4 border-b border-[var(--mh-border)]">
+    <div className="px-4 py-3.5 md:px-6 md:py-4 border-b border-[var(--mh-border)]">
       <h2 className="text-[15px] font-bold text-[var(--mh-text)]">{title}</h2>
       {description && (
         <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">{description}</p>
@@ -174,12 +174,12 @@ function CardHeader({ title, description }: { title: string; description?: strin
 }
 
 function CardBody({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={`px-6 py-5 ${className || ""}`}>{children}</div>;
+  return <div className={`px-4 py-4 md:px-6 md:py-5 ${className || ""}`}>{children}</div>;
 }
 
 function CardFooter({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-6 py-4 border-t border-[var(--mh-border)] flex justify-end gap-3">
+    <div className="px-4 py-3.5 md:px-6 md:py-4 border-t border-[var(--mh-border)] flex justify-end gap-3">
       {children}
     </div>
   );
@@ -503,15 +503,11 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* Header */}
-      <div>
-        <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
-          Settings
-        </h1>
-        <p className="text-[13px] text-[var(--mh-text-muted)] mt-0.5">
-          Manage your profile, business, and account preferences
-        </p>
+      <div className="hidden md:block">
+        <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">Settings</h1>
+        <p className="text-[13px] text-[var(--mh-text-muted)] mt-0.5">Manage your profile, business, and account preferences</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">

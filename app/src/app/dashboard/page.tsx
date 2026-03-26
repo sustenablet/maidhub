@@ -196,13 +196,13 @@ export default async function DashboardPage() {
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--mh-text-subtle)] mb-1">{todayDisplay}</p>
-          <h1 className="text-[24px] font-bold text-[var(--mh-text)] tracking-[-0.04em] leading-tight">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--mh-text-subtle)] mb-1 hidden md:block">{todayDisplay}</p>
+          <h1 className="text-[20px] md:text-[24px] font-bold text-[var(--mh-text)] tracking-[-0.04em] leading-tight">
             {greeting}, {firstName}.
           </h1>
         </div>
-        {/* Quick add */}
-        <div className="flex items-center gap-1.5 mt-1">
+        {/* Quick add — desktop only, FAB handles mobile */}
+        <div className="hidden md:flex items-center gap-1.5 mt-1">
           <Link href="/dashboard/clients" className="flex items-center gap-1.5 h-8 px-3 text-[12px] font-medium text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] rounded-[4px] hover:bg-[var(--mh-hover-overlay)] transition-all border border-transparent hover:border-[var(--mh-border)]">
             <UserPlus className="h-3.5 w-3.5" strokeWidth={1.6} />
             Client
@@ -230,7 +230,7 @@ export default async function DashboardPage() {
               </div>
               <ArrowUpRight className="h-3.5 w-3.5 text-[var(--mh-icon-dim)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={2} />
             </div>
-            <div className="text-[36px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
+            <div className="text-[28px] md:text-[36px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
               {clientCount}
             </div>
             <p className="text-[12px] font-medium text-[var(--mh-text-subtle)]">Total Clients</p>
@@ -246,7 +246,7 @@ export default async function DashboardPage() {
               </div>
               <ArrowUpRight className="h-3.5 w-3.5 text-[var(--mh-icon-dim)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={2} />
             </div>
-            <div className="text-[36px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
+            <div className="text-[28px] md:text-[36px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
               {jobCount}
             </div>
             <p className="text-[12px] font-medium text-[var(--mh-text-subtle)]">Upcoming Jobs</p>
@@ -262,7 +262,7 @@ export default async function DashboardPage() {
               </div>
               <ArrowUpRight className="h-3.5 w-3.5 text-[var(--mh-icon-dim)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={2} />
             </div>
-            <div className="text-[28px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
+            <div className="text-[22px] md:text-[28px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
               ${thisMonthRev.toLocaleString("en-US", { maximumFractionDigits: 0 })}
             </div>
             <p className="text-[12px] font-medium text-[var(--mh-text-subtle)]">This Month Revenue</p>
@@ -278,7 +278,7 @@ export default async function DashboardPage() {
               </div>
               <ArrowUpRight className="h-3.5 w-3.5 text-[var(--mh-icon-dim)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={2} />
             </div>
-            <div className={`text-[36px] font-bold leading-none tracking-[-0.04em] tabular-nums mb-1.5 ${invoiceCount > 0 ? "text-red-400" : "text-[var(--mh-text)]"}`}>
+            <div className={`text-[28px] md:text-[36px] font-bold leading-none tracking-[-0.04em] tabular-nums mb-1.5 ${invoiceCount > 0 ? "text-red-400" : "text-[var(--mh-text)]"}`}>
               {invoiceCount}
             </div>
             <p className="text-[12px] font-medium text-[var(--mh-text-subtle)]">Unpaid Invoices</p>
@@ -304,7 +304,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Main content row ───────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
 
         {/* Today's Jobs — 3 cols */}
         <div className="lg:col-span-3 bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] overflow-hidden">

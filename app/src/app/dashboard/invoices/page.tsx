@@ -457,18 +457,10 @@ export default function InvoicesPage() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="hidden md:flex items-center justify-between">
         <div>
-          <h1
-            className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]"
-          >
-            Invoices
-          </h1>
-          <p
-            className="text-sm text-[var(--mh-text-muted)] mt-0.5"
-          >
-            Track billing and payments
-          </p>
+          <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">Invoices</h1>
+          <p className="text-sm text-[var(--mh-text-muted)] mt-0.5">Track billing and payments</p>
         </div>
         <button
           onClick={openCreate}
@@ -480,40 +472,28 @@ export default function InvoicesPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
-          <p
-            className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider"
-          >
+      <div className="grid grid-cols-3 gap-2 md:gap-4">
+        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-3 md:p-5">
+          <p className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider">
             Total Invoiced
           </p>
-          <p
-            className="text-2xl font-bold text-[var(--mh-text)] mt-1"
-          >
+          <p className="text-base md:text-2xl font-bold text-[var(--mh-text)] mt-1">
             {formatCurrency(summaryTotalInvoiced)}
           </p>
         </div>
-        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
-          <p
-            className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider"
-          >
+        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-3 md:p-5">
+          <p className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider">
             Collected
           </p>
-          <p
-            className="text-2xl font-bold text-green-600 mt-1"
-          >
+          <p className="text-base md:text-2xl font-bold text-green-600 mt-1">
             {formatCurrency(summaryCollected)}
           </p>
         </div>
-        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
-          <p
-            className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider"
-          >
+        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-3 md:p-5">
+          <p className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider">
             Outstanding
           </p>
-          <p
-            className="text-2xl font-bold text-amber-600 mt-1"
-          >
+          <p className="text-base md:text-2xl font-bold text-amber-600 mt-1">
             {formatCurrency(summaryOutstanding)}
           </p>
         </div>
@@ -522,16 +502,15 @@ export default function InvoicesPage() {
       {/* Invoice Table */}
       <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
         {/* Toolbar */}
-        <div className="flex items-center justify-between p-5 border-b border-[var(--mh-divider)]">
-          <div className="relative">
+        <div className="flex items-center gap-2 px-4 py-3 md:px-5 md:py-5 border-b border-[var(--mh-divider)]">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-350" />
             <input
               type="text"
               placeholder="Search invoices..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-3 py-2 text-xs bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 w-52 transition-all"
-             
+              className="pl-9 pr-3 py-2 text-xs bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 w-full md:w-52 transition-all"
             />
           </div>
           <div className="relative">
@@ -608,7 +587,58 @@ export default function InvoicesPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            {/* Mobile invoice cards */}
+            <div className="md:hidden divide-y divide-[var(--mh-divider)]">
+              {filtered.map((inv) => {
+                const seq = invoiceSeqMap[inv.id] ?? 0;
+                const clientName = inv.clients
+                  ? `${inv.clients.first_name} ${inv.clients.last_name}`
+                  : "Client";
+                const isOverdue = inv.status === "unpaid" && inv.due_date && new Date(inv.due_date + "T00:00:00") < new Date();
+                return (
+                  <div key={inv.id} className="px-4 py-3.5">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-[11px] font-bold text-[var(--mh-text-faint)] tabular-nums">{invoiceNumber(seq)}</span>
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusBadge(inv.status)}`}>{inv.status}</span>
+                          {isOverdue && <span className="text-[10px] font-bold text-red-400">Overdue</span>}
+                        </div>
+                        <p className="text-[14px] font-semibold text-[var(--mh-text)] truncate">{clientName}</p>
+                        <p className="text-[11px] text-[var(--mh-text-faint)] mt-0.5">
+                          Due {inv.due_date ? formatDate(inv.due_date) : "\u2014"}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0 ml-3">
+                        <p className="text-[18px] font-bold text-[var(--mh-text)] tabular-nums tracking-tight">
+                          {formatCurrency(inv.total || 0)}
+                        </p>
+                      </div>
+                    </div>
+                    {inv.status === "unpaid" && (
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => markPaid(inv)}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[12px] font-semibold bg-[#34C759]/10 text-[#34C759] rounded-[6px] active:bg-[#34C759]/20 transition-colors"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
+                          Mark Paid
+                        </button>
+                        <button
+                          onClick={() => openEdit(inv)}
+                          className="flex items-center justify-center gap-1.5 px-3 py-2 text-[12px] font-semibold bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] rounded-[6px] active:bg-[var(--mh-hover-overlay)] transition-colors border border-[var(--mh-border)]"
+                        >
+                          <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-[var(--mh-surface-sunken)] border-b border-[var(--mh-divider)]">
@@ -726,7 +756,8 @@ export default function InvoicesPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </div>
 

@@ -1039,18 +1039,10 @@ export default function SchedulePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="hidden md:flex items-center justify-between">
         <div>
-          <h1
-            className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]"
-          >
-            Schedule
-          </h1>
-          <p
-            className="text-sm text-[var(--mh-text-muted)] mt-1"
-          >
-            Manage your cleaning appointments
-          </p>
+          <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">Schedule</h1>
+          <p className="text-sm text-[var(--mh-text-muted)] mt-1">Manage your cleaning appointments</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -1068,6 +1060,24 @@ export default function SchedulePage() {
             New Job
           </button>
         </div>
+      </div>
+
+      {/* Mobile action bar */}
+      <div className="flex items-center gap-2 md:hidden">
+        <button
+          onClick={() => { setRecurringOpen(true); fetchRecurringRules(); }}
+          className="flex items-center gap-2 flex-1 justify-center py-2.5 bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[var(--mh-text)] text-[13px] font-semibold rounded-[8px] transition-colors"
+        >
+          <Repeat className="h-4 w-4" />
+          Recurring
+        </button>
+        <button
+          onClick={openNewJobForm}
+          className="flex items-center gap-2 flex-1 justify-center py-2.5 bg-[#0071E3] text-white text-[13px] font-semibold rounded-[8px] transition-colors"
+        >
+          <Plus className="h-4 w-4" />
+          New Job
+        </button>
       </div>
 
       {/* Navigation bar */}

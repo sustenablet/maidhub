@@ -283,9 +283,9 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="hidden md:flex items-center justify-between">
         <div>
           <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
             Notifications

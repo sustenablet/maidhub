@@ -9,6 +9,7 @@ import {
   UserRound,
   Mail,
   Phone,
+  ChevronRight,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -265,7 +266,7 @@ export default function ClientsPage() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="hidden md:flex items-center justify-between">
         <div>
           <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
             Clients
@@ -286,15 +287,15 @@ export default function ClientsPage() {
       {/* Table card */}
       <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
         {/* Toolbar */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--mh-divider)]">
-          <div className="relative">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--mh-divider)]">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[var(--mh-text-faint)]" />
             <input
               type="text"
               placeholder="Search clients..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-3 py-1.5 text-[12.5px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 w-52 transition-all placeholder:text-[var(--mh-text-faint)] text-[var(--mh-text)]"
+              className="pl-9 pr-3 py-1.5 text-[12.5px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 w-full md:w-52 transition-all placeholder:text-[var(--mh-text-faint)] text-[var(--mh-text)]"
             />
           </div>
           <div className="relative">
@@ -362,7 +363,48 @@ export default function ClientsPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            {/* Mobile card list */}
+            <div className="md:hidden divide-y divide-[var(--mh-divider)]">
+              {filtered.map((client, index) => {
+                const initials = getInitials(client.first_name, client.last_name);
+                const color = getAvatarColor(index);
+                const statusBadge =
+                  client.status === "active"
+                    ? "bg-[#34C759]/10 text-[#34C759]"
+                    : "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)]";
+                return (
+                  <div
+                    key={client.id}
+                    onClick={() => router.push(`/dashboard/clients/${client.id}`)}
+                    className="flex items-center gap-3.5 px-4 py-3.5 active:bg-[var(--mh-hover-overlay)] transition-colors cursor-pointer"
+                  >
+                    <div className={`h-10 w-10 rounded-full ${color} flex items-center justify-center text-[12px] font-bold shrink-0`}>
+                      {initials}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[14px] font-semibold text-[var(--mh-text)] leading-tight">
+                        {client.first_name} {client.last_name}
+                      </p>
+                      <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5 truncate">
+                        {client.phone || client.email || "No contact info"}
+                      </p>
+                      {client.jobs_count > 0 && (
+                        <p className="text-[11px] text-[var(--mh-text-faint)] mt-0.5">{client.jobs_count} job{client.jobs_count !== 1 ? "s" : ""}</p>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize ${statusBadge}`}>
+                        {client.status}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-[var(--mh-text-faint)]" />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[var(--mh-divider)]">
@@ -451,7 +493,8 @@ export default function ClientsPage() {
                 })}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
       </div>
 
