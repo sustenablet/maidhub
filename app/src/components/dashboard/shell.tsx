@@ -517,21 +517,30 @@ export function DashboardShell({
           </div>
         </header>
 
-        {/* Mobile mini-header — safe area + account avatar */}
-        {pathname === "/dashboard" && (
-          <div
-            className="md:hidden flex items-center justify-end px-4"
-            style={{ paddingTop: "env(safe-area-inset-top)", minHeight: "calc(env(safe-area-inset-top) + 40px)" }}
-          >
-            <button
-              onClick={() => setMoreOpen(true)}
-              className="h-8 w-8 rounded-full bg-[#0071E3]/15 border border-[#0071E3]/25 flex items-center justify-center active:opacity-70 transition-opacity"
-              aria-label="Account"
-            >
-              <span className="text-[#0071E3] text-[11px] font-bold tracking-wide">{initials}</span>
-            </button>
-          </div>
-        )}
+        {/* Mobile mini-header — keep spacing on all pages; actions only on homepage */}
+        <div
+          className="md:hidden flex items-center justify-end px-4"
+          style={{ paddingTop: "env(safe-area-inset-top)", minHeight: "calc(env(safe-area-inset-top) + 40px)" }}
+        >
+          {pathname === "/dashboard" && (
+            <div className="flex items-center gap-2">
+              <Link
+                href="/dashboard/notifications"
+                className="h-8 w-8 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] flex items-center justify-center active:opacity-70 transition-opacity"
+                aria-label="Notifications"
+              >
+                <Bell className="h-4 w-4 text-[var(--mh-text-muted)]" strokeWidth={1.9} />
+              </Link>
+              <button
+                onClick={() => setMoreOpen(true)}
+                className="h-8 w-8 rounded-full bg-[#0071E3]/15 border border-[#0071E3]/25 flex items-center justify-center active:opacity-70 transition-opacity"
+                aria-label="Account"
+              >
+                <span className="text-[#0071E3] text-[11px] font-bold tracking-wide">{initials}</span>
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Page content — extra bottom padding on mobile for tab bar */}
         <main className="flex-1 p-4 md:p-6 overflow-auto pb-[calc(72px+env(safe-area-inset-bottom))] md:pb-6">
