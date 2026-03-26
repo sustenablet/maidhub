@@ -1471,7 +1471,8 @@ export default function SchedulePage() {
               const clientName = inv.clients
                 ? `${inv.clients.first_name} ${inv.clients.last_name}`
                 : "Client";
-              const isOverdue = new Date(inv.due_date + "T00:00:00") < new Date(new Date().toDateString());
+              const todayDateStr = new Date().toISOString().split("T")[0];
+              const isOverdue = inv.due_date < todayDateStr;
               return (
                 <div
                   key={inv.id}

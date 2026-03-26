@@ -11,6 +11,7 @@ import {
   Loader2,
   Clock,
   X,
+  AlertCircle,
 } from "lucide-react";
 type NotifCategory = "all" | "jobs" | "invoices";
 
@@ -22,6 +23,7 @@ interface ActivityItem {
   timestamp: string;
   relativeTime: string;
   unread: boolean;
+  urgent?: boolean;
   count?: number;
   groupKey?: string;
 }
@@ -41,11 +43,12 @@ function getRelativeTime(dateStr: string): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function getIcon(category: string) {
+function getIcon(category: string, urgent?: boolean) {
   switch (category) {
     case "jobs":
       return { Icon: Briefcase, bg: "bg-[#0071E3]/[0.12]", color: "text-[#0071E3]" };
     case "invoices":
+      if (urgent) return { Icon: AlertCircle, bg: "bg-[#FF9F0A]/15", color: "text-[#FF9F0A]" };
       return { Icon: Receipt, bg: "bg-[#0071E3]/[0.12]", color: "text-[#0071E3]" };
     default:
       return { Icon: Bell, bg: "bg-[var(--mh-surface-raised)]", color: "text-[var(--mh-text-muted)]" };
@@ -151,6 +154,34 @@ export default function NotificationsPage() {
       }
     }
 
+    const todayStr = new Date().toISOString().split("T")[0];
+
+    // Fetch invoices due today — pinned urgent notifications
+    const { data: dueToday } = await supabase
+      .from("invoices")
+      .select("id, total, due_date, clients(first_name, last_name)")
+      .eq("status", "unpaid")
+      .eq("due_date", todayStr);
+
+    if (dueToday && dueToday.length > 0) {
+      for (const inv of dueToday) {
+        const clientRaw = inv.clients as unknown as { first_name: string; last_name: string } | { first_name: string; last_name: string }[] | null;
+        const client = Array.isArray(clientRaw) ? clientRaw[0] ?? null : clientRaw;
+        const clientName = client ? `${client.first_name} ${client.last_name}` : "Unknown Client";
+        const amount = inv.total ? `$${Number(inv.total).toFixed(0)}` : "";
+        items.push({
+          id: `due-today-${inv.id}`,
+          category: "invoices",
+          title: "Invoice Due Today",
+          message: `Invoice for ${amount} to ${clientName} is due today — collect payment now`,
+          timestamp: new Date().toISOString(),
+          relativeTime: "Today",
+          unread: !readIds.has(`due-today-${inv.id}`),
+          urgent: true,
+        });
+      }
+    }
+
     // Fetch recent invoices
     const { data: invoices } = await supabase
       .from("invoices")
@@ -168,22 +199,27 @@ export default function NotificationsPage() {
         let message = "";
 
         switch (inv.status) {
-          case "unpaid":
-            const dueDate = inv.due_date ? new Date(inv.due_date) : null;
-            const isOverdue = dueDate && dueDate < new Date();
+          case "unpaid": {
+            // Use string comparison to avoid UTC parsing bug with date-only strings
+            const isOverdue = !!inv.due_date && inv.due_date < todayStr;
+            const isDueToday = inv.due_date === todayStr;
+            if (isDueToday) continue; // already injected as urgent above
             title = isOverdue ? "Invoice Overdue" : "Invoice Created";
             message = isOverdue
-              ? `Invoice for ${amount} from ${clientName} is overdue${dueDate ? ` (due ${dueDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })})` : ""}`
-              : `New invoice for ${amount} sent to ${clientName}`;
+              ? `Invoice for ${amount} to ${clientName} is overdue — was due ${new Date(inv.due_date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+              : `New invoice for ${amount} created for ${clientName}`;
             break;
+          }
           case "paid":
             title = "Payment Received";
-            message = `${clientName} paid ${amount}${inv.payment_date ? ` on ${new Date(inv.payment_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}`;
+            message = `${clientName} paid ${amount}${inv.payment_date ? ` on ${new Date(inv.payment_date + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}`;
             break;
           case "void":
             title = "Invoice Voided";
             message = `Invoice for ${amount} to ${clientName} has been voided`;
             break;
+          default:
+            continue;
         }
 
         items.push({
@@ -198,8 +234,12 @@ export default function NotificationsPage() {
       }
     }
 
-    // Sort all by timestamp descending
-    items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    // Sort: urgent first, then by timestamp descending
+    items.sort((a, b) => {
+      if (a.urgent && !b.urgent) return -1;
+      if (!a.urgent && b.urgent) return 1;
+      return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+    });
 
     // Deduplicate: group same groupKey within 10 minutes, keeping latest timestamp
     const deduped: ActivityItem[] = [];
@@ -328,15 +368,17 @@ export default function NotificationsPage() {
       ) : (
         <div className="space-y-2.5">
           {filtered.map((item) => {
-            const { Icon, bg, color } = getIcon(item.category);
+            const { Icon, bg, color } = getIcon(item.category, item.urgent);
             return (
               <button
                 key={item.id}
                 onClick={() => markRead(item.id)}
-                className={`w-full text-left bg-[var(--mh-surface)] border rounded-[12px] p-3.5 transition-colors ${
-                  item.unread
-                    ? "border-[#0071E3]/35"
-                    : "border-[var(--mh-border)]"
+                className={`w-full text-left rounded-[12px] p-3.5 transition-colors border ${
+                  item.urgent
+                    ? "bg-[#FF9F0A]/6 border-[#FF9F0A]/30"
+                    : item.unread
+                    ? "bg-[var(--mh-surface)] border-[#0071E3]/35"
+                    : "bg-[var(--mh-surface)] border-[var(--mh-border)]"
                 }`}
               >
                 <div className="flex items-start gap-3">
@@ -345,7 +387,7 @@ export default function NotificationsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className={`text-[13px] font-semibold truncate ${item.unread ? "text-[var(--mh-text)]" : "text-[var(--mh-text-muted)]"}`}>
+                      <p className={`text-[13px] font-semibold truncate ${item.urgent ? "text-[#FF9F0A]" : item.unread ? "text-[var(--mh-text)]" : "text-[var(--mh-text-muted)]"}`}>
                         {item.count && item.count > 1 ? `${item.count}× ${item.title}` : item.title}
                       </p>
                       <div className="flex items-center gap-2 shrink-0">
@@ -371,7 +413,11 @@ export default function NotificationsPage() {
                       {item.message}
                     </p>
                   </div>
-                  {item.unread && <span className="mt-1 h-2 w-2 rounded-full bg-[#0071E3] shrink-0" />}
+                  {item.urgent
+                    ? <span className="mt-1 h-2 w-2 rounded-full bg-[#FF9F0A] shrink-0" />
+                    : item.unread
+                    ? <span className="mt-1 h-2 w-2 rounded-full bg-[#0071E3] shrink-0" />
+                    : null}
                 </div>
               </button>
             );

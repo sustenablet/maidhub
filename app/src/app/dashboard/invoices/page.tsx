@@ -110,6 +110,9 @@ export default function InvoicesPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [actionMenuId, setActionMenuId] = useState<string | null>(null);
   const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null);
+  const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
+  const [mobileMenuId, setMobileMenuId] = useState<string | null>(null);
+  const [mobileDeleteConfirmId, setMobileDeleteConfirmId] = useState<string | null>(null);
 
   // Quick-add client state
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -671,55 +674,111 @@ export default function InvoicesPage() {
             {filtered.map((inv) => {
               const seq = invoiceSeqMap[inv.id] ?? 0;
               const clientName = inv.clients ? `${inv.clients.first_name} ${inv.clients.last_name}` : "Client";
-              const isOverdue = inv.status === "unpaid" && inv.due_date && new Date(inv.due_date + "T00:00:00") < new Date();
+              const todayStr = new Date().toISOString().split("T")[0];
+              const isOverdue = inv.status === "unpaid" && !!inv.due_date && inv.due_date < todayStr;
+              const isDueToday = inv.status === "unpaid" && inv.due_date === todayStr;
               const statusColors: Record<string, string> = {
-                unpaid: isOverdue ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-[#FF9F0A]/10 text-[#FF9F0A] border-[#FF9F0A]/20",
+                unpaid: isOverdue ? "bg-red-500/10 text-red-400 border-red-500/20" : isDueToday ? "bg-[#FF9F0A]/10 text-[#FF9F0A] border-[#FF9F0A]/20" : "bg-[#FF9F0A]/10 text-[#FF9F0A] border-[#FF9F0A]/20",
                 paid: "bg-[#34C759]/10 text-[#34C759] border-[#34C759]/20",
                 void: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] border-[var(--mh-border)]",
               };
+              const statusLabel = isOverdue ? "Overdue" : isDueToday ? "Due Today" : inv.status.charAt(0).toUpperCase() + inv.status.slice(1);
+              const menuOpen = mobileMenuId === inv.id;
               return (
-                <div key={inv.id} className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[14px] overflow-hidden">
-                  <div className="flex items-start gap-3 p-4">
+                <div key={inv.id} className={`bg-[var(--mh-surface)] border rounded-[14px] overflow-hidden ${isOverdue ? "border-red-500/30" : "border-[var(--mh-border)]"}`}>
+                  {/* Tappable main area → preview */}
+                  <button
+                    onClick={() => setPreviewInvoice(inv)}
+                    className="w-full flex items-start gap-3 p-4 text-left active:bg-[var(--mh-hover-overlay)] transition-colors"
+                  >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="text-[11px] font-bold text-[var(--mh-text-faint)] tabular-nums font-mono">{invoiceNumber(seq)}</span>
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusColors[inv.status] || statusColors.void}`}>
-                          {isOverdue ? "Overdue" : inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}
+                          {statusLabel}
                         </span>
                       </div>
                       <p className="text-[15px] font-bold text-[var(--mh-text)] tracking-[-0.02em] truncate">{clientName}</p>
                       <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
-                        Due {inv.due_date ? formatDate(inv.due_date) : "—"}
+                        {inv.status === "paid" && inv.payment_date
+                          ? `Paid ${formatDate(inv.payment_date)}`
+                          : `Due ${inv.due_date ? formatDate(inv.due_date) : "—"}`}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-[20px] font-bold text-[var(--mh-text)] tracking-[-0.03em] tabular-nums">
                         {formatCurrency(inv.total || 0)}
                       </p>
-                      {inv.status === "paid" && inv.payment_date && (
-                        <p className="text-[11px] text-[#34C759] mt-0.5">Paid {formatDate(inv.payment_date)}</p>
+                    </div>
+                  </button>
+                  {/* Action footer */}
+                  <div className="flex border-t border-[var(--mh-divider)]">
+                    {inv.status === "unpaid" && (
+                      <>
+                        <button
+                          onClick={() => markPaid(inv)}
+                          className="flex-1 flex items-center justify-center gap-1.5 py-3 text-[13px] font-semibold text-[#34C759] active:bg-[#34C759]/10 transition-colors"
+                        >
+                          <CheckCircle2 className="h-4 w-4" strokeWidth={2} />
+                          Mark Paid
+                        </button>
+                        <div className="w-px bg-[var(--mh-divider)]" />
+                        <button
+                          onClick={() => openEdit(inv)}
+                          className="flex items-center justify-center gap-1.5 px-4 py-3 text-[13px] font-semibold text-[var(--mh-text-muted)] active:bg-[var(--mh-hover-overlay)] transition-colors"
+                        >
+                          <Pencil className="h-4 w-4" strokeWidth={2} />
+                          Edit
+                        </button>
+                        <div className="w-px bg-[var(--mh-divider)]" />
+                      </>
+                    )}
+                    {/* ··· menu button */}
+                    <div className="relative">
+                      <button
+                        onClick={() => setMobileMenuId(menuOpen ? null : inv.id)}
+                        className="flex items-center justify-center px-4 py-3 text-[var(--mh-text-muted)] active:bg-[var(--mh-hover-overlay)] transition-colors"
+                      >
+                        <MoreHorizontal className="h-4 w-4" strokeWidth={2} />
+                      </button>
+                      {menuOpen && (
+                        <>
+                          <div className="fixed inset-0 z-[40]" onClick={() => { setMobileMenuId(null); setMobileDeleteConfirmId(null); }} />
+                          <div className="absolute right-0 bottom-full mb-1 z-[50] w-44 bg-[var(--mh-surface)] rounded-[10px] border border-[var(--mh-border)] shadow-[0_8px_32px_rgba(0,0,0,0.45)] py-1.5 overflow-hidden">
+                            {inv.status === "unpaid" && (
+                              <button
+                                onClick={() => { voidInvoice(inv); setMobileMenuId(null); }}
+                                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium text-[var(--mh-text-muted)] active:bg-[var(--mh-hover-overlay)] transition-colors text-left"
+                              >
+                                <Ban className="h-4 w-4 shrink-0" strokeWidth={1.8} />
+                                Void Invoice
+                              </button>
+                            )}
+                            <button
+                              onClick={() => {
+                                if (mobileDeleteConfirmId !== inv.id) {
+                                  setMobileDeleteConfirmId(inv.id);
+                                  setTimeout(() => setMobileDeleteConfirmId(null), 3000);
+                                } else {
+                                  deleteInvoice(inv);
+                                  setMobileMenuId(null);
+                                  setMobileDeleteConfirmId(null);
+                                }
+                              }}
+                              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium transition-colors text-left ${
+                                mobileDeleteConfirmId === inv.id
+                                  ? "text-red-500 bg-red-500/10"
+                                  : "text-red-400 active:bg-red-500/10"
+                              }`}
+                            >
+                              <Trash2 className="h-4 w-4 shrink-0" strokeWidth={1.8} />
+                              {mobileDeleteConfirmId === inv.id ? "Tap again to confirm" : "Delete"}
+                            </button>
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>
-                  {inv.status === "unpaid" && (
-                    <div className="flex border-t border-[var(--mh-divider)]">
-                      <button
-                        onClick={() => markPaid(inv)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-3 text-[13px] font-semibold text-[#34C759] active:bg-[#34C759]/10 transition-colors"
-                      >
-                        <CheckCircle2 className="h-4 w-4" strokeWidth={2} />
-                        Mark Paid
-                      </button>
-                      <div className="w-px bg-[var(--mh-divider)]" />
-                      <button
-                        onClick={() => openEdit(inv)}
-                        className="flex items-center justify-center gap-1.5 px-5 py-3 text-[13px] font-semibold text-[var(--mh-text-muted)] active:bg-[var(--mh-hover-overlay)] transition-colors"
-                      >
-                        <Pencil className="h-4 w-4" strokeWidth={2} />
-                        Edit
-                      </button>
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -1347,6 +1406,154 @@ export default function InvoicesPage() {
             </div>
           </div>
         </div>
+      </SlidePanel>
+
+      {/* ── Invoice Preview Panel ───────────────────────────── */}
+      <SlidePanel
+        open={!!previewInvoice}
+        onClose={() => setPreviewInvoice(null)}
+        title={previewInvoice ? invoiceNumber(invoiceSeqMap[previewInvoice.id] ?? 0) : "Invoice"}
+        subtitle={previewInvoice?.clients ? `${previewInvoice.clients.first_name} ${previewInvoice.clients.last_name}` : undefined}
+      >
+        {previewInvoice && (() => {
+          const inv = previewInvoice;
+          const todayStr = new Date().toISOString().split("T")[0];
+          const isOverdue = inv.status === "unpaid" && !!inv.due_date && inv.due_date < todayStr;
+          const isDueToday = inv.status === "unpaid" && inv.due_date === todayStr;
+          const statusLabel = inv.status === "paid" ? "Paid" : isOverdue ? "Overdue" : isDueToday ? "Due Today" : inv.status === "void" ? "Void" : "Unpaid";
+          const statusColor = inv.status === "paid"
+            ? "bg-[#34C759]/10 text-[#34C759] border-[#34C759]/25"
+            : isOverdue
+            ? "bg-red-500/10 text-red-400 border-red-500/25"
+            : isDueToday
+            ? "bg-[#FF9F0A]/10 text-[#FF9F0A] border-[#FF9F0A]/25"
+            : inv.status === "void"
+            ? "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] border-[var(--mh-border)]"
+            : "bg-[#FF9F0A]/10 text-[#FF9F0A] border-[#FF9F0A]/25";
+          const clientName = inv.clients ? `${inv.clients.first_name} ${inv.clients.last_name}` : "Client";
+          const lineItems: LineItem[] = Array.isArray(inv.line_items) ? inv.line_items : [];
+          return (
+            <div className="flex flex-col">
+              {/* Status + amount header */}
+              <div className="px-6 pt-5 pb-4 border-b border-[var(--mh-divider)]">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border ${statusColor}`}>
+                    {statusLabel}
+                  </span>
+                </div>
+                <p className="text-[28px] font-bold text-[var(--mh-text)] tracking-[-0.04em] tabular-nums">
+                  {formatCurrency(inv.total || 0)}
+                </p>
+              </div>
+
+              {/* Details */}
+              <div className="px-6 py-4 space-y-0 divide-y divide-[var(--mh-divider)]">
+                {/* Client */}
+                <div className="flex items-center gap-3 py-3">
+                  <div className="h-7 w-7 rounded-[5px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
+                    <Receipt className="h-3.5 w-3.5 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--mh-text-subtle)]">Client</p>
+                    <p className="text-[13px] font-semibold text-[var(--mh-text)] mt-0.5">{clientName}</p>
+                  </div>
+                </div>
+                {/* Created */}
+                <div className="flex items-center gap-3 py-3">
+                  <div className="h-7 w-7 rounded-[5px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
+                    <Receipt className="h-3.5 w-3.5 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--mh-text-subtle)]">Created</p>
+                    <p className="text-[13px] font-semibold text-[var(--mh-text)] mt-0.5">{formatDate(inv.created_at.split("T")[0])}</p>
+                  </div>
+                </div>
+                {/* Due date */}
+                {inv.due_date && (
+                  <div className="flex items-center gap-3 py-3">
+                    <div className="h-7 w-7 rounded-[5px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
+                      <Receipt className="h-3.5 w-3.5 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--mh-text-subtle)]">Due Date</p>
+                      <p className={`text-[13px] font-semibold mt-0.5 ${isOverdue ? "text-red-400" : isDueToday ? "text-[#FF9F0A]" : "text-[var(--mh-text)]"}`}>
+                        {formatDate(inv.due_date)}{isDueToday ? " — Today" : isOverdue ? " — Overdue" : ""}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {/* Payment date */}
+                {inv.status === "paid" && inv.payment_date && (
+                  <div className="flex items-center gap-3 py-3">
+                    <div className="h-7 w-7 rounded-[5px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
+                      <Receipt className="h-3.5 w-3.5 text-[#34C759]" strokeWidth={1.8} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--mh-text-subtle)]">Paid On</p>
+                      <p className="text-[13px] font-semibold text-[#34C759] mt-0.5">{formatDate(inv.payment_date)}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Line items */}
+              <div className="px-6 pb-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-2">Items</p>
+                <div className="rounded-[8px] border border-[var(--mh-border)] overflow-hidden divide-y divide-[var(--mh-divider)]">
+                  {lineItems.length === 0 ? (
+                    <div className="px-4 py-3 text-[12px] text-[var(--mh-text-muted)]">No line items</div>
+                  ) : (
+                    lineItems.map((item, i) => (
+                      <div key={i} className="flex items-center justify-between px-4 py-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-semibold text-[var(--mh-text)] truncate">{item.description}</p>
+                          {item.quantity !== 1 && (
+                            <p className="text-[11px] text-[var(--mh-text-muted)]">× {item.quantity}</p>
+                          )}
+                        </div>
+                        <p className="text-[13px] font-bold text-[var(--mh-text)] tabular-nums shrink-0 ml-4">
+                          {formatCurrency(item.unit_price * item.quantity)}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                  <div className="flex items-center justify-between px-4 py-3 bg-[var(--mh-surface-raised)]">
+                    <p className="text-[13px] font-bold text-[var(--mh-text)]">Total</p>
+                    <p className="text-[15px] font-bold text-[var(--mh-text)] tabular-nums">{formatCurrency(inv.total || 0)}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes */}
+              {inv.notes && (
+                <div className="px-6 pb-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-2">Notes</p>
+                  <p className="text-[13px] text-[var(--mh-text-muted)] leading-relaxed whitespace-pre-wrap">{inv.notes}</p>
+                </div>
+              )}
+
+              {/* Actions */}
+              {inv.status === "unpaid" && (
+                <div className="px-6 pb-6 pt-2 flex gap-2">
+                  <button
+                    onClick={() => { markPaid(inv); setPreviewInvoice(null); }}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#34C759] text-white text-[13px] font-bold rounded-[10px] active:opacity-80 transition-opacity"
+                  >
+                    <CheckCircle2 className="h-4 w-4" strokeWidth={2.5} />
+                    Mark Paid
+                  </button>
+                  <button
+                    onClick={() => { openEdit(inv); setPreviewInvoice(null); }}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[var(--mh-text)] text-[13px] font-bold rounded-[10px] active:opacity-80 transition-opacity"
+                  >
+                    <Pencil className="h-4 w-4" strokeWidth={2} />
+                    Edit
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </SlidePanel>
 
       {closePromptOpen && (
