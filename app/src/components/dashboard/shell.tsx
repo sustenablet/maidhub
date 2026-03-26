@@ -517,13 +517,13 @@ export function DashboardShell({
           </div>
         </header>
 
-        {/* Mobile mini-header — keep spacing on all pages; actions only on homepage */}
+        {/* Mobile mini-header — consistent spacing on all pages; actions only on homepage */}
         <div
           className="md:hidden flex items-center justify-end px-4"
-          style={{ paddingTop: "env(safe-area-inset-top)", minHeight: "calc(env(safe-area-inset-top) + 40px)" }}
+          style={{ paddingTop: "env(safe-area-inset-top)", minHeight: "calc(env(safe-area-inset-top) + 18px)" }}
         >
           {pathname === "/dashboard" && (
-            <div className="flex items-center gap-2">
+            <div className="flex h-9 items-center gap-2">
               <Link
                 href="/dashboard/notifications"
                 className="h-8 w-8 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] flex items-center justify-center active:opacity-70 transition-opacity"

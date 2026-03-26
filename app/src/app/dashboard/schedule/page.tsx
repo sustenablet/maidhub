@@ -1847,7 +1847,7 @@ export default function SchedulePage() {
               </FormSelect>
             </FormField>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField label="Date" required>
                 <FormInput
                   type="date"
@@ -1864,7 +1864,7 @@ export default function SchedulePage() {
               </FormField>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField label="Duration">
                 <FormSelect
                   value={formDuration}

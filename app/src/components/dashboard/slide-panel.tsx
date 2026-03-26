@@ -56,12 +56,15 @@ export function SlidePanel({
 
       {/* Panel */}
       <div
-        className={`fixed inset-y-0 right-0 z-50 ${width} bg-[var(--mh-surface)] shadow-[var(--mh-shadow-panel)] transform transition-transform duration-300 ease-out flex flex-col border-l border-[var(--mh-border)] ${
+        className={`fixed inset-y-0 right-0 z-50 ${width} bg-[var(--mh-surface)] shadow-[var(--mh-shadow-panel)] transform transition-transform duration-300 ease-out flex flex-col border-l border-[var(--mh-border)] overflow-x-hidden ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-4 border-b border-[var(--mh-border)] shrink-0">
+        <div
+          className="flex items-start justify-between px-4 md:px-6 pb-3 md:pb-4 border-b border-[var(--mh-border)] shrink-0"
+          style={{ paddingTop: "calc(env(safe-area-inset-top) + 10px)" }}
+        >
           <div>
             <h2 className="text-[16px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">
               {title}

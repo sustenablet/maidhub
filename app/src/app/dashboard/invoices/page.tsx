@@ -907,7 +907,7 @@ export default function InvoicesPage() {
           </FormActions>
         }
       >
-        <div className="px-6 py-6 space-y-6">
+        <div className="px-4 md:px-6 py-5 md:py-6 space-y-6">
           <FormSection label="Client">
             <FormField label="Client" required>
               <div className="space-y-2">
@@ -936,7 +936,7 @@ export default function InvoicesPage() {
                 {quickAddOpen && (
                   <div className="p-4 bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)] rounded-[6px] space-y-3">
                     <p className="text-[12px] font-semibold text-[var(--mh-text)]">Quick Add Client</p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <FormInput
                         placeholder="First name *"
                         value={qaFirstName}
