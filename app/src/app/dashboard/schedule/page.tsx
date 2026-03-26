@@ -207,6 +207,7 @@ export default function SchedulePage() {
   const [viewMode, setViewMode] = useState<"week" | "day" | "list" | "month">("week");
   const [selectedDay, setSelectedDay] = useState<Date>(today);
   const [jobStatusFilter, setJobStatusFilter] = useState<Job["status"] | "all">("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | "recurring" | "one_time">("all");
   const [monthOffset, setMonthOffset] = useState(0);
   const [monthJobs, setMonthJobs] = useState<Job[]>([]);
 
@@ -366,21 +367,27 @@ export default function SchedulePage() {
   const jobsByDay = useMemo(() => {
     const map: Record<number, Job[]> = {};
     for (let i = 0; i < 7; i++) map[i] = [];
-
     for (const job of jobs) {
-      // scheduled_date is YYYY-MM-DD
       const [y, m, d] = job.scheduled_date.split("-").map(Number);
       const jobDate = new Date(y, m - 1, d);
       const dayIndex = weekDays.findIndex((wd) => isSameDay(wd, jobDate));
-      if (dayIndex >= 0) {
-        map[dayIndex].push(job);
-      }
+      if (dayIndex >= 0) map[dayIndex].push(job);
     }
     return map;
   }, [jobs, weekDays]);
 
+  const applyFilters = useCallback((list: Job[]) => {
+    return list
+      .filter(j => jobStatusFilter === "all" || j.status === jobStatusFilter)
+      .filter(j => {
+        if (typeFilter === "recurring") return !!j.recurring_rule_id;
+        if (typeFilter === "one_time") return !j.recurring_rule_id;
+        return true;
+      });
+  }, [jobStatusFilter, typeFilter]);
+
   const filteredJobsByDay = useMemo(() => {
-    const filtered = jobStatusFilter === "all" ? jobs : jobs.filter(j => j.status === jobStatusFilter);
+    const filtered = applyFilters(jobs);
     const map: Record<number, Job[]> = {};
     for (let i = 0; i < 7; i++) map[i] = [];
     for (const job of filtered) {
@@ -390,25 +397,23 @@ export default function SchedulePage() {
       if (idx >= 0) map[idx].push(job);
     }
     return map;
-  }, [jobs, jobStatusFilter, weekDays]);
+  }, [jobs, applyFilters, weekDays]);
 
   const selectedDayJobs = useMemo(() => {
-    const filtered = jobStatusFilter === "all" ? jobs : jobs.filter(j => j.status === jobStatusFilter);
-    return filtered
+    return applyFilters(jobs)
       .filter(j => {
         const [y, m, d] = j.scheduled_date.split("-").map(Number);
         return isSameDay(new Date(y, m - 1, d), selectedDay);
       })
       .sort((a, b) => (a.start_time || "").localeCompare(b.start_time || ""));
-  }, [jobs, jobStatusFilter, selectedDay]);
+  }, [jobs, applyFilters, selectedDay]);
 
   const listViewJobs = useMemo(() => {
-    const filtered = jobStatusFilter === "all" ? jobs : jobs.filter(j => j.status === jobStatusFilter);
-    return [...filtered].sort((a, b) => {
+    return [...applyFilters(jobs)].sort((a, b) => {
       if (a.scheduled_date !== b.scheduled_date) return a.scheduled_date.localeCompare(b.scheduled_date);
       return (a.start_time || "").localeCompare(b.start_time || "");
     });
-  }, [jobs, jobStatusFilter]);
+  }, [jobs, applyFilters]);
 
   // Month view
   const monthStart = useMemo(() => {
@@ -433,9 +438,8 @@ export default function SchedulePage() {
   }, [monthStart]);
 
   const filteredMonthJobs = useMemo(() => {
-    if (jobStatusFilter === "all") return monthJobs;
-    return monthJobs.filter(j => j.status === jobStatusFilter);
-  }, [monthJobs, jobStatusFilter]);
+    return applyFilters(monthJobs);
+  }, [monthJobs, applyFilters]);
 
   const monthJobsByDate = useMemo(() => {
     const map: Record<string, Job[]> = {};
@@ -1078,13 +1082,35 @@ export default function SchedulePage() {
       {/* ── MOBILE SCHEDULE VIEW ──────────────────────────────── */}
       <div className="md:hidden space-y-3">
 
+        {/* Type filter — horizontal scroll */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: "none" }}>
+          {([
+            { key: "all" as const, label: "All Jobs" },
+            { key: "recurring" as const, label: "Recurring" },
+            { key: "one_time" as const, label: "One-Time" },
+          ] as const).map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setTypeFilter(f.key)}
+              className={`shrink-0 px-3 py-1.5 text-[12px] font-semibold rounded-full border transition-colors ${
+                typeFilter === f.key
+                  ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]"
+                  : "bg-[var(--mh-surface)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
         {/* Status filter — horizontal scroll */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: "none" }}>
           {([
-            { key: "all" as const, label: "All" },
+            { key: "all" as const, label: "Any Status" },
             { key: "scheduled" as const, label: "Scheduled" },
             { key: "in_progress" as const, label: "In Progress" },
             { key: "completed" as const, label: "Completed" },
+            { key: "invoiced" as const, label: "Invoiced" },
             { key: "cancelled" as const, label: "Cancelled" },
           ] as const).map((f) => (
             <button
@@ -1126,9 +1152,7 @@ export default function SchedulePage() {
             {weekDays.map((day, i) => {
               const isToday = isSameDay(day, today);
               const isSelected = isSameDay(day, selectedDay);
-              const dayJobCount = (jobsByDay[i] ?? []).filter(
-                (j) => jobStatusFilter === "all" || j.status === jobStatusFilter
-              ).length;
+              const dayJobCount = applyFilters(jobsByDay[i] ?? []).length;
               return (
                 <button
                   key={i}
@@ -1297,27 +1321,56 @@ export default function SchedulePage() {
             </div>
           </div>
         </div>
-        {/* Status filter chips */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {([
-            { key: "all" as const, label: "All" },
-            { key: "scheduled" as const, label: "Scheduled" },
-            { key: "in_progress" as const, label: "In Progress" },
-            { key: "completed" as const, label: "Completed" },
-            { key: "cancelled" as const, label: "Cancelled" },
-          ]).map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setJobStatusFilter(f.key)}
-              className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${
-                jobStatusFilter === f.key
-                  ? "bg-[#0071E3] border-[#0071E3] text-white"
-                  : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        {/* Filter rows */}
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Type filter */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)]">Type</span>
+            {([
+              { key: "all" as const, label: "All" },
+              { key: "recurring" as const, label: "Recurring" },
+              { key: "one_time" as const, label: "One-Time" },
+            ]).map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setTypeFilter(f.key)}
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${
+                  typeFilter === f.key
+                    ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]"
+                    : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="h-4 w-px bg-[var(--mh-border)]" />
+
+          {/* Status filter */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)]">Status</span>
+            {([
+              { key: "all" as const, label: "All" },
+              { key: "scheduled" as const, label: "Scheduled" },
+              { key: "in_progress" as const, label: "In Progress" },
+              { key: "completed" as const, label: "Completed" },
+              { key: "invoiced" as const, label: "Invoiced" },
+              { key: "cancelled" as const, label: "Cancelled" },
+            ]).map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setJobStatusFilter(f.key)}
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${
+                  jobStatusFilter === f.key
+                    ? "bg-[#0071E3] border-[#0071E3] text-white"
+                    : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
