@@ -334,7 +334,6 @@ function MobileMoreSheet({
   onSignOut: () => void;
 }) {
   const moreItems = [
-    { href: "/dashboard/finances", label: "Finances Overview", icon: Wallet, desc: "Revenue & reports" },
     { href: "/dashboard/notifications", label: "Notifications", icon: Bell, desc: "Recent activity" },
     { href: "/dashboard/settings", label: "Settings", icon: Settings, desc: "Account & preferences" },
   ];
@@ -519,18 +518,20 @@ export function DashboardShell({
         </header>
 
         {/* Mobile mini-header — safe area + account avatar */}
-        <div
-          className="md:hidden flex items-center justify-end px-4"
-          style={{ paddingTop: "env(safe-area-inset-top)", minHeight: "calc(env(safe-area-inset-top) + 40px)" }}
-        >
-          <button
-            onClick={() => setMoreOpen(true)}
-            className="h-8 w-8 rounded-full bg-[#0071E3]/15 border border-[#0071E3]/25 flex items-center justify-center active:opacity-70 transition-opacity"
-            aria-label="Account"
+        {pathname === "/dashboard" && (
+          <div
+            className="md:hidden flex items-center justify-end px-4"
+            style={{ paddingTop: "env(safe-area-inset-top)", minHeight: "calc(env(safe-area-inset-top) + 40px)" }}
           >
-            <span className="text-[#0071E3] text-[11px] font-bold tracking-wide">{initials}</span>
-          </button>
-        </div>
+            <button
+              onClick={() => setMoreOpen(true)}
+              className="h-8 w-8 rounded-full bg-[#0071E3]/15 border border-[#0071E3]/25 flex items-center justify-center active:opacity-70 transition-opacity"
+              aria-label="Account"
+            >
+              <span className="text-[#0071E3] text-[11px] font-bold tracking-wide">{initials}</span>
+            </button>
+          </div>
+        )}
 
         {/* Page content — extra bottom padding on mobile for tab bar */}
         <main className="flex-1 p-4 md:p-6 overflow-auto pb-[calc(72px+env(safe-area-inset-bottom))] md:pb-6">

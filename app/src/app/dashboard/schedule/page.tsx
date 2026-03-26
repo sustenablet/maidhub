@@ -1047,10 +1047,11 @@ export default function SchedulePage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => { setRecurringOpen(true); fetchRecurringRules(); }}
-            className="flex items-center gap-1.5 h-9 px-3.5 bg-[var(--mh-surface-raised)] hover:bg-[var(--mh-hover-overlay)] border border-[var(--mh-border)] text-[var(--mh-text)] text-[13px] font-semibold rounded-[8px] transition-colors"
+            className="flex items-center gap-1.5 h-9 px-3 md:px-3.5 bg-[var(--mh-surface-raised)] hover:bg-[var(--mh-hover-overlay)] border border-[var(--mh-border)] text-[var(--mh-text)] text-[13px] font-semibold rounded-[10px] md:rounded-[8px] transition-colors"
           >
             <Repeat className="h-4 w-4" />
             <span className="hidden sm:inline">Recurring</span>
+            <span className="sm:hidden">Rules</span>
           </button>
           <button
             onClick={openNewJobForm}
@@ -2006,10 +2007,10 @@ export default function SchedulePage() {
         subtitle="Manage recurring cleaning schedules"
         width="w-full max-w-lg"
       >
-        <div className="px-6 py-5 space-y-4">
+        <div className="px-4 md:px-6 py-4 md:py-5 space-y-4 md:space-y-5">
           <button
             onClick={() => { setRecurringFormOpen(true); resetRecurringForm(); }}
-            className="flex items-center gap-2 w-full px-4 py-3 bg-transparent hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text)] text-sm font-semibold rounded-[6px] transition-colors border border-dashed border-[var(--mh-border)]"
+            className="flex items-center justify-center gap-2 w-full px-4 py-3.5 bg-transparent hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text)] text-[13px] md:text-sm font-semibold rounded-[10px] md:rounded-[6px] transition-colors border border-dashed border-[var(--mh-border)]"
           >
             <Plus className="h-4 w-4" />
             New Recurring Rule
@@ -2038,24 +2039,24 @@ export default function SchedulePage() {
                 return (
                   <div
                     key={rule.id}
-                    className={`p-4 rounded-[6px] border transition-colors ${
+                    className={`p-3.5 md:p-4 rounded-[12px] md:rounded-[6px] border transition-colors ${
                       rule.is_active
                         ? "bg-[var(--mh-surface)] border-[var(--mh-border)]"
                         : "bg-[var(--mh-surface-sunken)] border-[var(--mh-divider)] opacity-60"
                     }`}
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <p className="text-[13px] font-semibold text-[var(--mh-text)]">
+                    <div className="flex items-start justify-between gap-2 mb-2.5">
+                      <div className="min-w-0">
+                        <p className="text-[14px] md:text-[13px] font-semibold text-[var(--mh-text)] truncate">
                           {clientName}
                         </p>
-                        <p className="text-[11px] text-[var(--mh-text-muted)] mt-0.5">
+                        <p className="text-[12px] md:text-[11px] text-[var(--mh-text-muted)] mt-0.5 leading-relaxed">
                           {freqLabel} &middot; {rule.service_type || "Cleaning"} &middot; {rule.price != null ? `$${rule.price}` : "No price"}
                         </p>
                       </div>
                       <button
                         onClick={() => toggleRuleActive(rule)}
-                        className={`px-2 py-1 text-[10px] font-semibold rounded-md transition-colors ${
+                        className={`px-2.5 py-1 text-[11px] md:text-[10px] font-semibold rounded-full transition-colors shrink-0 ${
                           rule.is_active
                             ? "bg-[#34C759]/10 text-green-600"
                             : "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)]"
@@ -2068,7 +2069,7 @@ export default function SchedulePage() {
                       <button
                         onClick={() => generateJobs(rule)}
                         disabled={!rule.is_active || recGenerating === rule.id}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] text-[var(--mh-text)] rounded-[6px] hover:bg-[var(--mh-hover-overlay)] disabled:opacity-40 transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 md:py-1.5 text-[12px] md:text-[11px] font-semibold bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] text-[var(--mh-text)] rounded-[8px] md:rounded-[6px] hover:bg-[var(--mh-hover-overlay)] disabled:opacity-40 transition-colors"
                       >
                         {recGenerating === rule.id ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
@@ -2079,9 +2080,9 @@ export default function SchedulePage() {
                       </button>
                       <button
                         onClick={() => deleteRule(rule.id)}
-                        className="p-1.5 text-[var(--mh-text-subtle)] hover:text-red-400 transition-colors"
+                        className="h-9 w-9 md:h-auto md:w-auto md:p-1.5 flex items-center justify-center rounded-[8px] md:rounded-none bg-[var(--mh-surface-raised)] md:bg-transparent border border-[var(--mh-border)] md:border-0 text-[var(--mh-text-subtle)] hover:text-red-400 transition-colors shrink-0"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-4 w-4 md:h-3.5 md:w-3.5" />
                       </button>
                     </div>
                   </div>
@@ -2099,17 +2100,17 @@ export default function SchedulePage() {
         title="New Recurring Rule"
         subtitle="Set up a repeating cleaning schedule"
         footer={
-          <FormActions>
-            <SecondaryButton onClick={() => setRecurringFormOpen(false)}>
+          <div className="shrink-0 bg-[var(--mh-surface)] border-t border-[var(--mh-border)] px-4 md:px-6 py-3 md:py-4 flex items-center gap-2.5">
+            <SecondaryButton className="flex-1 md:flex-none" onClick={() => setRecurringFormOpen(false)}>
               Cancel
             </SecondaryButton>
-            <PrimaryButton loading={recSaving} onClick={handleCreateRule}>
+            <PrimaryButton className="flex-1 md:flex-none" loading={recSaving} onClick={handleCreateRule}>
               Create Rule
             </PrimaryButton>
-          </FormActions>
+          </div>
         }
       >
-        <div className="px-6 py-5 space-y-6">
+        <div className="px-4 md:px-6 py-4 md:py-5 space-y-5 md:space-y-6">
           <FormSection label="Client & Location">
             <FormField label="Client" required>
               <FormSelect
@@ -2167,7 +2168,7 @@ export default function SchedulePage() {
                 />
               </FormField>
             )}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField label="Start Date" required>
                 <FormInput
                   type="date"
@@ -2197,7 +2198,7 @@ export default function SchedulePage() {
                 ))}
               </FormSelect>
             </FormField>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField label="Start Time">
                 <FormInput
                   type="time"
