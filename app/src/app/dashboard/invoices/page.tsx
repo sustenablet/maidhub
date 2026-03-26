@@ -98,6 +98,7 @@ export default function InvoicesPage() {
   const [addOnName, setAddOnName] = useState("");
   const [addOnPrice, setAddOnPrice] = useState("");
   const [addOnPresets, setAddOnPresets] = useState<string[]>(ADDON_PRESETS_DEFAULT);
+  const [addOnPresetPrices, setAddOnPresetPrices] = useState<Record<string, number>>({});
   const [serviceTypes, setServiceTypes] = useState<string[]>([...SERVICE_TYPES]);
   const [servicePrices, setServicePrices] = useState<Record<string, number>>({});
   const [formDueDate, setFormDueDate] = useState(defaultDueDate());
@@ -172,9 +173,11 @@ export default function InvoicesPage() {
       const biz = (((data?.settings || {}) as Record<string, unknown>).business || {}) as Record<string, unknown>;
       const types = (biz.service_types as string[]) || [];
       const additionalCosts = (biz.additional_cost_types as string[]) || [];
+      const additionalCostPrices = (biz.additional_cost_prices as Record<string, number>) || {};
       const prices = (biz.service_type_prices as Record<string, number>) || {};
       if (types.length > 0) setServiceTypes(types);
       if (additionalCosts.length > 0) setAddOnPresets(additionalCosts);
+      setAddOnPresetPrices(additionalCostPrices);
       setServicePrices(prices);
     })();
   }, [userId]);
@@ -1158,7 +1161,14 @@ export default function InvoicesPage() {
                       if (isActive) {
                         setFormAddOns((prev) => prev.filter((a) => a.name !== preset));
                       } else {
-                        setFormAddOns((prev) => [...prev, { id: String(Date.now() + Math.random()), name: preset, price: 0 }]);
+                        setFormAddOns((prev) => [
+                          ...prev,
+                          {
+                            id: String(Date.now() + Math.random()),
+                            name: preset,
+                            price: addOnPresetPrices[preset] || 0,
+                          },
+                        ]);
                       }
                     }}
                     className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${

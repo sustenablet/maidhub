@@ -235,6 +235,7 @@ export default function SettingsPage() {
   const [servicePrices, setServicePrices] = useState<Record<string, string>>({});
   const [newService, setNewService] = useState("");
   const [additionalCostTypes, setAdditionalCostTypes] = useState<string[]>(DEFAULT_ADDITIONAL_COST_TYPES);
+  const [additionalCostPrices, setAdditionalCostPrices] = useState<Record<string, string>>({});
   const [newAdditionalCost, setNewAdditionalCost] = useState("");
   const [editingPriceFor, setEditingPriceFor] = useState<string | null>(null);
   const [defaultRate, setDefaultRate] = useState("50");
@@ -299,6 +300,11 @@ export default function SettingsPage() {
         }
         if (Array.isArray(biz.additional_cost_types) && biz.additional_cost_types.length > 0) {
           setAdditionalCostTypes(biz.additional_cost_types as string[]);
+        }
+        if (biz.additional_cost_prices && typeof biz.additional_cost_prices === "object") {
+          const raw = biz.additional_cost_prices as Record<string, unknown>;
+          const saved = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, String(v)]));
+          setAdditionalCostPrices(saved);
         }
         // Pre-fill with DEFAULT_SERVICE_PRICES as baseline, then overlay saved prices
         const defaultPrices = Object.fromEntries(
@@ -386,6 +392,11 @@ export default function SettingsPage() {
     const bizSettings = {
       service_types: serviceTypes,
       additional_cost_types: additionalCostTypes,
+      additional_cost_prices: Object.fromEntries(
+        Object.entries(additionalCostPrices)
+          .filter(([, v]) => v !== "" && !isNaN(parseFloat(v)))
+          .map(([k, v]) => [k, parseFloat(v)])
+      ),
       service_type_prices: Object.fromEntries(
         Object.entries(servicePrices)
           .filter(([, v]) => v !== "" && !isNaN(parseFloat(v)))
@@ -512,6 +523,7 @@ export default function SettingsPage() {
       return;
     }
     setAdditionalCostTypes((prev) => [...prev, trimmed]);
+    setAdditionalCostPrices((prev) => ({ ...prev, [trimmed]: "" }));
     setNewAdditionalCost("");
     toast.success(`Added "${trimmed}"`);
   }
@@ -519,6 +531,11 @@ export default function SettingsPage() {
   function removeAdditionalCostType(index: number) {
     const removed = additionalCostTypes[index];
     setAdditionalCostTypes((prev) => prev.filter((_, i) => i !== index));
+    setAdditionalCostPrices((prev) => {
+      const next = { ...prev };
+      delete next[removed];
+      return next;
+    });
     toast.success(`Removed "${removed}"`);
   }
 
@@ -549,7 +566,7 @@ export default function SettingsPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Sidebar nav */}
         <div className="lg:w-52 shrink-0">
-          <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+          <nav className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-col gap-2 lg:gap-1 pb-1 lg:pb-0">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -557,7 +574,7 @@ export default function SettingsPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-left transition-all whitespace-nowrap lg:whitespace-normal min-w-fit ${
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-[8px] lg:rounded-[6px] text-left transition-all min-w-0 ${
                     isActive
                       ? "bg-[var(--mh-surface-raised)] border border-[var(--mh-border-strong)] text-[var(--mh-text)]"
                       : "text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] hover:bg-[var(--mh-surface-raised)]/60"
@@ -568,13 +585,13 @@ export default function SettingsPage() {
                   }`}>
                     <Icon className="h-4 w-4" strokeWidth={1.8} />
                   </div>
-                  <div className="hidden lg:block">
+                  <div className="hidden xl:block">
                     <p className="text-[13px] font-semibold leading-tight">{tab.label}</p>
                     <p className={`text-[11px] mt-0.5 ${isActive ? "text-[var(--mh-text-muted)]" : "text-[var(--mh-text-subtle)]"}`}>
                       {tab.description}
                     </p>
                   </div>
-                  <span className="lg:hidden text-[13px] font-semibold">{tab.label}</span>
+                  <span className="xl:hidden text-[12px] font-semibold truncate">{tab.label}</span>
                 </button>
               );
             })}
@@ -807,23 +824,35 @@ export default function SettingsPage() {
                         Add
                       </button>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="space-y-2">
                       {additionalCostTypes.map((cost, index) => (
-                        <div key={`${cost}-${index}`} className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)]">
-                          <span className="text-[12px] text-[var(--mh-text)]">{cost}</span>
+                        <div key={`${cost}-${index}`} className="flex items-center gap-2 px-3 py-2.5 rounded-[8px] bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)]">
+                          <span className="flex-1 min-w-0 text-[12px] text-[var(--mh-text)] truncate">{cost}</span>
+                          <div className="relative w-24 shrink-0">
+                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[11px] text-[var(--mh-text-subtle)]">$</span>
+                            <input
+                              type="number"
+                              min="0"
+                              step="1"
+                              value={additionalCostPrices[cost] || ""}
+                              onChange={(e) => setAdditionalCostPrices((prev) => ({ ...prev, [cost]: e.target.value }))}
+                              placeholder="0"
+                              className="w-full pl-5 pr-2 py-1.5 text-[12px] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] text-right text-[var(--mh-text)] outline-none focus:border-[#0071E3]/50"
+                            />
+                          </div>
                           <button
                             type="button"
                             onClick={() => removeAdditionalCostType(index)}
-                            className="text-[var(--mh-text-subtle)] hover:text-red-500 transition-colors"
+                            className="h-7 w-7 flex items-center justify-center rounded-[6px] text-[var(--mh-text-subtle)] hover:text-red-500 hover:bg-red-500/10 transition-colors shrink-0"
                             aria-label={`Remove ${cost}`}
                           >
-                            <X className="h-3 w-3" />
+                            <X className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       ))}
                     </div>
                     <p className="text-[11px] text-[var(--mh-text-subtle)]">
-                      {additionalCostTypes.length} preset{additionalCostTypes.length !== 1 ? "s" : ""} available in invoice additional costs.
+                      {additionalCostTypes.length} preset{additionalCostTypes.length !== 1 ? "s" : ""} available in invoice additional costs. Prices auto-fill and remain editable per invoice.
                     </p>
                   </div>
                 </CardBody>

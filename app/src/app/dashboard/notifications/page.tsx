@@ -10,6 +10,7 @@ import {
   BellOff,
   Loader2,
   Clock,
+  X,
 } from "lucide-react";
 type NotifCategory = "all" | "jobs" | "invoices";
 
@@ -62,6 +63,15 @@ export default function NotificationsPage() {
   const [activeTab, setActiveTab] = useState<NotifCategory>("all");
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const stored = localStorage.getItem("maidhub_dismissed_notifs");
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
   const [readIds, setReadIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
     try {
@@ -77,6 +87,14 @@ export default function NotificationsPage() {
       localStorage.setItem("maidhub_read_notifs", JSON.stringify([...readIds]));
     }
   }, [readIds]);
+
+  useEffect(() => {
+    if (dismissedIds.size > 0) {
+      localStorage.setItem("maidhub_dismissed_notifs", JSON.stringify([...dismissedIds]));
+    } else {
+      localStorage.removeItem("maidhub_dismissed_notifs");
+    }
+  }, [dismissedIds]);
 
   const loadActivities = useCallback(async () => {
     setLoading(true);
@@ -199,9 +217,9 @@ export default function NotificationsPage() {
       deduped.push({ ...item, count: 1 });
     }
 
-    setActivities(deduped);
+    setActivities(deduped.filter((item) => !dismissedIds.has(item.id)));
     setLoading(false);
-  }, [supabase, readIds]);
+  }, [supabase, readIds, dismissedIds]);
 
   useEffect(() => {
     loadActivities();
@@ -225,6 +243,11 @@ export default function NotificationsPage() {
     setActivities((prev) =>
       prev.map((a) => (a.id === id ? { ...a, unread: false } : a))
     );
+  }
+
+  function dismissNotification(id: string) {
+    setDismissedIds((prev) => new Set([...prev, id]));
+    setActivities((prev) => prev.filter((a) => a.id !== id));
   }
 
   const jobsUnread = activities.filter((a) => a.category === "jobs" && a.unread).length;
@@ -325,10 +348,24 @@ export default function NotificationsPage() {
                       <p className={`text-[13px] font-semibold truncate ${item.unread ? "text-[var(--mh-text)]" : "text-[var(--mh-text-muted)]"}`}>
                         {item.count && item.count > 1 ? `${item.count}× ${item.title}` : item.title}
                       </p>
-                      <span className="flex items-center gap-1 text-[11px] text-[var(--mh-text-faint)] shrink-0">
-                        <Clock className="h-3 w-3" />
-                        {item.relativeTime}
-                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="flex items-center gap-1 text-[11px] text-[var(--mh-text-faint)]">
+                          <Clock className="h-3 w-3" />
+                          {item.relativeTime}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            dismissNotification(item.id);
+                          }}
+                          className="h-6 w-6 flex items-center justify-center rounded-[6px] text-[var(--mh-text-faint)] hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                          aria-label="Delete notification"
+                          title="Delete notification"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
                     <p className="text-[12px] text-[var(--mh-text-muted)] mt-1 leading-relaxed">
                       {item.message}
