@@ -222,7 +222,68 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── KPI Cards ──────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+
+      {/* Mobile carousel */}
+      <div className="md:hidden -mx-4 px-4">
+        <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+
+          {/* Clients */}
+          <Link href="/dashboard/clients" className="shrink-0 w-[160px] block">
+            <div className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[14px] p-4 h-full">
+              <div className="h-8 w-8 rounded-[8px] bg-[#0071E3]/10 flex items-center justify-center mb-3">
+                <Users className="h-4 w-4 text-[#0071E3]" strokeWidth={1.8} />
+              </div>
+              <div className="text-[30px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] mb-1.5 tabular-nums">
+                {clientCount}
+              </div>
+              <p className="text-[11px] font-semibold text-[var(--mh-text-subtle)]">Total Clients</p>
+            </div>
+          </Link>
+
+          {/* Upcoming Jobs */}
+          <Link href="/dashboard/schedule" className="shrink-0 w-[160px] block">
+            <div className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[14px] p-4 h-full">
+              <div className="h-8 w-8 rounded-[8px] bg-[#34C759]/10 flex items-center justify-center mb-3">
+                <CalendarDays className="h-4 w-4 text-[#34C759]" strokeWidth={1.8} />
+              </div>
+              <div className="text-[30px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] mb-1.5 tabular-nums">
+                {jobCount}
+              </div>
+              <p className="text-[11px] font-semibold text-[var(--mh-text-subtle)]">Upcoming Jobs</p>
+            </div>
+          </Link>
+
+          {/* This Month Revenue */}
+          <Link href="/dashboard/invoices" className="shrink-0 w-[160px] block">
+            <div className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[14px] p-4 h-full">
+              <div className="h-8 w-8 rounded-[8px] bg-[#FF9F0A]/10 flex items-center justify-center mb-3">
+                <DollarSign className="h-4 w-4 text-[#FF9F0A]" strokeWidth={1.8} />
+              </div>
+              <div className="text-[24px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] mb-1.5 tabular-nums">
+                ${thisMonthRev.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              </div>
+              <p className="text-[11px] font-semibold text-[var(--mh-text-subtle)]">Month Revenue</p>
+            </div>
+          </Link>
+
+          {/* Unpaid Invoices */}
+          <Link href="/dashboard/invoices" className="shrink-0 w-[160px] block">
+            <div className={`bg-[var(--mh-surface)] border rounded-[14px] p-4 h-full ${invoiceCount > 0 ? "border-red-500/30" : "border-[var(--mh-border)]"}`}>
+              <div className={`h-8 w-8 rounded-[8px] flex items-center justify-center mb-3 ${invoiceCount > 0 ? "bg-red-500/10" : "bg-[var(--mh-surface-raised)]"}`}>
+                <Receipt className={`h-4 w-4 ${invoiceCount > 0 ? "text-red-400" : "text-[var(--mh-text-muted)]"}`} strokeWidth={1.8} />
+              </div>
+              <div className={`text-[30px] font-bold leading-none tracking-[-0.04em] mb-1.5 tabular-nums ${invoiceCount > 0 ? "text-red-400" : "text-[var(--mh-text)]"}`}>
+                {invoiceCount}
+              </div>
+              <p className="text-[11px] font-semibold text-[var(--mh-text-subtle)]">Unpaid Invoices</p>
+            </div>
+          </Link>
+
+        </div>
+      </div>
+
+      {/* Desktop grid */}
+      <div className="hidden md:grid grid-cols-2 xl:grid-cols-4 gap-3">
 
         {/* Clients */}
         <Link href="/dashboard/clients" className="group block">
@@ -233,7 +294,7 @@ export default async function DashboardPage() {
               </div>
               <ArrowUpRight className="h-3.5 w-3.5 text-[var(--mh-icon-dim)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={2} />
             </div>
-            <div className="text-[28px] md:text-[36px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
+            <div className="text-[36px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
               {clientCount}
             </div>
             <p className="text-[12px] font-medium text-[var(--mh-text-subtle)]">Total Clients</p>
@@ -249,7 +310,7 @@ export default async function DashboardPage() {
               </div>
               <ArrowUpRight className="h-3.5 w-3.5 text-[var(--mh-icon-dim)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={2} />
             </div>
-            <div className="text-[28px] md:text-[36px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
+            <div className="text-[36px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
               {jobCount}
             </div>
             <p className="text-[12px] font-medium text-[var(--mh-text-subtle)]">Upcoming Jobs</p>
@@ -265,7 +326,7 @@ export default async function DashboardPage() {
               </div>
               <ArrowUpRight className="h-3.5 w-3.5 text-[var(--mh-icon-dim)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={2} />
             </div>
-            <div className="text-[22px] md:text-[28px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
+            <div className="text-[28px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] tabular-nums mb-1.5">
               ${thisMonthRev.toLocaleString("en-US", { maximumFractionDigits: 0 })}
             </div>
             <p className="text-[12px] font-medium text-[var(--mh-text-subtle)]">This Month Revenue</p>
@@ -281,12 +342,13 @@ export default async function DashboardPage() {
               </div>
               <ArrowUpRight className="h-3.5 w-3.5 text-[var(--mh-icon-dim)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={2} />
             </div>
-            <div className={`text-[28px] md:text-[36px] font-bold leading-none tracking-[-0.04em] tabular-nums mb-1.5 ${invoiceCount > 0 ? "text-red-400" : "text-[var(--mh-text)]"}`}>
+            <div className={`text-[36px] font-bold leading-none tracking-[-0.04em] tabular-nums mb-1.5 ${invoiceCount > 0 ? "text-red-400" : "text-[var(--mh-text)]"}`}>
               {invoiceCount}
             </div>
             <p className="text-[12px] font-medium text-[var(--mh-text-subtle)]">Unpaid Invoices</p>
           </div>
         </Link>
+
       </div>
 
       {/* ── This Week strip ────────────────────────────────────── */}

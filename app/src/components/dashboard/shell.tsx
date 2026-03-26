@@ -17,7 +17,6 @@ import {
   ChevronDown,
   ArrowUpRight,
   Wallet,
-  MoreHorizontal,
   ChevronRight,
   Plus,
 } from "lucide-react";
@@ -267,15 +266,10 @@ const mobileTabs = [
   { href: "/dashboard/schedule", label: "Schedule", icon: CalendarDays },
   { href: "/dashboard/clients", label: "Clients", icon: Users },
   { href: "/dashboard/invoices", label: "Invoices", icon: Receipt },
+  { href: "/dashboard/finances", label: "Finances", icon: Wallet },
 ];
 
-function MobileBottomNav({
-  onMoreClick,
-  moreOpen,
-}: {
-  onMoreClick: () => void;
-  moreOpen: boolean;
-}) {
+function MobileBottomNav() {
   const pathname = usePathname();
 
   return (
@@ -314,29 +308,6 @@ function MobileBottomNav({
               </Link>
             );
           })}
-
-          {/* More tab */}
-          <button
-            onClick={onMoreClick}
-            className="flex-1 flex flex-col items-center justify-center gap-[3px] relative select-none"
-          >
-            {moreOpen && (
-              <span className="absolute top-[10px] w-5 h-[3px] rounded-full bg-[#0071E3]" />
-            )}
-            <MoreHorizontal
-              className={`h-[22px] w-[22px] mt-[6px] transition-colors ${
-                moreOpen ? "text-[#0071E3]" : "text-[var(--mh-text-faint)]"
-              }`}
-              strokeWidth={moreOpen ? 2.2 : 1.5}
-            />
-            <span
-              className={`text-[9.5px] font-semibold tracking-[0.02em] transition-colors ${
-                moreOpen ? "text-[#0071E3]" : "text-[var(--mh-text-faint)]"
-              }`}
-            >
-              More
-            </span>
-          </button>
         </div>
       </div>
     </nav>
@@ -544,8 +515,19 @@ export function DashboardShell({
           </div>
         </header>
 
-        {/* Mobile safe-area top spacer */}
-        <div className="md:hidden" style={{ height: "env(safe-area-inset-top)" }} />
+        {/* Mobile mini-header — safe area + account avatar */}
+        <div
+          className="md:hidden flex items-center justify-end px-4"
+          style={{ paddingTop: "env(safe-area-inset-top)", minHeight: "calc(env(safe-area-inset-top) + 40px)" }}
+        >
+          <button
+            onClick={() => setMoreOpen(true)}
+            className="h-8 w-8 rounded-full bg-[#0071E3]/15 border border-[#0071E3]/25 flex items-center justify-center active:opacity-70 transition-opacity"
+            aria-label="Account"
+          >
+            <span className="text-[#0071E3] text-[11px] font-bold tracking-wide">{initials}</span>
+          </button>
+        </div>
 
         {/* Page content — extra bottom padding on mobile for tab bar */}
         <main className="flex-1 p-4 md:p-6 overflow-auto pb-[calc(72px+env(safe-area-inset-bottom))] md:pb-6">
@@ -560,10 +542,7 @@ export function DashboardShell({
       <MobileFABSheet open={fabOpen} onClose={() => setFabOpen(false)} />
 
       {/* ── Mobile bottom tab bar ── */}
-      <MobileBottomNav
-        onMoreClick={() => { setMoreOpen((o) => !o); setFabOpen(false); }}
-        moreOpen={moreOpen}
-      />
+      <MobileBottomNav />
 
       {/* ── Mobile "More" sheet ── */}
       <MobileMoreSheet

@@ -471,38 +471,166 @@ export default function InvoicesPage() {
         </button>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-2 md:gap-4">
-        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-3 md:p-5">
-          <p className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider">
-            Total Invoiced
-          </p>
-          <p className="text-base md:text-2xl font-bold text-[var(--mh-text)] mt-1">
-            {formatCurrency(summaryTotalInvoiced)}
-          </p>
+      {/* ── MOBILE VIEW ─────────────────────────────────────── */}
+      <div className="md:hidden space-y-4">
+
+        {/* Summary strip */}
+        <div className="flex gap-3 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+          {[
+            { label: "Invoiced", value: formatCurrency(summaryTotalInvoiced), color: "text-[var(--mh-text)]" },
+            { label: "Collected", value: formatCurrency(summaryCollected), color: "text-[#34C759]" },
+            { label: "Outstanding", value: formatCurrency(summaryOutstanding), color: "text-[#FF9F0A]" },
+          ].map((stat) => (
+            <div key={stat.label} className="shrink-0 bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[12px] px-4 py-3 min-w-[140px]">
+              <p className="text-[10px] font-semibold text-[var(--mh-text-subtle)] uppercase tracking-[0.08em] mb-1">{stat.label}</p>
+              <p className={`text-[18px] font-bold tracking-[-0.03em] tabular-nums ${stat.color}`}>{stat.value}</p>
+            </div>
+          ))}
         </div>
-        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-3 md:p-5">
-          <p className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider">
-            Collected
-          </p>
-          <p className="text-base md:text-2xl font-bold text-green-600 mt-1">
-            {formatCurrency(summaryCollected)}
-          </p>
+
+        {/* Filter chips */}
+        <div className="flex gap-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: "none" }}>
+          {(["all", "unpaid", "paid", "void"] as const).map((opt) => (
+            <button
+              key={opt}
+              onClick={() => setStatusFilter(opt)}
+              className={`shrink-0 px-3.5 py-1.5 text-[12px] font-semibold rounded-full border transition-colors ${
+                statusFilter === opt
+                  ? "bg-[#0071E3] border-[#0071E3] text-white"
+                  : "bg-[var(--mh-surface)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+              }`}
+            >
+              {opt === "all" ? "All" : opt.charAt(0).toUpperCase() + opt.slice(1)}
+            </button>
+          ))}
         </div>
-        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-3 md:p-5">
-          <p className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider">
-            Outstanding
-          </p>
-          <p className="text-base md:text-2xl font-bold text-amber-600 mt-1">
-            {formatCurrency(summaryOutstanding)}
-          </p>
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--mh-text-faint)]" />
+          <input
+            type="text"
+            placeholder="Search invoices..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 text-[13px] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/40 focus:border-[#0071E3]/50 placeholder:text-[var(--mh-text-faint)] text-[var(--mh-text)]"
+          />
         </div>
+
+        {/* Invoice list */}
+        {invoices.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center bg-[var(--mh-surface)] rounded-[14px] border border-[var(--mh-border)]">
+            <div className="h-14 w-14 rounded-[12px] bg-[#0071E3]/10 flex items-center justify-center mb-3">
+              <Receipt className="h-7 w-7 text-[#0071E3]" />
+            </div>
+            <h3 className="text-[15px] font-bold text-[var(--mh-text)] mb-1">No invoices yet</h3>
+            <p className="text-[12px] text-[var(--mh-text-muted)] mb-5 max-w-[240px] leading-relaxed">Create your first invoice to start tracking payments.</p>
+            <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2.5 bg-[#0071E3] text-white text-[13px] font-semibold rounded-[10px] transition-colors">
+              <Plus className="h-4 w-4" />
+              New Invoice
+            </button>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-12 text-center">
+            <p className="text-[13px] font-semibold text-[var(--mh-text)]">No results for &ldquo;{search}&rdquo;</p>
+            <p className="text-[12px] text-[var(--mh-text-muted)] mt-1">Try a different search</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((inv) => {
+              const seq = invoiceSeqMap[inv.id] ?? 0;
+              const clientName = inv.clients ? `${inv.clients.first_name} ${inv.clients.last_name}` : "Client";
+              const isOverdue = inv.status === "unpaid" && inv.due_date && new Date(inv.due_date + "T00:00:00") < new Date();
+              const statusColors: Record<string, string> = {
+                unpaid: isOverdue ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-[#FF9F0A]/10 text-[#FF9F0A] border-[#FF9F0A]/20",
+                paid: "bg-[#34C759]/10 text-[#34C759] border-[#34C759]/20",
+                void: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] border-[var(--mh-border)]",
+              };
+              return (
+                <div key={inv.id} className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[14px] overflow-hidden">
+                  <div className="flex items-start gap-3 p-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[11px] font-bold text-[var(--mh-text-faint)] tabular-nums font-mono">{invoiceNumber(seq)}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusColors[inv.status] || statusColors.void}`}>
+                          {isOverdue ? "Overdue" : inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}
+                        </span>
+                      </div>
+                      <p className="text-[15px] font-bold text-[var(--mh-text)] tracking-[-0.02em] truncate">{clientName}</p>
+                      <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
+                        Due {inv.due_date ? formatDate(inv.due_date) : "—"}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[20px] font-bold text-[var(--mh-text)] tracking-[-0.03em] tabular-nums">
+                        {formatCurrency(inv.total || 0)}
+                      </p>
+                      {inv.status === "paid" && inv.payment_date && (
+                        <p className="text-[11px] text-[#34C759] mt-0.5">Paid {formatDate(inv.payment_date)}</p>
+                      )}
+                    </div>
+                  </div>
+                  {inv.status === "unpaid" && (
+                    <div className="flex border-t border-[var(--mh-divider)]">
+                      <button
+                        onClick={() => markPaid(inv)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-3 text-[13px] font-semibold text-[#34C759] active:bg-[#34C759]/10 transition-colors"
+                      >
+                        <CheckCircle2 className="h-4 w-4" strokeWidth={2} />
+                        Mark Paid
+                      </button>
+                      <div className="w-px bg-[var(--mh-divider)]" />
+                      <button
+                        onClick={() => openEdit(inv)}
+                        className="flex items-center justify-center gap-1.5 px-5 py-3 text-[13px] font-semibold text-[var(--mh-text-muted)] active:bg-[var(--mh-hover-overlay)] transition-colors"
+                      >
+                        <Pencil className="h-4 w-4" strokeWidth={2} />
+                        Edit
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {/* ── DESKTOP VIEW ────────────────────────────────────── */}
+      <div className="hidden md:block space-y-5">
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
+            <p className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider">
+              Total Invoiced
+            </p>
+            <p className="text-2xl font-bold text-[var(--mh-text)] mt-1">
+              {formatCurrency(summaryTotalInvoiced)}
+            </p>
+          </div>
+          <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
+            <p className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider">
+              Collected
+            </p>
+            <p className="text-2xl font-bold text-green-600 mt-1">
+              {formatCurrency(summaryCollected)}
+            </p>
+          </div>
+          <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-5">
+            <p className="text-xs font-semibold text-[var(--mh-text-muted)] uppercase tracking-wider">
+              Outstanding
+            </p>
+            <p className="text-2xl font-bold text-amber-600 mt-1">
+              {formatCurrency(summaryOutstanding)}
+            </p>
+          </div>
+        </div>
 
       {/* Invoice Table */}
       <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
         {/* Toolbar */}
-        <div className="flex items-center gap-2 px-4 py-3 md:px-5 md:py-5 border-b border-[var(--mh-divider)]">
+        <div className="flex items-center gap-2 px-5 py-5 border-b border-[var(--mh-divider)]">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-350" />
             <input
@@ -588,57 +716,8 @@ export default function InvoicesPage() {
           </div>
         ) : (
           <>
-            {/* Mobile invoice cards */}
-            <div className="md:hidden divide-y divide-[var(--mh-divider)]">
-              {filtered.map((inv) => {
-                const seq = invoiceSeqMap[inv.id] ?? 0;
-                const clientName = inv.clients
-                  ? `${inv.clients.first_name} ${inv.clients.last_name}`
-                  : "Client";
-                const isOverdue = inv.status === "unpaid" && inv.due_date && new Date(inv.due_date + "T00:00:00") < new Date();
-                return (
-                  <div key={inv.id} className="px-4 py-3.5">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-[11px] font-bold text-[var(--mh-text-faint)] tabular-nums">{invoiceNumber(seq)}</span>
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusBadge(inv.status)}`}>{inv.status}</span>
-                          {isOverdue && <span className="text-[10px] font-bold text-red-400">Overdue</span>}
-                        </div>
-                        <p className="text-[14px] font-semibold text-[var(--mh-text)] truncate">{clientName}</p>
-                        <p className="text-[11px] text-[var(--mh-text-faint)] mt-0.5">
-                          Due {inv.due_date ? formatDate(inv.due_date) : "\u2014"}
-                        </p>
-                      </div>
-                      <div className="text-right shrink-0 ml-3">
-                        <p className="text-[18px] font-bold text-[var(--mh-text)] tabular-nums tracking-tight">
-                          {formatCurrency(inv.total || 0)}
-                        </p>
-                      </div>
-                    </div>
-                    {inv.status === "unpaid" && (
-                      <div className="flex gap-2 mt-2">
-                        <button
-                          onClick={() => markPaid(inv)}
-                          className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[12px] font-semibold bg-[#34C759]/10 text-[#34C759] rounded-[6px] active:bg-[#34C759]/20 transition-colors"
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
-                          Mark Paid
-                        </button>
-                        <button
-                          onClick={() => openEdit(inv)}
-                          className="flex items-center justify-center gap-1.5 px-3 py-2 text-[12px] font-semibold bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] rounded-[6px] active:bg-[var(--mh-hover-overlay)] transition-colors border border-[var(--mh-border)]"
-                        >
-                          <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
             {/* Desktop table */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="bg-[var(--mh-surface-sunken)] border-b border-[var(--mh-divider)]">
@@ -760,6 +839,8 @@ export default function InvoicesPage() {
           </>
         )}
       </div>
+
+      </div>  {/* end desktop view */}
 
       {/* Action dropdown — rendered at root level with fixed position to avoid table overflow clipping */}
       {actionMenuId && menuPos && (() => {
