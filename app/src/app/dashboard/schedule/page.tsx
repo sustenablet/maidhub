@@ -1037,7 +1037,7 @@ export default function SchedulePage() {
   /* ── Main render ────────────────────────────────────────────── */
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -1061,6 +1061,168 @@ export default function SchedulePage() {
           </button>
         </div>
       </div>
+
+      {/* ── MOBILE SCHEDULE VIEW ──────────────────────────────── */}
+      <div className="md:hidden space-y-3">
+
+        {/* Status filter — horizontal scroll */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: "none" }}>
+          {([
+            { key: "all" as const, label: "All" },
+            { key: "scheduled" as const, label: "Scheduled" },
+            { key: "in_progress" as const, label: "In Progress" },
+            { key: "completed" as const, label: "Completed" },
+            { key: "cancelled" as const, label: "Cancelled" },
+          ] as const).map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setJobStatusFilter(f.key)}
+              className={`shrink-0 px-3 py-1.5 text-[12px] font-semibold rounded-full border transition-colors ${
+                jobStatusFilter === f.key
+                  ? "bg-[#0071E3] border-[#0071E3] text-white"
+                  : "bg-[var(--mh-surface)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Week day strip */}
+        <div className="bg-[var(--mh-surface)] rounded-[12px] border border-[var(--mh-border)] overflow-hidden">
+          {/* Week navigation row */}
+          <div className="flex items-center justify-between px-3 py-2.5 border-b border-[var(--mh-divider)]">
+            <button
+              onClick={() => setWeekOffset((o) => o - 1)}
+              className="p-1.5 rounded-[6px] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] active:opacity-70 transition-opacity"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="text-[13px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">
+              {formatWeekLabel(weekStart)}
+            </span>
+            <button
+              onClick={() => setWeekOffset((o) => o + 1)}
+              className="p-1.5 rounded-[6px] hover:bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] active:opacity-70 transition-opacity"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+          {/* Day strip */}
+          <div className="grid grid-cols-7 px-2 py-2 gap-1">
+            {weekDays.map((day, i) => {
+              const isToday = isSameDay(day, today);
+              const isSelected = isSameDay(day, selectedDay);
+              const dayJobCount = (jobsByDay[i] ?? []).filter(
+                (j) => jobStatusFilter === "all" || j.status === jobStatusFilter
+              ).length;
+              return (
+                <button
+                  key={i}
+                  onClick={() => setSelectedDay(day)}
+                  className="flex flex-col items-center py-1.5 rounded-[10px] transition-colors active:opacity-70"
+                >
+                  <span className={`text-[10px] font-bold uppercase tracking-wider mb-1.5 ${
+                    isSelected ? "text-[#0071E3]" : "text-[var(--mh-text-faint)]"
+                  }`}>
+                    {DAY_NAMES[i]}
+                  </span>
+                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-[14px] font-bold leading-none ${
+                    isSelected
+                      ? "bg-[#0071E3] text-white"
+                      : isToday
+                      ? "text-[#0071E3] ring-1.5 ring-[#0071E3]/50"
+                      : "text-[var(--mh-text)]"
+                  }`}>
+                    {day.getDate()}
+                  </span>
+                  <div className="h-1.5 mt-1.5 flex items-center justify-center">
+                    {dayJobCount > 0 && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#0071E3]" />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Selected day label */}
+        <div className="flex items-center justify-between px-1">
+          <p className="text-[14px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">
+            {isSameDay(selectedDay, today)
+              ? "Today"
+              : selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
+          </p>
+          {selectedDayJobs.length > 0 && (
+            <span className="text-[12px] text-[var(--mh-text-muted)]">
+              {selectedDayJobs.length} job{selectedDayJobs.length !== 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+
+        {/* Day jobs list */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-5 w-5 text-[var(--mh-text-muted)] animate-spin" />
+          </div>
+        ) : selectedDayJobs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center bg-[var(--mh-surface)] rounded-[12px] border border-[var(--mh-border)]">
+            <div className="h-12 w-12 rounded-full bg-[var(--mh-surface-raised)] flex items-center justify-center mb-3">
+              <Calendar className="h-6 w-6 text-[var(--mh-text-faint)]" />
+            </div>
+            <p className="text-[14px] font-semibold text-[var(--mh-text)] mb-1">No jobs today</p>
+            <p className="text-[12px] text-[var(--mh-text-muted)] mb-4">Tap + New Job to schedule one</p>
+            <button
+              onClick={openNewJobForm}
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#0071E3] text-white text-[13px] font-semibold rounded-[10px] transition-colors active:opacity-80"
+            >
+              <Plus className="h-4 w-4" />
+              New Job
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {selectedDayJobs.map((job) => {
+              const colors = STATUS_COLORS[job.status];
+              const clientName = job.clients
+                ? `${job.clients.first_name} ${job.clients.last_name}`
+                : "Unknown Client";
+              const timeRange = formatTimeRange(job.start_time, job.duration_minutes);
+              return (
+                <button
+                  key={job.id}
+                  onClick={() => { setSelectedJob(job); setDetailOpen(true); }}
+                  className="w-full flex items-center gap-3.5 p-4 bg-[var(--mh-surface)] rounded-[12px] border border-[var(--mh-border)] text-left active:opacity-80 transition-opacity"
+                >
+                  <div className={`w-1 self-stretch rounded-full ${colors.border} border-l-[3px]`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[15px] font-bold text-[var(--mh-text)] tracking-[-0.02em] truncate">{clientName}</p>
+                    <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5 truncate">
+                      {job.service_type || "Service"}
+                      {timeRange ? ` · ${timeRange}` : ""}
+                    </p>
+                    <span className={`inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${colors.bg} ${colors.text}`}>
+                      {job.status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                    </span>
+                  </div>
+                  <div className="text-right shrink-0">
+                    {job.price != null && (
+                      <p className="text-[16px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">
+                        ${Number(job.price).toLocaleString()}
+                      </p>
+                    )}
+                    <ChevronRight className="h-4 w-4 text-[var(--mh-text-faint)] ml-auto mt-1" />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── DESKTOP SCHEDULE VIEW ─────────────────────────────── */}
+      <div className="hidden md:block space-y-6">
 
       {/* Navigation bar */}
       <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] px-4 py-3 space-y-3">
@@ -1384,6 +1546,9 @@ export default function SchedulePage() {
           </div>
         )}
       </div>
+
+      </div>
+      {/* ── end DESKTOP SCHEDULE VIEW ── */}
 
       {/* ── Job Detail Panel ───────────────────────────────────── */}
       <SlidePanel
