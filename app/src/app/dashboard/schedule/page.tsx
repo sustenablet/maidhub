@@ -89,6 +89,14 @@ const STATUS_COLORS: Record<
 
 type ClientWithAddresses = Client & { addresses: Address[] };
 
+interface DueInvoice {
+  id: string;
+  due_date: string;
+  total: number | null;
+  status: "unpaid" | "paid" | "void";
+  clients: { first_name: string; last_name: string } | null;
+}
+
 /* ── Helpers ────────────────────────────────────────────────────── */
 
 function getMonday(date: Date): Date {
@@ -210,7 +218,11 @@ export default function SchedulePage() {
   const [selectedDay, setSelectedDay] = useState<Date>(today);
   const [jobStatusFilter, setJobStatusFilter] = useState<Job["status"] | "all">("all");
   const [typeFilter, setTypeFilter] = useState<"all" | "recurring" | "one_time">("all");
+  const [showFilter, setShowFilter] = useState<"active" | "all" | "done">("active");
+  const [showJobs, setShowJobs] = useState(true);
+  const [showInvoices, setShowInvoices] = useState(true);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [dueInvoices, setDueInvoices] = useState<DueInvoice[]>([]);
   const [monthOffset, setMonthOffset] = useState(0);
   const [monthJobs, setMonthJobs] = useState<Job[]>([]);
 
@@ -336,10 +348,25 @@ export default function SchedulePage() {
     setClients((data as ClientWithAddresses[]) ?? []);
   }, [supabase]);
 
+  const fetchDueInvoices = useCallback(async () => {
+    const { data } = await supabase
+      .from("invoices")
+      .select("id, due_date, total, status, clients(first_name, last_name)")
+      .eq("status", "unpaid")
+      .gte("due_date", formatDate(weekStart))
+      .lte("due_date", formatDate(weekEnd))
+      .order("due_date", { ascending: true });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setDueInvoices(((data ?? []) as any[]).map((inv) => ({
+      ...inv,
+      clients: Array.isArray(inv.clients) ? inv.clients[0] ?? null : inv.clients,
+    })) as DueInvoice[]);
+  }, [supabase, weekStart, weekEnd]);
+
   useEffect(() => {
     setLoading(true);
-    Promise.all([fetchJobs(), fetchClients()]).finally(() => setLoading(false));
-  }, [fetchJobs, fetchClients]);
+    Promise.all([fetchJobs(), fetchClients(), fetchDueInvoices()]).finally(() => setLoading(false));
+  }, [fetchJobs, fetchClients, fetchDueInvoices]);
 
   // Load service pricing defaults from user settings
   useEffect(() => {
@@ -379,15 +406,23 @@ export default function SchedulePage() {
     return map;
   }, [jobs, weekDays]);
 
+  const DONE_STATUSES = ["completed", "invoiced", "cancelled"];
+
   const applyFilters = useCallback((list: Job[]) => {
     return list
+      .filter(j => {
+        if (showFilter === "active") return !DONE_STATUSES.includes(j.status);
+        if (showFilter === "done") return DONE_STATUSES.includes(j.status);
+        return true;
+      })
       .filter(j => jobStatusFilter === "all" || j.status === jobStatusFilter)
       .filter(j => {
         if (typeFilter === "recurring") return !!j.recurring_rule_id;
         if (typeFilter === "one_time") return !j.recurring_rule_id;
         return true;
       });
-  }, [jobStatusFilter, typeFilter]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobStatusFilter, typeFilter, showFilter]);
 
   const filteredJobsByDay = useMemo(() => {
     const filtered = applyFilters(jobs);
@@ -417,6 +452,26 @@ export default function SchedulePage() {
       return (a.start_time || "").localeCompare(b.start_time || "");
     });
   }, [jobs, applyFilters]);
+
+  // Due invoices for the selected day
+  const selectedDayInvoices = useMemo(() => {
+    if (!showInvoices) return [];
+    return dueInvoices.filter(inv => {
+      const [y, m, d] = inv.due_date.split("-").map(Number);
+      return isSameDay(new Date(y, m - 1, d), selectedDay);
+    });
+  }, [dueInvoices, selectedDay, showInvoices]);
+
+  // Due invoices keyed by date string for dot indicators
+  const dueInvoicesByDate = useMemo(() => {
+    if (!showInvoices) return {} as Record<string, DueInvoice[]>;
+    const map: Record<string, DueInvoice[]> = {};
+    for (const inv of dueInvoices) {
+      if (!map[inv.due_date]) map[inv.due_date] = [];
+      map[inv.due_date].push(inv);
+    }
+    return map;
+  }, [dueInvoices, showInvoices]);
 
   // Month view
   const monthStart = useMemo(() => {
@@ -1087,37 +1142,47 @@ export default function SchedulePage() {
 
         {/* Filter button row */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setFilterOpen(true)}
-            className={`flex items-center gap-1.5 h-8 px-3 rounded-full border text-[12px] font-semibold transition-colors ${
-              jobStatusFilter !== "all" || typeFilter !== "all"
-                ? "bg-[#0071E3] border-[#0071E3] text-white"
-                : "bg-[var(--mh-surface)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
-            }`}
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={2} />
-            Filters
-            {(jobStatusFilter !== "all" ? 1 : 0) + (typeFilter !== "all" ? 1 : 0) > 0 && (
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[10px] font-bold">
-                {(jobStatusFilter !== "all" ? 1 : 0) + (typeFilter !== "all" ? 1 : 0)}
-              </span>
-            )}
-          </button>
+          {(() => {
+            const activeCount =
+              (jobStatusFilter !== "all" ? 1 : 0) +
+              (typeFilter !== "all" ? 1 : 0) +
+              (showFilter !== "active" ? 1 : 0) +
+              (!showJobs ? 1 : 0) +
+              (!showInvoices ? 1 : 0);
+            return (
+              <button
+                onClick={() => setFilterOpen(true)}
+                className={`flex items-center gap-1.5 h-8 px-3 rounded-full border text-[12px] font-semibold transition-colors ${
+                  activeCount > 0
+                    ? "bg-[#0071E3] border-[#0071E3] text-white"
+                    : "bg-[var(--mh-surface)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+                }`}
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={2} />
+                Filters
+                {activeCount > 0 && (
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[10px] font-bold">
+                    {activeCount}
+                  </span>
+                )}
+              </button>
+            );
+          })()}
           {/* Active filter pills */}
+          {showFilter !== "active" && (
+            <button onClick={() => setShowFilter("active")} className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] active:opacity-70">
+              {showFilter === "done" ? "Done only" : "All incl. done"}
+              <X className="h-3 w-3" strokeWidth={2.5} />
+            </button>
+          )}
           {typeFilter !== "all" && (
-            <button
-              onClick={() => setTypeFilter("all")}
-              className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] active:opacity-70"
-            >
+            <button onClick={() => setTypeFilter("all")} className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] active:opacity-70">
               {typeFilter === "recurring" ? "Recurring" : "One-Time"}
               <X className="h-3 w-3" strokeWidth={2.5} />
             </button>
           )}
           {jobStatusFilter !== "all" && (
-            <button
-              onClick={() => setJobStatusFilter("all")}
-              className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] active:opacity-70"
-            >
+            <button onClick={() => setJobStatusFilter("all")} className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] active:opacity-70">
               {jobStatusFilter.replace("_", " ").replace(/\b\w/g, c => c.toUpperCase())}
               <X className="h-3 w-3" strokeWidth={2.5} />
             </button>
@@ -1143,12 +1208,12 @@ export default function SchedulePage() {
             <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--mh-divider)]">
               <p className="text-[15px] font-bold text-[var(--mh-text)]">Filters</p>
               <div className="flex items-center gap-2">
-                {(jobStatusFilter !== "all" || typeFilter !== "all") && (
+                {(jobStatusFilter !== "all" || typeFilter !== "all" || showFilter !== "active" || !showJobs || !showInvoices) && (
                   <button
-                    onClick={() => { setJobStatusFilter("all"); setTypeFilter("all"); }}
+                    onClick={() => { setJobStatusFilter("all"); setTypeFilter("all"); setShowFilter("active"); setShowJobs(true); setShowInvoices(true); }}
                     className="text-[12px] font-semibold text-[#0071E3]"
                   >
-                    Clear all
+                    Reset
                   </button>
                 )}
                 <button onClick={() => setFilterOpen(false)} className="h-7 w-7 rounded-full bg-[var(--mh-surface-raised)] flex items-center justify-center">
@@ -1156,55 +1221,106 @@ export default function SchedulePage() {
                 </button>
               </div>
             </div>
-            {/* Type group */}
-            <div className="px-5 pt-4 pb-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-3">Job Type</p>
-              <div className="flex gap-2 flex-wrap">
-                {([
-                  { key: "all" as const, label: "All Jobs" },
-                  { key: "recurring" as const, label: "Recurring" },
-                  { key: "one_time" as const, label: "One-Time" },
-                ] as const).map((f) => (
-                  <button
-                    key={f.key}
-                    onClick={() => setTypeFilter(f.key)}
-                    className={`px-4 py-2 text-[13px] font-semibold rounded-[10px] border transition-colors ${
-                      typeFilter === f.key
-                        ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]"
-                        : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
-                    }`}
-                  >
-                    {f.label}
-                  </button>
-                ))}
+
+            <div className="overflow-y-auto" style={{ maxHeight: "65vh" }}>
+              {/* Show group */}
+              <div className="px-5 pt-4 pb-3">
+                <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-3">Show</p>
+                <div className="flex gap-2 flex-wrap">
+                  {([
+                    { key: "active" as const, label: "Active" },
+                    { key: "all" as const, label: "All" },
+                    { key: "done" as const, label: "Done" },
+                  ] as const).map((f) => (
+                    <button
+                      key={f.key}
+                      onClick={() => setShowFilter(f.key)}
+                      className={`px-4 py-2 text-[13px] font-semibold rounded-[10px] border transition-colors ${
+                        showFilter === f.key
+                          ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]"
+                          : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Content toggles */}
+              <div className="px-5 pt-1 pb-3 border-b border-[var(--mh-divider)]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-3">Content</p>
+                <div className="space-y-2">
+                  {[
+                    { label: "Jobs", value: showJobs, set: setShowJobs },
+                    { label: "Due Invoices", value: showInvoices, set: setShowInvoices },
+                  ].map(({ label, value, set }) => (
+                    <button
+                      key={label}
+                      onClick={() => set(!value)}
+                      className="flex items-center justify-between w-full px-3 py-2.5 rounded-[10px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)]"
+                    >
+                      <span className="text-[13px] font-semibold text-[var(--mh-text)]">{label}</span>
+                      <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-0.5 ${value ? "bg-[#0071E3]" : "bg-[var(--mh-toggle-off)]"}`}>
+                        <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${value ? "translate-x-4" : "translate-x-0"}`} />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Type group */}
+              <div className="px-5 pt-3 pb-3">
+                <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-3">Job Type</p>
+                <div className="flex gap-2 flex-wrap">
+                  {([
+                    { key: "all" as const, label: "All" },
+                    { key: "recurring" as const, label: "Recurring" },
+                    { key: "one_time" as const, label: "One-Time" },
+                  ] as const).map((f) => (
+                    <button
+                      key={f.key}
+                      onClick={() => setTypeFilter(f.key)}
+                      className={`px-4 py-2 text-[13px] font-semibold rounded-[10px] border transition-colors ${
+                        typeFilter === f.key
+                          ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]"
+                          : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Status group */}
+              <div className="px-5 pt-1 pb-3">
+                <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-3">Status</p>
+                <div className="flex gap-2 flex-wrap">
+                  {([
+                    { key: "all" as const, label: "Any" },
+                    { key: "scheduled" as const, label: "Scheduled" },
+                    { key: "in_progress" as const, label: "In Progress" },
+                    { key: "completed" as const, label: "Completed" },
+                    { key: "invoiced" as const, label: "Invoiced" },
+                    { key: "cancelled" as const, label: "Cancelled" },
+                  ] as const).map((f) => (
+                    <button
+                      key={f.key}
+                      onClick={() => setJobStatusFilter(f.key)}
+                      className={`px-4 py-2 text-[13px] font-semibold rounded-[10px] border transition-colors ${
+                        jobStatusFilter === f.key
+                          ? "bg-[#0071E3] border-[#0071E3] text-white"
+                          : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-            {/* Status group */}
-            <div className="px-5 pt-2 pb-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-3">Status</p>
-              <div className="flex gap-2 flex-wrap">
-                {([
-                  { key: "all" as const, label: "Any" },
-                  { key: "scheduled" as const, label: "Scheduled" },
-                  { key: "in_progress" as const, label: "In Progress" },
-                  { key: "completed" as const, label: "Completed" },
-                  { key: "invoiced" as const, label: "Invoiced" },
-                  { key: "cancelled" as const, label: "Cancelled" },
-                ] as const).map((f) => (
-                  <button
-                    key={f.key}
-                    onClick={() => setJobStatusFilter(f.key)}
-                    className={`px-4 py-2 text-[13px] font-semibold rounded-[10px] border transition-colors ${
-                      jobStatusFilter === f.key
-                        ? "bg-[#0071E3] border-[#0071E3] text-white"
-                        : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
-                    }`}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+
             {/* Apply button */}
             <div className="px-5 pt-2">
               <button
@@ -1263,9 +1379,12 @@ export default function SchedulePage() {
                   }`}>
                     {day.getDate()}
                   </span>
-                  <div className="h-1.5 mt-1.5 flex items-center justify-center">
+                  <div className="h-1.5 mt-1.5 flex items-center justify-center gap-0.5">
                     {dayJobCount > 0 && (
                       <span className="w-1.5 h-1.5 rounded-full bg-[#0071E3]" />
+                    )}
+                    {showInvoices && (dueInvoicesByDate[formatDate(day)] ?? []).length > 0 && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#FF9F0A]" />
                     )}
                   </div>
                 </button>
@@ -1281,24 +1400,26 @@ export default function SchedulePage() {
               ? "Today"
               : selectedDay.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
           </p>
-          {selectedDayJobs.length > 0 && (
+          {(selectedDayJobs.length > 0 || selectedDayInvoices.length > 0) && (
             <span className="text-[12px] text-[var(--mh-text-muted)]">
-              {selectedDayJobs.length} job{selectedDayJobs.length !== 1 ? "s" : ""}
+              {selectedDayJobs.length > 0 && `${selectedDayJobs.length} job${selectedDayJobs.length !== 1 ? "s" : ""}`}
+              {selectedDayJobs.length > 0 && selectedDayInvoices.length > 0 && " · "}
+              {selectedDayInvoices.length > 0 && `${selectedDayInvoices.length} due`}
             </span>
           )}
         </div>
 
-        {/* Day jobs list */}
+        {/* Day jobs + invoices list */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-5 w-5 text-[var(--mh-text-muted)] animate-spin" />
           </div>
-        ) : selectedDayJobs.length === 0 ? (
+        ) : selectedDayJobs.length === 0 && selectedDayInvoices.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center bg-[var(--mh-surface)] rounded-[12px] border border-[var(--mh-border)]">
             <div className="h-12 w-12 rounded-full bg-[var(--mh-surface-raised)] flex items-center justify-center mb-3">
               <Calendar className="h-6 w-6 text-[var(--mh-text-faint)]" />
             </div>
-            <p className="text-[14px] font-semibold text-[var(--mh-text)] mb-1">No jobs today</p>
+            <p className="text-[14px] font-semibold text-[var(--mh-text)] mb-1">Nothing scheduled</p>
             <p className="text-[12px] text-[var(--mh-text-muted)] mb-4">Tap + New Job to schedule one</p>
             <button
               onClick={openNewJobForm}
@@ -1310,7 +1431,8 @@ export default function SchedulePage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {selectedDayJobs.map((job) => {
+            {/* Job cards */}
+            {showJobs && selectedDayJobs.map((job) => {
               const colors = STATUS_COLORS[job.status];
               const clientName = job.clients
                 ? `${job.clients.first_name} ${job.clients.last_name}`
@@ -1342,6 +1464,42 @@ export default function SchedulePage() {
                     <ChevronRight className="h-4 w-4 text-[var(--mh-text-faint)] ml-auto mt-1" />
                   </div>
                 </button>
+              );
+            })}
+            {/* Due invoice cards */}
+            {selectedDayInvoices.map((inv) => {
+              const clientName = inv.clients
+                ? `${inv.clients.first_name} ${inv.clients.last_name}`
+                : "Client";
+              const isOverdue = new Date(inv.due_date + "T00:00:00") < new Date(new Date().toDateString());
+              return (
+                <div
+                  key={inv.id}
+                  className={`w-full flex items-center gap-3.5 p-4 rounded-[12px] border text-left ${
+                    isOverdue
+                      ? "bg-red-500/5 border-red-500/25"
+                      : "bg-[#FF9F0A]/8 border-[#FF9F0A]/30"
+                  }`}
+                >
+                  <div className={`w-1 self-stretch rounded-full border-l-[3px] ${isOverdue ? "border-red-400" : "border-[#FF9F0A]"}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[15px] font-bold text-[var(--mh-text)] tracking-[-0.02em] truncate">{clientName}</p>
+                    <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">Invoice due</p>
+                    <span className={`inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      isOverdue ? "bg-red-500/10 text-red-400" : "bg-[#FF9F0A]/15 text-[#FF9F0A]"
+                    }`}>
+                      {isOverdue ? "Overdue" : "Due Today"}
+                    </span>
+                  </div>
+                  <div className="text-right shrink-0">
+                    {inv.total != null && (
+                      <p className={`text-[16px] font-bold tracking-[-0.02em] ${isOverdue ? "text-red-400" : "text-[#FF9F0A]"}`}>
+                        ${Number(inv.total).toLocaleString()}
+                      </p>
+                    )}
+                    <Receipt className="h-4 w-4 text-[var(--mh-text-faint)] ml-auto mt-1" />
+                  </div>
+                </div>
               );
             })}
           </div>
@@ -1414,39 +1572,83 @@ export default function SchedulePage() {
         {/* Filter button + active pills */}
         <div className="flex items-center gap-2 flex-wrap">
           <div className="relative">
-            <button
-              onClick={() => setFilterOpen((o) => !o)}
-              className={`flex items-center gap-1.5 h-8 px-3 rounded-[6px] border text-[12px] font-semibold transition-colors ${
-                jobStatusFilter !== "all" || typeFilter !== "all"
-                  ? "bg-[#0071E3] border-[#0071E3] text-white"
-                  : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
-              }`}
-            >
-              <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={2} />
-              Filters
-              {(jobStatusFilter !== "all" ? 1 : 0) + (typeFilter !== "all" ? 1 : 0) > 0 && (
-                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[10px] font-bold">
-                  {(jobStatusFilter !== "all" ? 1 : 0) + (typeFilter !== "all" ? 1 : 0)}
-                </span>
-              )}
-            </button>
+            {(() => {
+              const activeCount =
+                (jobStatusFilter !== "all" ? 1 : 0) +
+                (typeFilter !== "all" ? 1 : 0) +
+                (showFilter !== "active" ? 1 : 0) +
+                (!showJobs ? 1 : 0) +
+                (!showInvoices ? 1 : 0);
+              return (
+                <button
+                  onClick={() => setFilterOpen((o) => !o)}
+                  className={`flex items-center gap-1.5 h-8 px-3 rounded-[6px] border text-[12px] font-semibold transition-colors ${
+                    activeCount > 0
+                      ? "bg-[#0071E3] border-[#0071E3] text-white"
+                      : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
+                  }`}
+                >
+                  <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={2} />
+                  Filters
+                  {activeCount > 0 && (
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[10px] font-bold">
+                      {activeCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })()}
 
             {/* Desktop dropdown */}
             {filterOpen && (
               <>
                 <div className="fixed inset-0 z-[40]" onClick={() => setFilterOpen(false)} />
-                <div className="absolute left-0 top-full mt-1.5 z-[50] w-64 bg-[var(--mh-surface)] rounded-[10px] border border-[var(--mh-border)] shadow-[0_8px_32px_rgba(0,0,0,0.45)] overflow-hidden">
+                <div className="absolute left-0 top-full mt-1.5 z-[50] w-72 bg-[var(--mh-surface)] rounded-[10px] border border-[var(--mh-border)] shadow-[0_8px_32px_rgba(0,0,0,0.45)] overflow-hidden">
                   {/* Header */}
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--mh-divider)]">
+                  <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--mh-divider)]">
                     <p className="text-[13px] font-bold text-[var(--mh-text)]">Filters</p>
-                    {(jobStatusFilter !== "all" || typeFilter !== "all") && (
+                    {(jobStatusFilter !== "all" || typeFilter !== "all" || showFilter !== "active" || !showJobs || !showInvoices) && (
                       <button
-                        onClick={() => { setJobStatusFilter("all"); setTypeFilter("all"); }}
+                        onClick={() => { setJobStatusFilter("all"); setTypeFilter("all"); setShowFilter("active"); setShowJobs(true); setShowInvoices(true); }}
                         className="text-[11px] font-semibold text-[#0071E3] hover:underline"
                       >
-                        Clear all
+                        Reset all
                       </button>
                     )}
+                  </div>
+                  {/* Show group */}
+                  <div className="px-4 pt-3 pb-2">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-2">Show</p>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {([
+                        { key: "active" as const, label: "Active" },
+                        { key: "all" as const, label: "All" },
+                        { key: "done" as const, label: "Done" },
+                      ]).map((f) => (
+                        <button key={f.key} onClick={() => setShowFilter(f.key)}
+                          className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${showFilter === f.key ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]" : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"}`}>
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Content toggles */}
+                  <div className="px-4 pt-1 pb-3 border-b border-[var(--mh-divider)]">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-2">Content</p>
+                    <div className="space-y-1.5">
+                      {[
+                        { label: "Jobs", value: showJobs, set: setShowJobs },
+                        { label: "Due Invoices", value: showInvoices, set: setShowInvoices },
+                      ].map(({ label, value, set }) => (
+                        <button key={label} onClick={() => set(!value)}
+                          className="flex items-center justify-between w-full px-2.5 py-1.5 rounded-[6px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] hover:bg-[var(--mh-hover-overlay)] transition-colors">
+                          <span className="text-[11px] font-semibold text-[var(--mh-text)]">{label}</span>
+                          <div className={`w-8 h-4.5 rounded-full transition-colors flex items-center px-0.5 ${value ? "bg-[#0071E3]" : "bg-[var(--mh-toggle-off)]"}`}>
+                            <div className={`w-3.5 h-3.5 rounded-full bg-white shadow transition-transform ${value ? "translate-x-3.5" : "translate-x-0"}`} />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   {/* Type group */}
                   <div className="px-4 pt-3 pb-2">
@@ -1457,22 +1659,15 @@ export default function SchedulePage() {
                         { key: "recurring" as const, label: "Recurring" },
                         { key: "one_time" as const, label: "One-Time" },
                       ]).map((f) => (
-                        <button
-                          key={f.key}
-                          onClick={() => setTypeFilter(f.key)}
-                          className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${
-                            typeFilter === f.key
-                              ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]"
-                              : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
-                          }`}
-                        >
+                        <button key={f.key} onClick={() => setTypeFilter(f.key)}
+                          className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${typeFilter === f.key ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]" : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"}`}>
                           {f.label}
                         </button>
                       ))}
                     </div>
                   </div>
                   {/* Status group */}
-                  <div className="px-4 pt-2 pb-3">
+                  <div className="px-4 pt-1 pb-3">
                     <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-2">Status</p>
                     <div className="flex gap-1.5 flex-wrap">
                       {([
@@ -1483,15 +1678,8 @@ export default function SchedulePage() {
                         { key: "invoiced" as const, label: "Invoiced" },
                         { key: "cancelled" as const, label: "Cancelled" },
                       ]).map((f) => (
-                        <button
-                          key={f.key}
-                          onClick={() => setJobStatusFilter(f.key)}
-                          className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${
-                            jobStatusFilter === f.key
-                              ? "bg-[#0071E3] border-[#0071E3] text-white"
-                              : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
-                          }`}
-                        >
+                        <button key={f.key} onClick={() => setJobStatusFilter(f.key)}
+                          className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${jobStatusFilter === f.key ? "bg-[#0071E3] border-[#0071E3] text-white" : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"}`}>
                           {f.label}
                         </button>
                       ))}
@@ -1503,20 +1691,20 @@ export default function SchedulePage() {
           </div>
 
           {/* Active filter pills */}
+          {showFilter !== "active" && (
+            <button onClick={() => setShowFilter("active")} className="flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors">
+              {showFilter === "done" ? "Done only" : "All incl. done"}
+              <X className="h-3 w-3" strokeWidth={2.5} />
+            </button>
+          )}
           {typeFilter !== "all" && (
-            <button
-              onClick={() => setTypeFilter("all")}
-              className="flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
-            >
+            <button onClick={() => setTypeFilter("all")} className="flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors">
               {typeFilter === "recurring" ? "Recurring" : "One-Time"}
               <X className="h-3 w-3" strokeWidth={2.5} />
             </button>
           )}
           {jobStatusFilter !== "all" && (
-            <button
-              onClick={() => setJobStatusFilter("all")}
-              className="flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
-            >
+            <button onClick={() => setJobStatusFilter("all")} className="flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors">
               {jobStatusFilter.replace("_", " ").replace(/\b\w/g, c => c.toUpperCase())}
               <X className="h-3 w-3" strokeWidth={2.5} />
             </button>
