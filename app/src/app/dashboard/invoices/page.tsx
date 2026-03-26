@@ -457,17 +457,17 @@ export default function InvoicesPage() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="hidden md:flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">Invoices</h1>
-          <p className="text-sm text-[var(--mh-text-muted)] mt-0.5">Track billing and payments</p>
+          <h1 className="text-[26px] md:text-[21px] font-bold md:font-semibold text-[var(--mh-text)] tracking-[-0.03em] md:tracking-[-0.02em]">Invoices</h1>
+          <p className="hidden md:block text-sm text-[var(--mh-text-muted)] mt-0.5">Track billing and payments</p>
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED] text-white text-[13px] font-semibold rounded-[6px] shadow-sm transition-colors"
+          className="flex items-center gap-1.5 h-9 px-3.5 bg-[#0071E3] hover:bg-[#0077ED] text-white text-[13px] font-semibold rounded-[8px] transition-colors"
         >
           <Plus className="h-4 w-4" />
-          New Invoice
+          <span className="hidden sm:inline">New Invoice</span>
         </button>
       </div>
 

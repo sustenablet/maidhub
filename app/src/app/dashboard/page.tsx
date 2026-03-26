@@ -196,10 +196,13 @@ export default async function DashboardPage() {
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--mh-text-subtle)] mb-1 hidden md:block">{todayDisplay}</p>
-          <h1 className="text-[20px] md:text-[24px] font-bold text-[var(--mh-text)] tracking-[-0.04em] leading-tight">
+          <h1 className="text-[28px] md:text-[24px] font-bold text-[var(--mh-text)] tracking-[-0.04em] leading-tight">
             {greeting}, {firstName}.
           </h1>
+          <p className="text-[12px] text-[var(--mh-text-subtle)] mt-1">
+            <span className="md:hidden">{todayDisplay}</span>
+            <span className="hidden md:inline text-[11px] font-semibold uppercase tracking-[0.1em]">{todayDisplay}</span>
+          </p>
         </div>
         {/* Quick add — desktop only, FAB handles mobile */}
         <div className="hidden md:flex items-center gap-1.5 mt-1">

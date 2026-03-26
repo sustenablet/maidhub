@@ -285,30 +285,26 @@ export default function NotificationsPage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="hidden md:flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
-            Notifications
+          <h1 className="text-[26px] md:text-[21px] font-bold md:font-semibold text-[var(--mh-text)] tracking-[-0.03em] md:tracking-[-0.02em]">
+            Activity
           </h1>
-          <p className="text-sm text-[var(--mh-text-muted)] mt-0.5">
+          <p className="text-[12px] md:text-sm text-[var(--mh-text-muted)] mt-0.5">
             {loading
-              ? "Loading activity…"
+              ? "Loading…"
               : unreadCount > 0
-                ? (
-                  <span>
-                    <strong className="text-[var(--mh-text)]">{unreadCount}</strong> unread
-                  </span>
-                )
+                ? <span><strong className="text-[var(--mh-text)]">{unreadCount}</strong> unread</span>
                 : "You're all caught up"}
           </p>
         </div>
         {unreadCount > 0 && (
           <button
             onClick={markAllRead}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-surface-raised)] shadow-sm transition-colors"
+            className="flex items-center gap-1.5 h-9 px-3.5 text-[13px] font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[8px] hover:bg-[var(--mh-surface-raised)] transition-colors"
           >
             <Check className="h-4 w-4" />
-            Mark all read
+            <span className="hidden sm:inline">Mark all read</span>
           </button>
         )}
       </div>

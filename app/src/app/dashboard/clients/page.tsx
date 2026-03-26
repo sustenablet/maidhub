@@ -266,21 +266,21 @@ export default function ClientsPage() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="hidden md:flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
+          <h1 className="text-[26px] md:text-[21px] font-bold md:font-semibold text-[var(--mh-text)] tracking-[-0.03em] md:tracking-[-0.02em]">
             Clients
           </h1>
-          <p className="text-[12.5px] text-[var(--mh-text-muted)] mt-0.5">
+          <p className="hidden md:block text-[12.5px] text-[var(--mh-text-muted)] mt-0.5">
             Manage your client relationships
           </p>
         </div>
         <button
           onClick={openPanel}
-          className="flex items-center gap-2 px-4 py-2 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white text-[13px] font-semibold rounded-[6px] shadow-sm transition-colors"
+          className="flex items-center gap-1.5 h-9 px-3.5 bg-[#0071E3] hover:bg-[#0071E3]/90 text-white text-[13px] font-semibold rounded-[8px] transition-colors"
         >
-          <Plus className="h-3.5 w-3.5" />
-          Add Client
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">Add Client</span>
         </button>
       </div>
 

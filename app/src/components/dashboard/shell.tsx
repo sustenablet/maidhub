@@ -491,30 +491,17 @@ export function DashboardShell({
       {/* ── Main content ── */}
       <div className="flex flex-1 flex-col min-w-0">
 
-        {/* Desktop topbar */}
-        <header className="sticky top-0 z-30 bg-[var(--mh-sidebar)]/90 backdrop-blur-md border-b border-[var(--mh-border-subtle)] flex items-center justify-between px-6 h-[50px]"
-          style={{ paddingTop: "env(safe-area-inset-top)" }}>
+        {/* Desktop topbar only */}
+        <header className="hidden md:flex sticky top-0 z-30 bg-[var(--mh-sidebar)]/90 backdrop-blur-md border-b border-[var(--mh-border-subtle)] items-center justify-between px-6 h-[50px]">
 
-          {/* Left — desktop only breadcrumb */}
-          <div className="hidden md:flex items-center gap-2 text-[13px]">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-[13px]">
             <span className="text-[var(--mh-text-faint)]">Home</span>
             <span className="text-[var(--mh-text-faint)]">/</span>
             <span className="text-[var(--mh-text)] font-semibold">{breadcrumb}</span>
           </div>
 
-          {/* Mobile header — logo left, title center, avatar right */}
-          <div className="flex md:hidden items-center gap-3 w-full">
-            {/* Logo mark */}
-            <div className="flex h-[28px] w-[28px] items-center justify-center rounded-[6px] bg-[#0071E3] shrink-0">
-              <span className="text-white font-bold text-[13px] leading-none tracking-tight">M</span>
-            </div>
-            {/* Page title */}
-            <span className="flex-1 text-[15px] font-bold text-[var(--mh-text)] tracking-[-0.02em]">
-              {breadcrumb}
-            </span>
-          </div>
-
-          {/* Right — user avatar (both mobile & desktop) */}
+          {/* Right — user avatar */}
           <div className="relative shrink-0" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -556,6 +543,9 @@ export function DashboardShell({
             )}
           </div>
         </header>
+
+        {/* Mobile safe-area top spacer */}
+        <div className="md:hidden" style={{ height: "env(safe-area-inset-top)" }} />
 
         {/* Page content — extra bottom padding on mobile for tab bar */}
         <main className="flex-1 p-4 md:p-6 overflow-auto pb-[calc(72px+env(safe-area-inset-bottom))] md:pb-6">

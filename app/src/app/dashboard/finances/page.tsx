@@ -111,25 +111,18 @@ export default async function FinancesPage() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="hidden md:flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">Finances</h1>
-          <p className="text-[13px] text-[var(--mh-text-muted)] mt-0.5">Overview of your revenue, invoices, and estimates</p>
+          <h1 className="text-[26px] md:text-[21px] font-bold md:font-semibold text-[var(--mh-text)] tracking-[-0.03em] md:tracking-[-0.02em]">Finances</h1>
+          <p className="hidden md:block text-[13px] text-[var(--mh-text-muted)] mt-0.5">Overview of your revenue, invoices, and estimates</p>
         </div>
-        <div className="hidden sm:flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <Link
             href="/dashboard/invoices"
-            className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-surface-raised)] transition-colors"
+            className="flex items-center gap-1.5 h-9 px-3.5 text-[12px] font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[8px] hover:bg-[var(--mh-surface-raised)] transition-colors"
           >
             <Receipt className="h-3.5 w-3.5" strokeWidth={1.8} />
-            Invoices
-          </Link>
-          <Link
-            href="/dashboard/estimates"
-            className="flex items-center gap-1.5 px-3 py-2 text-[12px] font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-surface-raised)] transition-colors"
-          >
-            <FileText className="h-3.5 w-3.5" strokeWidth={1.8} />
-            Estimates
+            <span className="hidden sm:inline">Invoices</span>
           </Link>
         </div>
       </div>

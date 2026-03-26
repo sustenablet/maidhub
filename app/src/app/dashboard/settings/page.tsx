@@ -505,9 +505,9 @@ export default function SettingsPage() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="hidden md:block">
-        <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">Settings</h1>
-        <p className="text-[13px] text-[var(--mh-text-muted)] mt-0.5">Manage your profile, business, and account preferences</p>
+      <div>
+        <h1 className="text-[26px] md:text-[21px] font-bold md:font-semibold text-[var(--mh-text)] tracking-[-0.03em] md:tracking-[-0.02em]">Settings</h1>
+        <p className="hidden md:block text-[13px] text-[var(--mh-text-muted)] mt-0.5">Manage your profile, business, and account preferences</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
