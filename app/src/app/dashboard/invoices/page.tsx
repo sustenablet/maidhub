@@ -113,6 +113,8 @@ export default function InvoicesPage() {
   const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
   const [mobileMenuId, setMobileMenuId] = useState<string | null>(null);
   const [mobileDeleteConfirmId, setMobileDeleteConfirmId] = useState<string | null>(null);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [periodFilter, setPeriodFilter] = useState<"all" | "this_week" | "this_month" | "last_month">("all");
 
   // Quick-add client state
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -264,6 +266,27 @@ export default function InvoicesPage() {
   // Filter invoices
   const filtered = invoices.filter((inv) => {
     if (statusFilter !== "all" && inv.status !== statusFilter) return false;
+    // Period filter (mobile)
+    if (periodFilter !== "all") {
+      const now = new Date();
+      const dateStr = (inv.created_at || "").split("T")[0];
+      if (periodFilter === "this_week") {
+        const day = now.getDay();
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+        monday.setHours(0, 0, 0, 0);
+        if (dateStr < monday.toISOString().split("T")[0]) return false;
+      } else if (periodFilter === "this_month") {
+        const start = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+        if (dateStr < start) return false;
+      } else if (periodFilter === "last_month") {
+        const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lmEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+        const start = lm.toISOString().split("T")[0];
+        const end = lmEnd.toISOString().split("T")[0];
+        if (dateStr < start || dateStr > end) return false;
+      }
+    }
     if (!search) return true;
     const q = search.toLowerCase();
     const clientName = inv.clients
@@ -596,14 +619,123 @@ export default function InvoicesPage() {
           <h1 className="text-[26px] md:text-[21px] font-bold md:font-semibold text-[var(--mh-text)] tracking-[-0.03em] md:tracking-[-0.02em]">Invoices</h1>
           <p className="hidden md:block text-sm text-[var(--mh-text-muted)] mt-0.5">Track billing and payments</p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-1.5 h-9 px-3.5 bg-[#0071E3] hover:bg-[#0077ED] text-white text-[13px] font-semibold rounded-[8px] transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">New Invoice</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Mobile: Filters button */}
+          <button
+            onClick={() => setMobileFilterOpen(true)}
+            className={`md:hidden flex items-center gap-1.5 h-9 px-3 rounded-[10px] border text-[13px] font-semibold transition-colors ${
+              statusFilter !== "all" || periodFilter !== "all"
+                ? "bg-[#0071E3] border-[#0071E3] text-white"
+                : "bg-[var(--mh-surface)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+            }`}
+          >
+            <SlidersHorizontal className="h-4 w-4" strokeWidth={2} />
+            Filters
+            {(statusFilter !== "all" ? 1 : 0) + (periodFilter !== "all" ? 1 : 0) > 0 && (
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[10px] font-bold">
+                {(statusFilter !== "all" ? 1 : 0) + (periodFilter !== "all" ? 1 : 0)}
+              </span>
+            )}
+          </button>
+          {/* Desktop: New Invoice */}
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-1.5 h-9 px-3.5 bg-[#0071E3] hover:bg-[#0077ED] text-white text-[13px] font-semibold rounded-[8px] transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">New Invoice</span>
+          </button>
+        </div>
       </div>
+
+      {/* Mobile filter bottom sheet */}
+      <>
+        <div
+          className={`fixed inset-0 z-[60] transition-opacity duration-300 md:hidden ${mobileFilterOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+          style={{ background: "rgba(0,0,0,0.55)" }}
+          onClick={() => setMobileFilterOpen(false)}
+        />
+        <div
+          className={`fixed inset-x-0 bottom-0 z-[70] md:hidden bg-[var(--mh-surface)] rounded-t-[20px] border-t border-[var(--mh-border)] transition-transform duration-300 ease-out ${mobileFilterOpen ? "translate-y-0" : "translate-y-full"}`}
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)" }}
+        >
+          <div className="flex justify-center pt-3 pb-1">
+            <div className="w-9 h-[4px] rounded-full bg-[var(--mh-border-strong)]" />
+          </div>
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--mh-divider)]">
+            <p className="text-[15px] font-bold text-[var(--mh-text)]">Filters</p>
+            <div className="flex items-center gap-2">
+              {(statusFilter !== "all" || periodFilter !== "all") && (
+                <button
+                  onClick={() => { setStatusFilter("all"); setPeriodFilter("all"); }}
+                  className="text-[12px] font-semibold text-[#0071E3]"
+                >
+                  Reset
+                </button>
+              )}
+              <button onClick={() => setMobileFilterOpen(false)} className="h-7 w-7 rounded-full bg-[var(--mh-surface-raised)] flex items-center justify-center">
+                <X className="h-3.5 w-3.5 text-[var(--mh-text-muted)]" strokeWidth={2} />
+              </button>
+            </div>
+          </div>
+          {/* Period group */}
+          <div className="px-5 pt-4 pb-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-3">Period</p>
+            <div className="flex flex-wrap gap-2">
+              {([
+                { key: "all" as const, label: "All Time" },
+                { key: "this_week" as const, label: "This Week" },
+                { key: "this_month" as const, label: "This Month" },
+                { key: "last_month" as const, label: "Last Month" },
+              ] as const).map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => setPeriodFilter(f.key)}
+                  className={`px-4 py-2 text-[13px] font-semibold rounded-[10px] border transition-colors ${
+                    periodFilter === f.key
+                      ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]"
+                      : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Status group */}
+          <div className="px-5 pt-1 pb-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-3">Status</p>
+            <div className="flex flex-wrap gap-2">
+              {([
+                { key: "all" as const, label: "All" },
+                { key: "unpaid" as const, label: "Unpaid" },
+                { key: "paid" as const, label: "Paid" },
+                { key: "void" as const, label: "Void" },
+              ] as const).map((f) => (
+                <button
+                  key={f.key}
+                  onClick={() => setStatusFilter(f.key)}
+                  className={`px-4 py-2 text-[13px] font-semibold rounded-[10px] border transition-colors ${
+                    statusFilter === f.key
+                      ? "bg-[#0071E3] border-[#0071E3] text-white"
+                      : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="px-5 pt-1">
+            <button
+              onClick={() => setMobileFilterOpen(false)}
+              className="w-full py-3 bg-[#0071E3] text-white text-[14px] font-bold rounded-[12px] active:opacity-80 transition-opacity"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      </>
 
       {/* ── MOBILE VIEW ─────────────────────────────────────── */}
       <div className="md:hidden space-y-4">
@@ -622,22 +754,29 @@ export default function InvoicesPage() {
           ))}
         </div>
 
-        {/* Filter chips */}
-        <div className="flex gap-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: "none" }}>
-          {(["all", "unpaid", "paid", "void"] as const).map((opt) => (
-            <button
-              key={opt}
-              onClick={() => setStatusFilter(opt)}
-              className={`shrink-0 px-3.5 py-1.5 text-[12px] font-semibold rounded-full border transition-colors ${
-                statusFilter === opt
-                  ? "bg-[#0071E3] border-[#0071E3] text-white"
-                  : "bg-[var(--mh-surface)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
-              }`}
-            >
-              {opt === "all" ? "All" : opt.charAt(0).toUpperCase() + opt.slice(1)}
-            </button>
-          ))}
-        </div>
+        {/* Active filter pills */}
+        {(statusFilter !== "all" || periodFilter !== "all") && (
+          <div className="flex gap-2 flex-wrap">
+            {periodFilter !== "all" && (
+              <button
+                onClick={() => setPeriodFilter("all")}
+                className="flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)]"
+              >
+                {{ this_week: "This Week", this_month: "This Month", last_month: "Last Month" }[periodFilter]}
+                <X className="h-3 w-3" strokeWidth={2.5} />
+              </button>
+            )}
+            {statusFilter !== "all" && (
+              <button
+                onClick={() => setStatusFilter("all")}
+                className="flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)]"
+              >
+                {statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
+                <X className="h-3 w-3" strokeWidth={2.5} />
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Search */}
         <div className="relative">
@@ -733,51 +872,13 @@ export default function InvoicesPage() {
                         <div className="w-px bg-[var(--mh-divider)]" />
                       </>
                     )}
-                    {/* ··· menu button */}
-                    <div className="relative">
-                      <button
-                        onClick={() => setMobileMenuId(menuOpen ? null : inv.id)}
-                        className="flex items-center justify-center px-4 py-3 text-[var(--mh-text-muted)] active:bg-[var(--mh-hover-overlay)] transition-colors"
-                      >
-                        <MoreHorizontal className="h-4 w-4" strokeWidth={2} />
-                      </button>
-                      {menuOpen && (
-                        <>
-                          <div className="fixed inset-0 z-[40]" onClick={() => { setMobileMenuId(null); setMobileDeleteConfirmId(null); }} />
-                          <div className="absolute right-0 bottom-full mb-1 z-[50] w-44 bg-[var(--mh-surface)] rounded-[10px] border border-[var(--mh-border)] shadow-[0_8px_32px_rgba(0,0,0,0.45)] py-1.5 overflow-hidden">
-                            {inv.status === "unpaid" && (
-                              <button
-                                onClick={() => { voidInvoice(inv); setMobileMenuId(null); }}
-                                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium text-[var(--mh-text-muted)] active:bg-[var(--mh-hover-overlay)] transition-colors text-left"
-                              >
-                                <Ban className="h-4 w-4 shrink-0" strokeWidth={1.8} />
-                                Void Invoice
-                              </button>
-                            )}
-                            <button
-                              onClick={() => {
-                                if (mobileDeleteConfirmId !== inv.id) {
-                                  setMobileDeleteConfirmId(inv.id);
-                                  setTimeout(() => setMobileDeleteConfirmId(null), 3000);
-                                } else {
-                                  deleteInvoice(inv);
-                                  setMobileMenuId(null);
-                                  setMobileDeleteConfirmId(null);
-                                }
-                              }}
-                              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-medium transition-colors text-left ${
-                                mobileDeleteConfirmId === inv.id
-                                  ? "text-red-500 bg-red-500/10"
-                                  : "text-red-400 active:bg-red-500/10"
-                              }`}
-                            >
-                              <Trash2 className="h-4 w-4 shrink-0" strokeWidth={1.8} />
-                              {mobileDeleteConfirmId === inv.id ? "Tap again to confirm" : "Delete"}
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                    {/* ··· menu button — opens bottom sheet */}
+                    <button
+                      onClick={() => { setMobileMenuId(menuOpen ? null : inv.id); setMobileDeleteConfirmId(null); }}
+                      className="flex items-center justify-center px-4 py-3 text-[var(--mh-text-muted)] active:bg-[var(--mh-hover-overlay)] transition-colors"
+                    >
+                      <MoreHorizontal className="h-4 w-4" strokeWidth={2} />
+                    </button>
                   </div>
                 </div>
               );
@@ -785,6 +886,69 @@ export default function InvoicesPage() {
           </div>
         )}
       </div>
+
+      {/* ··· action bottom sheet */}
+      {(() => {
+        const inv = mobileMenuId ? invoices.find(i => i.id === mobileMenuId) : null;
+        if (!inv) return null;
+        const clientName = inv.clients ? `${inv.clients.first_name} ${inv.clients.last_name}` : "Client";
+        return (
+          <>
+            <div
+              className="fixed inset-0 z-[60] md:hidden transition-opacity duration-300"
+              style={{ background: "rgba(0,0,0,0.55)" }}
+              onClick={() => { setMobileMenuId(null); setMobileDeleteConfirmId(null); }}
+            />
+            <div
+              className="fixed inset-x-0 bottom-0 z-[70] md:hidden bg-[var(--mh-surface)] rounded-t-[20px] border-t border-[var(--mh-border)]"
+              style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)" }}
+            >
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-9 h-[4px] rounded-full bg-[var(--mh-border-strong)]" />
+              </div>
+              <div className="px-5 py-3 border-b border-[var(--mh-divider)]">
+                <p className="text-[14px] font-bold text-[var(--mh-text)]">{clientName}</p>
+                <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">{formatCurrency(inv.total || 0)}</p>
+              </div>
+              <div className="px-3 pt-2 pb-1 space-y-0.5">
+                {inv.status === "unpaid" && (
+                  <button
+                    onClick={() => { voidInvoice(inv); setMobileMenuId(null); }}
+                    className="flex w-full items-center gap-3.5 px-3 py-3 rounded-[10px] hover:bg-[var(--mh-hover-overlay)] active:bg-[var(--mh-hover-overlay)] transition-colors"
+                  >
+                    <div className="h-9 w-9 rounded-[8px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
+                      <Ban className="h-4 w-4 text-[var(--mh-text-muted)]" strokeWidth={1.7} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[14px] font-semibold text-[var(--mh-text)]">Void Invoice</p>
+                      <p className="text-[11px] text-[var(--mh-text-faint)]">Mark as void — no payment expected</p>
+                    </div>
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    if (mobileDeleteConfirmId !== inv.id) {
+                      setMobileDeleteConfirmId(inv.id);
+                    } else {
+                      deleteInvoice(inv);
+                      setMobileMenuId(null);
+                      setMobileDeleteConfirmId(null);
+                    }
+                  }}
+                  className="flex w-full items-center gap-3.5 px-3 py-3 rounded-[10px] hover:bg-red-500/[0.06] active:bg-red-500/[0.08] transition-colors"
+                >
+                  <div className="h-9 w-9 rounded-[8px] bg-red-500/10 flex items-center justify-center shrink-0">
+                    <Trash2 className="h-4 w-4 text-red-400" strokeWidth={1.7} />
+                  </div>
+                  <p className="text-[14px] font-semibold text-red-400">
+                    {mobileDeleteConfirmId === inv.id ? "Tap again to delete" : "Delete Invoice"}
+                  </p>
+                </button>
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       {/* ── DESKTOP VIEW ────────────────────────────────────── */}
       <div className="hidden md:block space-y-5">
