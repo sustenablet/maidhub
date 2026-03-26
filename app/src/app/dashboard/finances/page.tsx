@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Receipt,
-  FileText,
   ArrowUpRight,
   ArrowRight,
 } from "lucide-react";
@@ -53,8 +52,6 @@ export default async function FinancesPage() {
     unpaidInvoicesRes,
     overdueRes,
     recentInvoicesRes,
-    estimatesRes,
-    openEstimatesRes,
     monthInvoicesRes,
   ] = await Promise.allSettled([
     // All invoices (non-void)
@@ -67,10 +64,6 @@ export default async function FinancesPage() {
     supabase.from("invoices").select("total").eq("user_id", user.id).eq("status", "unpaid").lt("due_date", new Date().toISOString().split("T")[0]),
     // Recent invoices for table
     supabase.from("invoices").select("id, total, status, due_date, payment_date, created_at, clients(first_name, last_name)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
-    // Total estimates
-    supabase.from("estimates").select("total, status").eq("user_id", user.id),
-    // Open estimates
-    supabase.from("estimates").select("total").eq("user_id", user.id).in("status", ["draft", "sent"]),
     // This month's paid invoices
     supabase.from("invoices").select("total").eq("user_id", user.id).eq("status", "paid").gte("payment_date", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0]),
   ]);
@@ -81,17 +74,12 @@ export default async function FinancesPage() {
   const unpaidInvoices = unpaidInvoicesRes.status === "fulfilled" ? (unpaidInvoicesRes.value.data ?? []) : [];
   const overdueInvoices = overdueRes.status === "fulfilled" ? (overdueRes.value.data ?? []) : [];
   const recentInvoices = recentInvoicesRes.status === "fulfilled" ? (recentInvoicesRes.value.data ?? []) : [];
-  const allEstimates = estimatesRes.status === "fulfilled" ? (estimatesRes.value.data ?? []) : [];
-  const openEstimates = openEstimatesRes.status === "fulfilled" ? (openEstimatesRes.value.data ?? []) : [];
   const monthInvoices = monthInvoicesRes.status === "fulfilled" ? (monthInvoicesRes.value.data ?? []) : [];
-
-  void allEstimates;
 
   const totalRevenue = paidInvoices.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
   const totalOutstanding = unpaidInvoices.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
   const totalOverdue = overdueInvoices.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
   const thisMonthRevenue = monthInvoices.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
-  const totalEstimatesValue = openEstimates.reduce((sum, est) => sum + (Number(est.total) || 0), 0);
   const avgInvoice = allInvoices.length > 0
     ? allInvoices.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0) / allInvoices.length
     : 0;
@@ -114,7 +102,7 @@ export default async function FinancesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-[26px] md:text-[21px] font-bold md:font-semibold text-[var(--mh-text)] tracking-[-0.03em] md:tracking-[-0.02em]">Finances</h1>
-          <p className="hidden md:block text-[13px] text-[var(--mh-text-muted)] mt-0.5">Overview of your revenue, invoices, and estimates</p>
+          <p className="hidden md:block text-[13px] text-[var(--mh-text-muted)] mt-0.5">Overview of your revenue and invoices</p>
         </div>
         <div className="flex items-center gap-2">
           <Link
@@ -307,29 +295,6 @@ export default async function FinancesPage() {
             </div>
           )}
 
-          {/* Open Estimates */}
-          <div className="bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] shadow-[0_1px_3px_rgba(0,0,0,0.4)] p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[13px] font-bold text-[var(--mh-text)]">
-                Open Estimates
-              </h3>
-              <Link
-                href="/dashboard/estimates"
-                className="text-[11px] font-semibold text-[var(--mh-text-subtle)] hover:text-[var(--mh-text)] transition-colors"
-              >
-                View All
-              </Link>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-[24px] font-normal text-[var(--mh-text)] tabular-nums">
-                {formatCurrency(totalEstimatesValue)}
-              </span>
-            </div>
-            <p className="text-[12px] text-[var(--mh-text-subtle)] mt-1">
-              {openEstimates.length} estimate{openEstimates.length !== 1 ? "s" : ""} pending response
-            </p>
-          </div>
-
           {/* Quick Actions */}
           <div className="space-y-2">
             <Link
@@ -342,21 +307,6 @@ export default async function FinancesPage() {
                 </div>
                 <span className="text-[13px] font-semibold text-[var(--mh-text-muted)]">
                   Create Invoice
-                </span>
-              </div>
-              <ArrowRight className="h-3.5 w-3.5 text-[var(--mh-text-faint)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={1.8} />
-            </Link>
-
-            <Link
-              href="/dashboard/estimates"
-              className="flex items-center justify-between p-3.5 bg-[var(--mh-surface)] rounded-[6px] border border-[var(--mh-border)] hover:bg-[var(--mh-surface-raised)] hover:shadow-[0_2px_6px_rgba(0,0,0,0.4)] transition-all group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-[6px] bg-[var(--mh-surface-raised)] flex items-center justify-center">
-                  <FileText className="h-4 w-4 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
-                </div>
-                <span className="text-[13px] font-semibold text-[var(--mh-text-muted)]">
-                  New Estimate
                 </span>
               </div>
               <ArrowRight className="h-3.5 w-3.5 text-[var(--mh-text-faint)] group-hover:text-[var(--mh-text-muted)] transition-colors" strokeWidth={1.8} />
