@@ -186,11 +186,11 @@ function SidebarContent({
 }
 
 // ── FAB quick-action sheet ──────────────────────────────────────
-function MobileFAB({ onClick }: { onClick: () => void }) {
+function MobileFAB({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }) {
   return (
     <button
       onClick={onClick}
-      className="fixed z-50 md:hidden flex items-center justify-center rounded-full bg-[#0071E3] shadow-[0_4px_20px_rgba(0,113,227,0.5)] active:scale-95 transition-transform"
+      className="fixed z-[59] md:hidden flex items-center justify-center rounded-full bg-[#0071E3] shadow-[0_4px_20px_rgba(0,113,227,0.5)] transition-transform active:scale-95"
       style={{
         bottom: "calc(env(safe-area-inset-bottom) + 70px)",
         right: "20px",
@@ -199,7 +199,9 @@ function MobileFAB({ onClick }: { onClick: () => void }) {
       }}
       aria-label="Quick actions"
     >
-      <Plus className="h-6 w-6 text-white" strokeWidth={2.5} />
+      <div className={`transition-transform duration-200 ${isOpen ? "rotate-45" : "rotate-0"}`}>
+        <Plus className="h-6 w-6 text-white" strokeWidth={2.5} />
+      </div>
     </button>
   );
 }
@@ -212,49 +214,50 @@ function MobileFABSheet({
   onClose: () => void;
 }) {
   const actions = [
-    { href: "/dashboard/schedule", label: "New Job", desc: "Schedule a cleaning", icon: CalendarDays, color: "#0071E3" },
-    { href: "/dashboard/clients", label: "New Client", desc: "Add a client", icon: Users, color: "#34C759" },
-    { href: "/dashboard/invoices", label: "New Invoice", desc: "Create & send invoice", icon: Receipt, color: "#FF9F0A" },
+    { href: "/dashboard/invoices?action=new", label: "New Invoice", desc: "Create & send invoice", icon: Receipt, color: "#FF9F0A" },
+    { href: "/dashboard/clients?action=new", label: "New Client", desc: "Add a client", icon: Users, color: "#34C759" },
+    { href: "/dashboard/schedule?action=new", label: "New Job", desc: "Schedule a cleaning", icon: CalendarDays, color: "#0071E3" },
   ];
 
   return (
     <>
+      {/* Backdrop */}
       <div
         className={`fixed inset-0 z-[55] md:hidden transition-opacity duration-200 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-        style={{ background: "rgba(0,0,0,0.5)" }}
+        style={{ background: "rgba(0,0,0,0.65)" }}
         onClick={onClose}
       />
+      {/* Action items floating above FAB */}
       <div
-        className={`fixed inset-x-0 bottom-0 z-[58] md:hidden bg-[var(--mh-surface)] rounded-t-[20px] border-t border-[var(--mh-border)] transition-transform duration-300 ease-out ${open ? "translate-y-0" : "translate-y-full"}`}
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)" }}
+        className={`fixed z-[58] md:hidden flex flex-col gap-3 transition-all duration-200 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        style={{
+          bottom: "calc(env(safe-area-inset-bottom) + 136px)",
+          right: "12px",
+        }}
       >
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-9 h-[4px] rounded-full bg-[var(--mh-border-strong)]" />
-        </div>
-        <div className="px-5 pt-2 pb-1">
-          <p className="text-[11px] font-semibold text-[var(--mh-text-faint)] uppercase tracking-[0.1em] mb-3">Quick Actions</p>
-          <div className="space-y-2">
-            {actions.map(({ href, label, desc, icon: Icon, color }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={onClose}
-                className="flex items-center gap-4 p-3.5 rounded-[12px] bg-[var(--mh-surface-raised)] active:opacity-70 transition-opacity"
-              >
-                <div
-                  className="h-10 w-10 rounded-[10px] flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: `${color}20` }}
-                >
-                  <Icon className="h-5 w-5" style={{ color }} strokeWidth={1.8} />
-                </div>
-                <div>
-                  <p className="text-[14px] font-semibold text-[var(--mh-text)]">{label}</p>
-                  <p className="text-[11px] text-[var(--mh-text-faint)]">{desc}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+        {actions.map(({ href, label, desc, icon: Icon, color }, i) => (
+          <Link
+            key={href}
+            href={href}
+            onClick={onClose}
+            className={`flex items-center gap-3 pl-4 pr-5 py-3 rounded-[16px] bg-[var(--mh-surface)] border border-[var(--mh-border)] shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-200 active:opacity-80`}
+            style={{
+              transitionDelay: open ? `${i * 40}ms` : "0ms",
+              transform: open ? "translateY(0) scale(1)" : "translateY(16px) scale(0.95)",
+            }}
+          >
+            <div
+              className="h-9 w-9 rounded-[10px] flex items-center justify-center shrink-0"
+              style={{ backgroundColor: `${color}20` }}
+            >
+              <Icon className="h-[18px] w-[18px]" style={{ color }} strokeWidth={2} />
+            </div>
+            <div className="text-left">
+              <p className="text-[14px] font-bold text-[var(--mh-text)] leading-tight">{label}</p>
+              <p className="text-[11px] text-[var(--mh-text-faint)]">{desc}</p>
+            </div>
+          </Link>
+        ))}
       </div>
     </>
   );
@@ -536,7 +539,7 @@ export function DashboardShell({
       </div>
 
       {/* ── Mobile FAB ── */}
-      <MobileFAB onClick={() => { setFabOpen((o) => !o); setMoreOpen(false); }} />
+      <MobileFAB onClick={() => { setFabOpen((o) => !o); setMoreOpen(false); }} isOpen={fabOpen} />
 
       {/* ── Mobile FAB action sheet ── */}
       <MobileFABSheet open={fabOpen} onClose={() => setFabOpen(false)} />

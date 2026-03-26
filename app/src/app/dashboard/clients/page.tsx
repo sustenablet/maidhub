@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Search,
   Plus,
@@ -56,6 +56,7 @@ interface ClientWithMeta extends Client {
 
 export default function ClientsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
 
   const [clients, setClients] = useState<ClientWithMeta[]>([]);
@@ -153,6 +154,15 @@ export default function ClientsPage() {
   useEffect(() => {
     fetchClients();
   }, [fetchClients]);
+
+  // Auto-open add client panel on ?action=new
+  useEffect(() => {
+    if (searchParams.get("action") === "new") {
+      resetForm();
+      setPanelOpen(true);
+      window.history.replaceState({}, "", "/dashboard/clients");
+    }
+  }, [searchParams]);
 
   const resetForm = () => {
     setFirstName("");

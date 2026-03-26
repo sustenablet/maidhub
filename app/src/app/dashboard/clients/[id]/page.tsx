@@ -377,98 +377,86 @@ export default function ClientDetailPage() {
       {/* Back link */}
       <button
         onClick={() => router.push("/dashboard/clients")}
-        className="flex items-center gap-1.5 text-sm text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
+        className="flex items-center gap-1.5 text-[13px] font-semibold text-[#0071E3] active:opacity-70 transition-opacity"
       >
-        <ArrowLeft className="h-3.5 w-3.5" />
+        <ArrowLeft className="h-4 w-4" strokeWidth={2.5} />
         Clients
       </button>
 
       {/* Client header card */}
-      <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-6">
-        <div className="flex flex-col sm:flex-row sm:items-start gap-5">
-          {/* Avatar */}
-          <div className="h-16 w-16 rounded-full bg-[var(--mh-hover-overlay)] text-[var(--mh-text)] flex items-center justify-center text-xl font-bold shrink-0">
+      <div className="bg-[var(--mh-surface)] rounded-[14px] border border-[var(--mh-border)] overflow-hidden">
+        {/* Top section — avatar + info */}
+        <div className="flex items-start gap-4 p-5">
+          <div className="h-14 w-14 rounded-full bg-[#0071E3]/15 border border-[#0071E3]/25 text-[#0071E3] flex items-center justify-center text-[18px] font-bold shrink-0">
             {initials}
           </div>
-
-          {/* Info */}
           <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
-              <h1 className="text-[21px] font-semibold text-[var(--mh-text)] tracking-[-0.02em]">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <h1 className="text-[20px] font-bold text-[var(--mh-text)] tracking-[-0.03em] leading-tight">
                 {client.first_name} {client.last_name}
               </h1>
-              <span className={`inline-flex items-center self-start px-2.5 py-0.5 rounded-full text-[10px] font-semibold capitalize ${statusBadge}`}>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ${statusBadge}`}>
                 {client.status}
               </span>
             </div>
-
-            <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-[var(--mh-text-muted)]">
+            <div className="flex flex-col gap-1">
               {client.email && (
-                <div className="flex items-center gap-1.5">
-                  <Mail className="h-3.5 w-3.5 text-[var(--mh-text-faint)]" />
-                  {client.email}
-                </div>
+                <a href={`mailto:${client.email}`} className="flex items-center gap-1.5 text-[12px] text-[var(--mh-text-muted)]">
+                  <Mail className="h-3.5 w-3.5 text-[var(--mh-text-faint)] shrink-0" />
+                  <span className="truncate">{client.email}</span>
+                </a>
               )}
               {client.phone && (
-                <div className="flex items-center gap-1.5">
-                  <Phone className="h-3.5 w-3.5 text-[var(--mh-text-faint)]" />
+                <a href={`tel:${client.phone}`} className="flex items-center gap-1.5 text-[12px] text-[var(--mh-text-muted)]">
+                  <Phone className="h-3.5 w-3.5 text-[var(--mh-text-faint)] shrink-0" />
                   {client.phone}
-                </div>
+                </a>
               )}
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 text-[var(--mh-text-faint)]" />
+              <p className="flex items-center gap-1.5 text-[11px] text-[var(--mh-text-faint)]">
+                <Calendar className="h-3 w-3 shrink-0" />
                 Client since {formatDate(client.created_at)}
-              </div>
+              </p>
             </div>
           </div>
+        </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={openEditPanel}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-surface-raised)] transition-colors"
-            >
-              <Edit2 className="h-3.5 w-3.5" />
-              Edit
-            </button>
-            <button
-              onClick={handleArchive}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-surface-raised)] transition-colors"
-            >
-              <Archive className="h-3.5 w-3.5" />
-              {client.status === "active" ? "Archive" : "Reactivate"}
-            </button>
-            <button
-              onClick={handleDelete}
-              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-[6px] transition-colors ${
-                deleteConfirm
-                  ? "bg-red-500/100 text-white hover:bg-red-600"
-                  : "text-red-400 bg-[var(--mh-surface)] border border-[var(--mh-border)] hover:bg-red-500/10 hover:text-red-400"
-              }`}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              {deleteConfirm ? "Confirm Delete?" : "Delete"}
-            </button>
-            <button
-              onClick={() => router.push(`/dashboard/invoices?clientId=${clientId}`)}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-surface-raised)] transition-colors"
-            >
-              <Receipt className="h-3.5 w-3.5" />
-              Create Invoice
-            </button>
-            <button
-              onClick={() => router.push(`/dashboard/schedule?clientId=${clientId}`)}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#0071E3] hover:bg-[#0071E3]/90 rounded-[6px] shadow-sm transition-colors"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Book a Job
-            </button>
-          </div>
+        {/* Primary actions */}
+        <div className="flex border-t border-[var(--mh-divider)]">
+          <button
+            onClick={() => router.push(`/dashboard/schedule?clientId=${clientId}&action=new`)}
+            className="flex-1 flex items-center justify-center gap-1.5 py-3 text-[13px] font-semibold text-white bg-[#0071E3] active:opacity-80 transition-opacity"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2.5} />
+            Book Job
+          </button>
+          <div className="w-px bg-[var(--mh-divider)]" />
+          <button
+            onClick={() => router.push(`/dashboard/invoices?clientId=${clientId}&action=new`)}
+            className="flex-1 flex items-center justify-center gap-1.5 py-3 text-[13px] font-semibold text-[var(--mh-text-muted)] active:bg-[var(--mh-hover-overlay)] transition-colors"
+          >
+            <Receipt className="h-4 w-4" strokeWidth={2} />
+            Invoice
+          </button>
+          <div className="w-px bg-[var(--mh-divider)]" />
+          <button
+            onClick={openEditPanel}
+            className="flex-1 flex items-center justify-center gap-1.5 py-3 text-[13px] font-semibold text-[var(--mh-text-muted)] active:bg-[var(--mh-hover-overlay)] transition-colors"
+          >
+            <Edit2 className="h-4 w-4" strokeWidth={2} />
+            Edit
+          </button>
+          <div className="w-px bg-[var(--mh-divider)]" />
+          <button
+            onClick={handleArchive}
+            className="flex items-center justify-center px-4 py-3 text-[13px] font-semibold text-[var(--mh-text-muted)] active:bg-[var(--mh-hover-overlay)] transition-colors"
+          >
+            <Archive className="h-4 w-4" strokeWidth={2} />
+          </button>
         </div>
       </div>
 
       {/* Tab navigation */}
-      <div className="flex items-center gap-0 border-b border-[var(--mh-divider)]">
+      <div className="flex items-center gap-0 border-b border-[var(--mh-divider)] overflow-x-auto" style={{ scrollbarWidth: "none" }}>
         {([
           { key: "overview" as const, label: "Overview" },
           { key: "jobs" as const, label: `Jobs${jobs.length > 0 ? ` (${jobs.length})` : ""}` },
@@ -493,14 +481,14 @@ export default function ClientDetailPage() {
       {activeTab === "overview" && (
         <div className="space-y-6">
           {/* Stats row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: "Total Jobs", value: totalJobs.toString(), color: "text-[var(--mh-text)]" },
               { label: "Completed", value: completedJobs.toString(), color: "text-[#34C759]" },
               { label: "Total Invoiced", value: `$${totalInvoiced.toLocaleString("en-US", { minimumFractionDigits: 0 })}`, color: "text-[var(--mh-text)]" },
               { label: "Outstanding", value: `$${outstanding.toLocaleString("en-US", { minimumFractionDigits: 0 })}`, color: outstanding > 0 ? "text-[#FF9F0A]" : "text-[var(--mh-text)]" },
             ].map((stat) => (
-              <div key={stat.label} className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-4">
+              <div key={stat.label} className="bg-[var(--mh-surface)] rounded-[12px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-4">
                 <p className="text-[10px] font-bold tracking-[0.1em] text-[var(--mh-text-subtle)] uppercase mb-1.5">{stat.label}</p>
                 <p className={`text-xl font-bold tabular-nums ${stat.color}`}>{stat.value}</p>
               </div>
@@ -532,107 +520,104 @@ export default function ClientDetailPage() {
       )}
 
       {activeTab === "jobs" && (
-        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
+        <div className="space-y-3">
           {jobs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-              <Briefcase className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" />
-              <p className="text-sm font-semibold text-[var(--mh-text-muted)] mb-1">No jobs yet</p>
-              <p className="text-xs text-[var(--mh-text-subtle)]">Book a job to get started</p>
+            <div className="flex flex-col items-center justify-center py-16 text-center bg-[var(--mh-surface)] rounded-[14px] border border-[var(--mh-border)]">
+              <Briefcase className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" strokeWidth={1.5} />
+              <p className="text-[14px] font-semibold text-[var(--mh-text)] mb-1">No jobs yet</p>
+              <p className="text-[12px] text-[var(--mh-text-subtle)]">Book a job to get started</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-[var(--mh-surface-raised)]/50 border-b border-[var(--mh-divider)]">
-                    {["Date", "Service Type", "Status", "Price", "Duration", "Actions"].map((h) => (
-                      <th key={h} className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)] whitespace-nowrap">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--mh-divider)]">
-                  {jobs.map((job) => {
-                    const status = JOB_STATUS_CONFIG[job.status] || { label: job.status, className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]" };
-                    return (
-                      <tr key={job.id} className="hover:bg-[var(--mh-hover-overlay)] transition-colors">
-                        <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
-                          {formatDate(job.scheduled_date)}
-                          {job.start_time && <span className="text-[var(--mh-text-subtle)] ml-1.5">{formatTime(job.start_time)}</span>}
-                        </td>
-                        <td className="px-5 py-4 text-xs font-medium text-[var(--mh-text-muted)]">{job.service_type || "\u2014"}</td>
-                        <td className="px-5 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${status.className}`}>{status.label}</span>
-                        </td>
-                        <td className="px-5 py-4 text-sm font-bold text-[var(--mh-text)] tabular-nums">
-                          {job.price != null ? `$${Number(job.price).toLocaleString("en-US", { minimumFractionDigits: 0 })}` : "\u2014"}
-                        </td>
-                        <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
-                          {job.duration_minutes ? `${Math.floor(job.duration_minutes / 60)}h ${job.duration_minutes % 60}m` : "\u2014"}
-                        </td>
-                        <td className="px-5 py-4">
-                          {job.status === "completed" ? (
-                            <button onClick={() => handleCreateInvoiceFromJob(job)} disabled={creatingInvoiceJobId === job.id} className="flex items-center gap-1 text-xs font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors disabled:opacity-50">
-                              {creatingInvoiceJobId === job.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Receipt className="h-3 w-3" />}
-                              {creatingInvoiceJobId === job.id ? "Creating..." : "Create Invoice"}
-                            </button>
-                          ) : job.status === "invoiced" ? (
-                            <span className="text-xs text-[#34C759] font-medium">Invoiced</span>
-                          ) : null}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            jobs.map((job) => {
+              const status = JOB_STATUS_CONFIG[job.status] || { label: job.status, className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)]" };
+              return (
+                <div key={job.id} className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[14px] overflow-hidden">
+                  <div className="flex items-start gap-3 p-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${status.className}`}>{status.label}</span>
+                        {job.price != null && (
+                          <span className="text-[14px] font-bold text-[var(--mh-text)] tabular-nums ml-auto">${Number(job.price).toLocaleString()}</span>
+                        )}
+                      </div>
+                      <p className="text-[14px] font-semibold text-[var(--mh-text)]">
+                        {job.service_type || "Cleaning Service"}
+                      </p>
+                      <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
+                        {formatDate(job.scheduled_date)}
+                        {job.start_time ? ` · ${formatTime(job.start_time)}` : ""}
+                        {job.duration_minutes ? ` · ${Math.floor(job.duration_minutes / 60)}h${job.duration_minutes % 60 > 0 ? ` ${job.duration_minutes % 60}m` : ""}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  {job.status === "completed" && (
+                    <div className="border-t border-[var(--mh-divider)]">
+                      <button
+                        onClick={() => handleCreateInvoiceFromJob(job)}
+                        disabled={creatingInvoiceJobId === job.id}
+                        className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[12px] font-semibold text-[var(--mh-text-muted)] active:bg-[var(--mh-hover-overlay)] transition-colors disabled:opacity-50"
+                      >
+                        {creatingInvoiceJobId === job.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Receipt className="h-3.5 w-3.5" />}
+                        {creatingInvoiceJobId === job.id ? "Creating..." : "Create Invoice"}
+                      </button>
+                    </div>
+                  )}
+                  {job.status === "invoiced" && (
+                    <div className="border-t border-[var(--mh-divider)] px-4 py-2">
+                      <span className="text-[11px] font-semibold text-[#34C759]">✓ Invoiced</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })
           )}
         </div>
       )}
 
       {activeTab === "invoices" && (
-        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)]">
+        <div className="space-y-3">
           {invoices.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-              <Receipt className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" />
-              <p className="text-sm font-semibold text-[var(--mh-text-muted)] mb-1">No invoices yet</p>
-              <p className="text-xs text-[var(--mh-text-subtle)]">Invoices will appear here after jobs are completed</p>
+            <div className="flex flex-col items-center justify-center py-16 text-center bg-[var(--mh-surface)] rounded-[14px] border border-[var(--mh-border)]">
+              <Receipt className="h-8 w-8 text-[var(--mh-text-faint)] mb-3" strokeWidth={1.5} />
+              <p className="text-[14px] font-semibold text-[var(--mh-text)] mb-1">No invoices yet</p>
+              <p className="text-[12px] text-[var(--mh-text-subtle)]">Invoices appear after jobs are completed</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-[var(--mh-surface-raised)]/50 border-b border-[var(--mh-divider)]">
-                    {["Invoice #", "Date", "Amount", "Status", "Due Date"].map((h) => (
-                      <th key={h} className="text-left px-5 py-3 text-[11px] font-semibold text-[var(--mh-text-muted)] whitespace-nowrap">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[var(--mh-divider)]">
-                  {invoices.map((invoice) => {
-                    const status = INVOICE_STATUS_CONFIG[invoice.status] || { label: invoice.status, className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] ring-1 ring-inset ring-[#2C2C2C]" };
-                    const invoiceNum = `INV-${invoice.id.slice(0, 6).toUpperCase()}`;
-                    return (
-                      <tr key={invoice.id} className="hover:bg-[var(--mh-hover-overlay)] transition-colors">
-                        <td className="px-5 py-4 text-xs font-mono text-[var(--mh-text-muted)]">{invoiceNum}</td>
-                        <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">{formatDate(invoice.created_at)}</td>
-                        <td className="px-5 py-4 text-sm font-bold text-[var(--mh-text)] tabular-nums">
-                          {invoice.total != null ? `$${Number(invoice.total).toLocaleString("en-US", { minimumFractionDigits: 0 })}` : "\u2014"}
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${status.className}`}>{status.label}</span>
-                        </td>
-                        <td className="px-5 py-4 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">{formatDate(invoice.due_date)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            invoices.map((inv) => {
+              const status = INVOICE_STATUS_CONFIG[inv.status] || { label: inv.status, className: "bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)]" };
+              const isOverdue = inv.status === "unpaid" && inv.due_date && new Date(inv.due_date + "T00:00:00") < new Date();
+              return (
+                <div key={inv.id} className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[14px] p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          isOverdue ? "bg-red-500/10 text-red-400 border-red-500/20" : status.className
+                        }`}>
+                          {isOverdue ? "Overdue" : status.label}
+                        </span>
+                      </div>
+                      <p className="text-[14px] font-semibold text-[var(--mh-text)]">
+                        {inv.total != null ? `$${Number(inv.total).toLocaleString("en-US", { minimumFractionDigits: 0 })}` : "—"}
+                      </p>
+                      <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
+                        {inv.status === "paid" && inv.payment_date
+                          ? `Paid ${formatDate(inv.payment_date)}`
+                          : inv.due_date
+                          ? `Due ${formatDate(inv.due_date)}`
+                          : formatDate(inv.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
           )}
         </div>
       )}
 
       {activeTab === "notes" && (
-        <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] p-6">
+        <div className="bg-[var(--mh-surface)] rounded-[14px] border border-[var(--mh-border)] p-6">
           <div className="flex items-center gap-2 mb-4">
             <StickyNote className="h-4 w-4 text-[var(--mh-text-faint)]" />
             <h3 className="text-xs font-bold tracking-[0.08em] text-[var(--mh-text-subtle)] uppercase">Notes</h3>

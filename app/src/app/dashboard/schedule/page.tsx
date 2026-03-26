@@ -338,13 +338,13 @@ export default function SchedulePage() {
     loadPricing();
   }, [supabase]);
 
-  // Auto-open form when navigated with clientId param
+  // Auto-open form when navigated with clientId or action=new param
   useEffect(() => {
     const clientIdParam = searchParams.get("clientId");
-    if (clientIdParam && clients.length > 0) {
-      setFormClientId(clientIdParam);
+    const actionParam = searchParams.get("action");
+    if (actionParam === "new" || (clientIdParam && clients.length > 0)) {
+      if (clientIdParam) setFormClientId(clientIdParam);
       setFormOpen(true);
-      // Clear the param from URL without navigation
       window.history.replaceState({}, "", "/dashboard/schedule");
     }
   }, [searchParams, clients]);

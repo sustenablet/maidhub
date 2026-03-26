@@ -151,11 +151,12 @@ export default function InvoicesPage() {
     fetchData();
   }, [fetchData]);
 
-  // Auto-open form when navigated with clientId param
+  // Auto-open form when navigated with clientId or action=new param
   useEffect(() => {
     const clientIdParam = searchParams.get("clientId");
-    if (clientIdParam && clients.length > 0) {
-      setFormClientId(clientIdParam);
+    const actionParam = searchParams.get("action");
+    if (actionParam === "new" || clientIdParam) {
+      if (clientIdParam) setFormClientId(clientIdParam);
       setPanelOpen(true);
       window.history.replaceState({}, "", "/dashboard/invoices");
     }
