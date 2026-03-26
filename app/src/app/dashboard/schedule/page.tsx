@@ -20,6 +20,8 @@ import {
   CheckCircle2,
   XCircle,
   PlayCircle,
+  SlidersHorizontal,
+  X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -208,6 +210,7 @@ export default function SchedulePage() {
   const [selectedDay, setSelectedDay] = useState<Date>(today);
   const [jobStatusFilter, setJobStatusFilter] = useState<Job["status"] | "all">("all");
   const [typeFilter, setTypeFilter] = useState<"all" | "recurring" | "one_time">("all");
+  const [filterOpen, setFilterOpen] = useState(false);
   const [monthOffset, setMonthOffset] = useState(0);
   const [monthJobs, setMonthJobs] = useState<Job[]>([]);
 
@@ -1082,50 +1085,137 @@ export default function SchedulePage() {
       {/* ── MOBILE SCHEDULE VIEW ──────────────────────────────── */}
       <div className="md:hidden space-y-3">
 
-        {/* Type filter — horizontal scroll */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: "none" }}>
-          {([
-            { key: "all" as const, label: "All Jobs" },
-            { key: "recurring" as const, label: "Recurring" },
-            { key: "one_time" as const, label: "One-Time" },
-          ] as const).map((f) => (
+        {/* Filter button row */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setFilterOpen(true)}
+            className={`flex items-center gap-1.5 h-8 px-3 rounded-full border text-[12px] font-semibold transition-colors ${
+              jobStatusFilter !== "all" || typeFilter !== "all"
+                ? "bg-[#0071E3] border-[#0071E3] text-white"
+                : "bg-[var(--mh-surface)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+            }`}
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={2} />
+            Filters
+            {(jobStatusFilter !== "all" ? 1 : 0) + (typeFilter !== "all" ? 1 : 0) > 0 && (
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[10px] font-bold">
+                {(jobStatusFilter !== "all" ? 1 : 0) + (typeFilter !== "all" ? 1 : 0)}
+              </span>
+            )}
+          </button>
+          {/* Active filter pills */}
+          {typeFilter !== "all" && (
             <button
-              key={f.key}
-              onClick={() => setTypeFilter(f.key)}
-              className={`shrink-0 px-3 py-1.5 text-[12px] font-semibold rounded-full border transition-colors ${
-                typeFilter === f.key
-                  ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]"
-                  : "bg-[var(--mh-surface)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
-              }`}
+              onClick={() => setTypeFilter("all")}
+              className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] active:opacity-70"
             >
-              {f.label}
+              {typeFilter === "recurring" ? "Recurring" : "One-Time"}
+              <X className="h-3 w-3" strokeWidth={2.5} />
             </button>
-          ))}
+          )}
+          {jobStatusFilter !== "all" && (
+            <button
+              onClick={() => setJobStatusFilter("all")}
+              className="flex items-center gap-1 h-8 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] active:opacity-70"
+            >
+              {jobStatusFilter.replace("_", " ").replace(/\b\w/g, c => c.toUpperCase())}
+              <X className="h-3 w-3" strokeWidth={2.5} />
+            </button>
+          )}
         </div>
 
-        {/* Status filter — horizontal scroll */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: "none" }}>
-          {([
-            { key: "all" as const, label: "Any Status" },
-            { key: "scheduled" as const, label: "Scheduled" },
-            { key: "in_progress" as const, label: "In Progress" },
-            { key: "completed" as const, label: "Completed" },
-            { key: "invoiced" as const, label: "Invoiced" },
-            { key: "cancelled" as const, label: "Cancelled" },
-          ] as const).map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setJobStatusFilter(f.key)}
-              className={`shrink-0 px-3 py-1.5 text-[12px] font-semibold rounded-full border transition-colors ${
-                jobStatusFilter === f.key
-                  ? "bg-[#0071E3] border-[#0071E3] text-white"
-                  : "bg-[var(--mh-surface)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
+        {/* Filter bottom sheet */}
+        <>
+          <div
+            className={`fixed inset-0 z-[60] transition-opacity duration-300 md:hidden ${filterOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+            style={{ background: "rgba(0,0,0,0.55)" }}
+            onClick={() => setFilterOpen(false)}
+          />
+          <div
+            className={`fixed inset-x-0 bottom-0 z-[70] md:hidden bg-[var(--mh-surface)] rounded-t-[20px] border-t border-[var(--mh-border)] transition-transform duration-300 ease-out ${filterOpen ? "translate-y-0" : "translate-y-full"}`}
+            style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)" }}
+          >
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-9 h-[4px] rounded-full bg-[var(--mh-border-strong)]" />
+            </div>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--mh-divider)]">
+              <p className="text-[15px] font-bold text-[var(--mh-text)]">Filters</p>
+              <div className="flex items-center gap-2">
+                {(jobStatusFilter !== "all" || typeFilter !== "all") && (
+                  <button
+                    onClick={() => { setJobStatusFilter("all"); setTypeFilter("all"); }}
+                    className="text-[12px] font-semibold text-[#0071E3]"
+                  >
+                    Clear all
+                  </button>
+                )}
+                <button onClick={() => setFilterOpen(false)} className="h-7 w-7 rounded-full bg-[var(--mh-surface-raised)] flex items-center justify-center">
+                  <X className="h-3.5 w-3.5 text-[var(--mh-text-muted)]" strokeWidth={2} />
+                </button>
+              </div>
+            </div>
+            {/* Type group */}
+            <div className="px-5 pt-4 pb-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-3">Job Type</p>
+              <div className="flex gap-2 flex-wrap">
+                {([
+                  { key: "all" as const, label: "All Jobs" },
+                  { key: "recurring" as const, label: "Recurring" },
+                  { key: "one_time" as const, label: "One-Time" },
+                ] as const).map((f) => (
+                  <button
+                    key={f.key}
+                    onClick={() => setTypeFilter(f.key)}
+                    className={`px-4 py-2 text-[13px] font-semibold rounded-[10px] border transition-colors ${
+                      typeFilter === f.key
+                        ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]"
+                        : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Status group */}
+            <div className="px-5 pt-2 pb-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-3">Status</p>
+              <div className="flex gap-2 flex-wrap">
+                {([
+                  { key: "all" as const, label: "Any" },
+                  { key: "scheduled" as const, label: "Scheduled" },
+                  { key: "in_progress" as const, label: "In Progress" },
+                  { key: "completed" as const, label: "Completed" },
+                  { key: "invoiced" as const, label: "Invoiced" },
+                  { key: "cancelled" as const, label: "Cancelled" },
+                ] as const).map((f) => (
+                  <button
+                    key={f.key}
+                    onClick={() => setJobStatusFilter(f.key)}
+                    className={`px-4 py-2 text-[13px] font-semibold rounded-[10px] border transition-colors ${
+                      jobStatusFilter === f.key
+                        ? "bg-[#0071E3] border-[#0071E3] text-white"
+                        : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Apply button */}
+            <div className="px-5 pt-2">
+              <button
+                onClick={() => setFilterOpen(false)}
+                className="w-full py-3 bg-[#0071E3] text-white text-[14px] font-bold rounded-[12px] active:opacity-80 transition-opacity"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </>
 
         {/* Week day strip */}
         <div className="bg-[var(--mh-surface)] rounded-[12px] border border-[var(--mh-border)] overflow-hidden">
@@ -1321,56 +1411,116 @@ export default function SchedulePage() {
             </div>
           </div>
         </div>
-        {/* Filter rows */}
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Type filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)]">Type</span>
-            {([
-              { key: "all" as const, label: "All" },
-              { key: "recurring" as const, label: "Recurring" },
-              { key: "one_time" as const, label: "One-Time" },
-            ]).map((f) => (
-              <button
-                key={f.key}
-                onClick={() => setTypeFilter(f.key)}
-                className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${
-                  typeFilter === f.key
-                    ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]"
-                    : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
+        {/* Filter button + active pills */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="relative">
+            <button
+              onClick={() => setFilterOpen((o) => !o)}
+              className={`flex items-center gap-1.5 h-8 px-3 rounded-[6px] border text-[12px] font-semibold transition-colors ${
+                jobStatusFilter !== "all" || typeFilter !== "all"
+                  ? "bg-[#0071E3] border-[#0071E3] text-white"
+                  : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
+              }`}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={2} />
+              Filters
+              {(jobStatusFilter !== "all" ? 1 : 0) + (typeFilter !== "all" ? 1 : 0) > 0 && (
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[10px] font-bold">
+                  {(jobStatusFilter !== "all" ? 1 : 0) + (typeFilter !== "all" ? 1 : 0)}
+                </span>
+              )}
+            </button>
+
+            {/* Desktop dropdown */}
+            {filterOpen && (
+              <>
+                <div className="fixed inset-0 z-[40]" onClick={() => setFilterOpen(false)} />
+                <div className="absolute left-0 top-full mt-1.5 z-[50] w-64 bg-[var(--mh-surface)] rounded-[10px] border border-[var(--mh-border)] shadow-[0_8px_32px_rgba(0,0,0,0.45)] overflow-hidden">
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--mh-divider)]">
+                    <p className="text-[13px] font-bold text-[var(--mh-text)]">Filters</p>
+                    {(jobStatusFilter !== "all" || typeFilter !== "all") && (
+                      <button
+                        onClick={() => { setJobStatusFilter("all"); setTypeFilter("all"); }}
+                        className="text-[11px] font-semibold text-[#0071E3] hover:underline"
+                      >
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+                  {/* Type group */}
+                  <div className="px-4 pt-3 pb-2">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-2">Job Type</p>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {([
+                        { key: "all" as const, label: "All" },
+                        { key: "recurring" as const, label: "Recurring" },
+                        { key: "one_time" as const, label: "One-Time" },
+                      ]).map((f) => (
+                        <button
+                          key={f.key}
+                          onClick={() => setTypeFilter(f.key)}
+                          className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${
+                            typeFilter === f.key
+                              ? "bg-[var(--mh-text)] border-[var(--mh-text)] text-[var(--mh-bg)]"
+                              : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
+                          }`}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Status group */}
+                  <div className="px-4 pt-2 pb-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)] mb-2">Status</p>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {([
+                        { key: "all" as const, label: "Any" },
+                        { key: "scheduled" as const, label: "Scheduled" },
+                        { key: "in_progress" as const, label: "In Progress" },
+                        { key: "completed" as const, label: "Completed" },
+                        { key: "invoiced" as const, label: "Invoiced" },
+                        { key: "cancelled" as const, label: "Cancelled" },
+                      ]).map((f) => (
+                        <button
+                          key={f.key}
+                          onClick={() => setJobStatusFilter(f.key)}
+                          className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${
+                            jobStatusFilter === f.key
+                              ? "bg-[#0071E3] border-[#0071E3] text-white"
+                              : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
+                          }`}
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="h-4 w-px bg-[var(--mh-border)]" />
-
-          {/* Status filter */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--mh-text-faint)]">Status</span>
-            {([
-              { key: "all" as const, label: "All" },
-              { key: "scheduled" as const, label: "Scheduled" },
-              { key: "in_progress" as const, label: "In Progress" },
-              { key: "completed" as const, label: "Completed" },
-              { key: "invoiced" as const, label: "Invoiced" },
-              { key: "cancelled" as const, label: "Cancelled" },
-            ]).map((f) => (
-              <button
-                key={f.key}
-                onClick={() => setJobStatusFilter(f.key)}
-                className={`px-2.5 py-1 text-[11px] font-semibold rounded-full border transition-colors ${
-                  jobStatusFilter === f.key
-                    ? "bg-[#0071E3] border-[#0071E3] text-white"
-                    : "bg-[var(--mh-surface-raised)] border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
+          {/* Active filter pills */}
+          {typeFilter !== "all" && (
+            <button
+              onClick={() => setTypeFilter("all")}
+              className="flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
+            >
+              {typeFilter === "recurring" ? "Recurring" : "One-Time"}
+              <X className="h-3 w-3" strokeWidth={2.5} />
+            </button>
+          )}
+          {jobStatusFilter !== "all" && (
+            <button
+              onClick={() => setJobStatusFilter("all")}
+              className="flex items-center gap-1 h-7 px-2.5 rounded-full bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[11px] font-semibold text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] transition-colors"
+            >
+              {jobStatusFilter.replace("_", " ").replace(/\b\w/g, c => c.toUpperCase())}
+              <X className="h-3 w-3" strokeWidth={2.5} />
+            </button>
+          )}
         </div>
       </div>
 
