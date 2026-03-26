@@ -334,7 +334,6 @@ function MobileMoreSheet({
   onSignOut: () => void;
 }) {
   const moreItems = [
-    { href: "/dashboard/notifications", label: "Notifications", icon: Bell, desc: "Recent activity" },
     { href: "/dashboard/settings", label: "Settings", icon: Settings, desc: "Account & preferences" },
   ];
 

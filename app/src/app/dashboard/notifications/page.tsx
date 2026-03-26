@@ -6,17 +6,16 @@ import {
   Bell,
   Briefcase,
   Receipt,
-  FileText,
   Check,
   BellOff,
   Loader2,
   Clock,
 } from "lucide-react";
-type NotifCategory = "all" | "jobs" | "invoices" | "estimates";
+type NotifCategory = "all" | "jobs" | "invoices";
 
 interface ActivityItem {
   id: string;
-  category: "jobs" | "invoices" | "estimates";
+  category: "jobs" | "invoices";
   title: string;
   message: string;
   timestamp: string;
@@ -47,8 +46,6 @@ function getIcon(category: string) {
       return { Icon: Briefcase, bg: "bg-[#0071E3]/[0.12]", color: "text-[#0071E3]" };
     case "invoices":
       return { Icon: Receipt, bg: "bg-[#0071E3]/[0.12]", color: "text-[#0071E3]" };
-    case "estimates":
-      return { Icon: FileText, bg: "bg-purple-500/10", color: "text-purple-400" };
     default:
       return { Icon: Bell, bg: "bg-[var(--mh-surface-raised)]", color: "text-[var(--mh-text-muted)]" };
   }
@@ -58,7 +55,6 @@ const tabs: { label: string; value: NotifCategory }[] = [
   { label: "All", value: "all" },
   { label: "Jobs", value: "jobs" },
   { label: "Invoices", value: "invoices" },
-  { label: "Estimates", value: "estimates" },
 ];
 
 export default function NotificationsPage() {
@@ -184,57 +180,6 @@ export default function NotificationsPage() {
       }
     }
 
-    // Fetch recent estimates
-    const { data: estimates } = await supabase
-      .from("estimates")
-      .select("id, total, status, created_at, updated_at, clients(first_name, last_name)")
-      .order("updated_at", { ascending: false })
-      .limit(10);
-
-    if (estimates) {
-      for (const est of estimates) {
-        const clientRaw = est.clients as unknown as { first_name: string; last_name: string } | { first_name: string; last_name: string }[] | null;
-        const client = Array.isArray(clientRaw) ? clientRaw[0] ?? null : clientRaw;
-        const clientName = client ? `${client.first_name} ${client.last_name}` : "Unknown Client";
-        const amount = est.total ? `$${Number(est.total).toFixed(0)}` : "";
-        let title = "";
-        let message = "";
-
-        switch (est.status) {
-          case "draft":
-            title = "Estimate Draft";
-            message = `Draft estimate for ${amount} created for ${clientName}`;
-            break;
-          case "sent":
-            title = "Estimate Sent";
-            message = `Estimate for ${amount} sent to ${clientName}`;
-            break;
-          case "accepted":
-            title = "Estimate Accepted";
-            message = `${clientName} accepted the estimate for ${amount}`;
-            break;
-          case "declined":
-            title = "Estimate Declined";
-            message = `${clientName} declined the estimate for ${amount}`;
-            break;
-          case "expired":
-            title = "Estimate Expired";
-            message = `Estimate for ${amount} to ${clientName} has expired`;
-            break;
-        }
-
-        items.push({
-          id: `est-${est.id}`,
-          category: "estimates",
-          title,
-          message,
-          timestamp: est.updated_at || est.created_at,
-          relativeTime: getRelativeTime(est.updated_at || est.created_at),
-          unread: !readIds.has(`est-${est.id}`),
-        });
-      }
-    }
-
     // Sort all by timestamp descending
     items.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
@@ -282,143 +227,120 @@ export default function NotificationsPage() {
     );
   }
 
+  const jobsUnread = activities.filter((a) => a.category === "jobs" && a.unread).length;
+  const invoicesUnread = activities.filter((a) => a.category === "invoices" && a.unread).length;
+
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-[26px] md:text-[21px] font-bold md:font-semibold text-[var(--mh-text)] tracking-[-0.03em] md:tracking-[-0.02em]">
-            Activity
+            Notifications
           </h1>
-          <p className="text-[12px] md:text-sm text-[var(--mh-text-muted)] mt-0.5">
-            {loading
-              ? "Loading…"
-              : unreadCount > 0
-                ? <span><strong className="text-[var(--mh-text)]">{unreadCount}</strong> unread</span>
-                : "You're all caught up"}
+          <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">
+            {loading ? "Loading…" : unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
           </p>
         </div>
         {unreadCount > 0 && (
           <button
             onClick={markAllRead}
-            className="flex items-center gap-1.5 h-9 px-3.5 text-[13px] font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[8px] hover:bg-[var(--mh-surface-raised)] transition-colors"
+            className="shrink-0 flex items-center gap-1.5 h-9 px-3 text-[12px] font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[10px] hover:bg-[var(--mh-surface-raised)] transition-colors"
           >
-            <Check className="h-4 w-4" />
-            <span className="hidden sm:inline">Mark all read</span>
+            <Check className="h-3.5 w-3.5" />
+            Mark all
           </button>
         )}
       </div>
 
-      {/* Main Card */}
-      <div className="bg-[var(--mh-surface)] rounded-[6px] shadow-[0_1px_3px_rgba(0,0,0,0.4)] border border-[var(--mh-border)] overflow-hidden">
-        {/* Filter tabs */}
-        <div className="flex items-center gap-1 p-3 border-b border-[var(--mh-divider)]">
-          {tabs.map((tab) => {
-            const count =
-              tab.value === "all"
-                ? unreadCount
-                : activities.filter(
-                    (a) => a.category === tab.value && a.unread
-                  ).length;
+      <div className="md:hidden grid grid-cols-2 gap-2.5">
+        <div className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[12px] p-3">
+          <p className="text-[10px] uppercase tracking-[0.08em] text-[var(--mh-text-faint)] font-bold">Jobs</p>
+          <p className="text-[20px] font-bold text-[var(--mh-text)] mt-1 tabular-nums">{jobsUnread}</p>
+        </div>
+        <div className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[12px] p-3">
+          <p className="text-[10px] uppercase tracking-[0.08em] text-[var(--mh-text-faint)] font-bold">Invoices</p>
+          <p className="text-[20px] font-bold text-[var(--mh-text)] mt-1 tabular-nums">{invoicesUnread}</p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: "none" }}>
+        {tabs.map((tab) => {
+          const count = tab.value === "all"
+            ? unreadCount
+            : activities.filter((a) => a.category === tab.value && a.unread).length;
+          return (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
+              className={`shrink-0 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border transition-colors ${
+                activeTab === tab.value
+                  ? "bg-[#0071E3] border-[#0071E3] text-white"
+                  : "bg-[var(--mh-surface)] border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+              }`}
+            >
+              {tab.label}
+              {count > 0 && <span className="ml-1.5 text-[10px] font-bold">{count}</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 text-[var(--mh-text-faint)] animate-spin" />
+          <p className="text-sm text-[var(--mh-text-muted)] mt-3">Loading notifications…</p>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[14px]">
+          <div className="h-14 w-14 rounded-[12px] bg-[var(--mh-surface-raised)] flex items-center justify-center mb-4">
+            <BellOff className="h-7 w-7 text-[var(--mh-text-faint)]" />
+          </div>
+          <p className="text-sm font-semibold text-[var(--mh-text)]">No notifications yet</p>
+          <p className="text-xs text-[var(--mh-text-muted)] mt-1 max-w-xs">
+            {activeTab === "all"
+              ? "Create jobs and invoices to see updates here"
+              : `No ${activeTab} updates yet`}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {filtered.map((item) => {
+            const { Icon, bg, color } = getIcon(item.category);
             return (
               <button
-                key={tab.value}
-                onClick={() => setActiveTab(tab.value)}
-                className={`px-4 py-1.5 rounded-[6px] text-xs font-semibold transition-colors ${
-                  activeTab === tab.value
-                    ? "bg-[var(--mh-hover-overlay)] text-[var(--mh-text)]"
-                    : "text-[var(--mh-text-muted)] hover:text-[var(--mh-text)] hover:bg-[var(--mh-hover-overlay)]"
+                key={item.id}
+                onClick={() => markRead(item.id)}
+                className={`w-full text-left bg-[var(--mh-surface)] border rounded-[12px] p-3.5 transition-colors ${
+                  item.unread
+                    ? "border-[#0071E3]/35"
+                    : "border-[var(--mh-border)]"
                 }`}
               >
-                {tab.label}
-                {count > 0 && (
-                  <span className="ml-1.5 inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-[#0071E3] text-white text-[9px] font-bold">
-                    {count}
-                  </span>
-                )}
+                <div className="flex items-start gap-3">
+                  <div className={`h-9 w-9 rounded-[10px] ${bg} flex items-center justify-center shrink-0`}>
+                    <Icon className={`h-4.5 w-4.5 ${color}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className={`text-[13px] font-semibold truncate ${item.unread ? "text-[var(--mh-text)]" : "text-[var(--mh-text-muted)]"}`}>
+                        {item.count && item.count > 1 ? `${item.count}× ${item.title}` : item.title}
+                      </p>
+                      <span className="flex items-center gap-1 text-[11px] text-[var(--mh-text-faint)] shrink-0">
+                        <Clock className="h-3 w-3" />
+                        {item.relativeTime}
+                      </span>
+                    </div>
+                    <p className="text-[12px] text-[var(--mh-text-muted)] mt-1 leading-relaxed">
+                      {item.message}
+                    </p>
+                  </div>
+                  {item.unread && <span className="mt-1 h-2 w-2 rounded-full bg-[#0071E3] shrink-0" />}
+                </div>
               </button>
             );
           })}
         </div>
-
-        {/* Loading */}
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="h-6 w-6 text-[var(--mh-text-faint)] animate-spin" />
-            <p className="text-sm text-[var(--mh-text-muted)] mt-3">
-              Loading activity…
-            </p>
-          </div>
-        ) : filtered.length === 0 ? (
-          /* Empty state */
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="h-14 w-14 rounded-[6px] bg-[var(--mh-surface-raised)] flex items-center justify-center mb-4">
-              <BellOff className="h-7 w-7 text-[var(--mh-text-faint)]" />
-            </div>
-            <p className="text-sm font-semibold text-[var(--mh-text)]">
-              No activity yet
-            </p>
-            <p className="text-xs text-[var(--mh-text-muted)] mt-1 max-w-xs">
-              {activeTab === "all"
-                ? "Create clients, schedule jobs, and send invoices to see activity here"
-                : `No ${activeTab} activity yet`}
-            </p>
-          </div>
-        ) : (
-          /* Activity Feed */
-          <div className="divide-y divide-[var(--mh-divider)]">
-            {filtered.map((item) => {
-              const { Icon, bg, color } = getIcon(item.category);
-              return (
-                <div
-                  key={item.id}
-                  className={`flex items-start gap-4 px-5 py-4 hover:bg-[var(--mh-hover-overlay)] transition-colors cursor-pointer ${
-                    item.unread ? "bg-[var(--mh-surface-sunken)]" : ""
-                  }`}
-                  onClick={() => markRead(item.id)}
-                >
-                  {/* Icon */}
-                  <div
-                    className={`h-10 w-10 rounded-[6px] ${bg} flex items-center justify-center shrink-0 mt-0.5`}
-                  >
-                    <Icon className={`h-5 w-5 ${color}`} />
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <p
-                          className={`text-sm font-semibold ${item.unread ? "text-[var(--mh-text)]" : "text-[var(--mh-text-muted)]"}`}
-                        >
-                          {item.count && item.count > 1 ? `${item.count}× ${item.title}` : item.title}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="flex items-center gap-1 text-xs text-[var(--mh-text-muted)] whitespace-nowrap">
-                          <Clock className="h-3 w-3" />
-                          {item.relativeTime}
-                        </span>
-                        {item.unread && (
-                          <div className="h-2 w-2 rounded-full bg-[#0071E3] shrink-0" />
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-xs text-[var(--mh-text-muted)] mt-0.5 leading-relaxed">
-                      {item.message}
-                    </p>
-                    <span
-                      className="inline-flex items-center mt-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[var(--mh-surface-raised)] text-[var(--mh-text-muted)] capitalize"
-                    >
-                      {item.category}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
