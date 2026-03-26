@@ -168,6 +168,18 @@ function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
+function getStatusLabel(job: Job): string {
+  if (job.status === "invoiced") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const invoices = (job as any).invoices;
+    const isPaid = Array.isArray(invoices)
+      ? invoices.some((inv: { status: string }) => inv.status === "paid")
+      : invoices?.status === "paid";
+    if (isPaid) return "Invoice Paid";
+  }
+  return job.status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 /* ── Component ──────────────────────────────────────────────────── */
 
 export default function SchedulePage() {
@@ -293,7 +305,7 @@ export default function SchedulePage() {
   const fetchJobs = useCallback(async () => {
     const { data, error } = await supabase
       .from("jobs")
-      .select("*, clients(*), addresses(*)")
+      .select("*, clients(*), addresses(*), invoices(status)")
       .gte("scheduled_date", formatDate(weekStart))
       .lte("scheduled_date", formatDate(weekEnd))
       .order("start_time", { ascending: true });
@@ -1204,7 +1216,7 @@ export default function SchedulePage() {
                       {timeRange ? ` · ${timeRange}` : ""}
                     </p>
                     <span className={`inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${colors.bg} ${colors.text}`}>
-                      {job.status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                      {getStatusLabel(job)}
                     </span>
                   </div>
                   <div className="text-right shrink-0">
@@ -1432,7 +1444,7 @@ export default function SchedulePage() {
                               <p className="text-[13px] font-bold text-[var(--mh-text)]">${Number(job.price).toLocaleString()}</p>
                             )}
                             <span className={`text-[10px] font-semibold ${colors.text}`}>
-                              {job.status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                              {getStatusLabel(job)}
                             </span>
                           </div>
                         </button>
@@ -1575,7 +1587,7 @@ export default function SchedulePage() {
                     STATUS_COLORS[selectedJob.status].bg
                   } ${STATUS_COLORS[selectedJob.status].text}`}
                 >
-                  {selectedJob.status.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                  {getStatusLabel(selectedJob)}
                 </span>
                 {selectedJob.recurring_rule_id && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] text-[var(--mh-text-muted)]">
