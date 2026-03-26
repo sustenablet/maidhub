@@ -1791,7 +1791,7 @@ export default function SchedulePage() {
           </FormActions>
         }
       >
-        <div className="px-6 py-5 space-y-6">
+        <div className="px-4 md:px-6 py-4 md:py-5 space-y-5 md:space-y-6">
           <FormSection label="Client & Location">
             <FormField label="Client" required>
               <FormSelect
@@ -1847,11 +1847,11 @@ export default function SchedulePage() {
               </FormSelect>
             </FormField>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
               <FormField label="Date" required>
                 <FormInput
                   type="date"
-                  className="h-9 px-2.5 text-[12px]"
+                  className="h-9 px-2 text-[11px]"
                   value={formDate}
                   onChange={(e) => setFormDate(e.target.value)}
                 />
@@ -1859,17 +1859,17 @@ export default function SchedulePage() {
               <FormField label="Start Time">
                 <FormInput
                   type="time"
-                  className="h-9 px-2.5 text-[12px]"
+                  className="h-9 px-2 text-[11px]"
                   value={formStartTime}
                   onChange={(e) => setFormStartTime(e.target.value)}
                 />
               </FormField>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
               <FormField label="Duration">
                 <FormSelect
-                  className="h-9 px-2.5 text-[12px]"
+                  className="h-9 px-2 text-[11px]"
                   value={formDuration}
                   onChange={(e) => setFormDuration(e.target.value)}
                 >
@@ -1883,7 +1883,7 @@ export default function SchedulePage() {
               <FormField label="Price">
                 <FormInput
                   type="number"
-                  className="h-9 px-2.5 text-[12px]"
+                  className="h-9 px-2 text-[11px]"
                   step="0.01"
                   min="0"
                   placeholder="0.00"
@@ -2150,33 +2150,51 @@ export default function SchedulePage() {
           </FormSection>
 
           <FormSection label="Frequency">
-            <FormField label="Repeat" required>
-              <FormSelect
-                value={recFrequency}
-                onChange={(e) => setRecFrequency(e.target.value as RecurringRule["frequency"])}
-              >
-                <option value="weekly">Weekly</option>
-                <option value="biweekly">Every 2 Weeks</option>
-                <option value="monthly">Monthly</option>
-                <option value="custom">Custom Interval</option>
-              </FormSelect>
-            </FormField>
+            <div className="space-y-3 p-3.5 rounded-[10px] border border-[var(--mh-border)] bg-[var(--mh-surface-sunken)]">
+              <p className="text-[11px] font-semibold text-[var(--mh-text-subtle)] uppercase tracking-[0.08em]">
+                Repeat
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    { value: "weekly", label: "Weekly" },
+                    { value: "biweekly", label: "Every 2 Weeks" },
+                    { value: "monthly", label: "Monthly" },
+                    { value: "custom", label: "Custom" },
+                  ] as const
+                ).map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setRecFrequency(value)}
+                    className={`px-3 py-1.5 text-[12px] font-semibold rounded-full border transition-colors ${
+                      recFrequency === value
+                        ? "bg-[#0071E3] border-[#0071E3] text-white"
+                        : "bg-transparent border-[var(--mh-border)] text-[var(--mh-text-muted)]"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
             {recFrequency === "custom" && (
               <FormField label="Interval (days)">
                 <FormInput
                   type="number"
                   min="1"
+                  className="h-9 px-2.5 text-[12px]"
                   value={recCustomDays}
                   onChange={(e) => setRecCustomDays(e.target.value)}
                   placeholder="7"
                 />
               </FormField>
             )}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
               <FormField label="Start Date" required>
                 <FormInput
                   type="date"
-                  className="h-9 px-2.5 text-[12px]"
+                  className="h-9 px-2 text-[11px]"
                   value={recStartDate}
                   onChange={(e) => setRecStartDate(e.target.value)}
                 />
@@ -2184,7 +2202,7 @@ export default function SchedulePage() {
               <FormField label="End Date">
                 <FormInput
                   type="date"
-                  className="h-9 px-2.5 text-[12px]"
+                  className="h-9 px-2 text-[11px]"
                   value={recEndDate}
                   onChange={(e) => setRecEndDate(e.target.value)}
                 />
@@ -2204,18 +2222,18 @@ export default function SchedulePage() {
                 ))}
               </FormSelect>
             </FormField>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
               <FormField label="Start Time">
                 <FormInput
                   type="time"
-                  className="h-9 px-2.5 text-[12px]"
+                  className="h-9 px-2 text-[11px]"
                   value={recStartTime}
                   onChange={(e) => setRecStartTime(e.target.value)}
                 />
               </FormField>
               <FormField label="Duration">
                 <FormSelect
-                  className="h-9 px-2.5 text-[12px]"
+                  className="h-9 px-2 text-[11px]"
                   value={recDuration}
                   onChange={(e) => setRecDuration(e.target.value)}
                 >

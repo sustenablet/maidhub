@@ -142,7 +142,7 @@ export function FormInput({
   return (
     <input
       {...props}
-      className={`w-full px-3 py-2 text-[13px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[4px] text-[var(--mh-text)] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[var(--mh-text-faint)] ${props.className || ""}`}
+      className={`w-full min-w-0 appearance-none px-3 py-2 text-[13px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[4px] text-[var(--mh-text)] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all placeholder:text-[var(--mh-text-faint)] ${props.className || ""}`}
       style={props.style}
     />
   );
@@ -167,7 +167,7 @@ export function FormSelect({
   return (
     <select
       {...props}
-      className={`w-full px-3 py-2 text-[13px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[4px] text-[var(--mh-text)] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all ${props.className || ""}`}
+      className={`w-full min-w-0 px-3 py-2 text-[13px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[4px] text-[var(--mh-text)] focus:outline-none focus:ring-1 focus:ring-[#0071E3]/50 focus:border-[#0071E3]/60 transition-all ${props.className || ""}`}
       style={props.style}
     >
       {children}
