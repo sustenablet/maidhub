@@ -26,13 +26,13 @@ import {
   FormSelect,
   FormActions,
   PrimaryButton,
-  SecondaryButton,
 } from "@/components/dashboard/slide-panel";
 import type { Client, Invoice, Job, LineItem } from "@/lib/types";
 import { SERVICE_TYPES, DEFAULT_SERVICE_PRICES } from "@/lib/types";
 import { toast } from "sonner";
 
 const supabase = createClient();
+const INVOICE_DRAFT_KEY = "maidhub_invoice_draft";
 
 const ADDON_PRESETS_DEFAULT = [
   "Window Cleaning",
@@ -88,6 +88,7 @@ export default function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | "unpaid" | "paid" | "void">("all");
   const [filterOpen, setFilterOpen] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [closePromptOpen, setClosePromptOpen] = useState(false);
 
   // Form state
   const [formClientId, setFormClientId] = useState("");
@@ -274,10 +275,7 @@ export default function InvoicesPage() {
     return d.toISOString().split("T")[0];
   }
 
-  // Open create panel
-  function openCreate() {
-    setEditMode(false);
-    setEditInvoiceId(null);
+  function resetInvoiceForm() {
     setFormClientId("");
     setFormServiceType("");
     setFormBasePrice(0);
@@ -285,8 +283,52 @@ export default function InvoicesPage() {
     setAddOnName("");
     setAddOnPrice("");
     setDueDatePreset("14");
-    setFormDueDate(dueDateFromPreset("14"));
+    setFormDueDate(defaultDueDate());
     setFormNotes("");
+  }
+
+  // Open create panel
+  function openCreate() {
+    setEditMode(false);
+    setEditInvoiceId(null);
+    resetInvoiceForm();
+    try {
+      const raw = localStorage.getItem(INVOICE_DRAFT_KEY);
+      if (raw) {
+        const draft = JSON.parse(raw) as {
+          formClientId?: string;
+          formServiceType?: string;
+          formBasePrice?: number;
+          formAddOns?: {id: string; name: string; price: number}[];
+          addOnName?: string;
+          addOnPrice?: string;
+          formDueDate?: string;
+          formNotes?: string;
+        };
+        if (draft.formClientId) setFormClientId(draft.formClientId);
+        if (draft.formServiceType) setFormServiceType(draft.formServiceType);
+        if (typeof draft.formBasePrice === "number") setFormBasePrice(draft.formBasePrice);
+        if (Array.isArray(draft.formAddOns)) setFormAddOns(draft.formAddOns);
+        if (typeof draft.addOnName === "string") setAddOnName(draft.addOnName);
+        if (typeof draft.addOnPrice === "string") setAddOnPrice(draft.addOnPrice);
+        if (draft.formDueDate) {
+          setFormDueDate(draft.formDueDate);
+          const diffDays = Math.round(
+            (new Date(draft.formDueDate + "T00:00:00").getTime() -
+              new Date(new Date().toISOString().split("T")[0] + "T00:00:00").getTime()) /
+              86400000
+          );
+          if (diffDays === 7) setDueDatePreset("7");
+          else if (diffDays === 14) setDueDatePreset("14");
+          else if (diffDays === 30) setDueDatePreset("30");
+          else setDueDatePreset("custom");
+        }
+        if (typeof draft.formNotes === "string") setFormNotes(draft.formNotes);
+        toast.info("Loaded saved invoice draft");
+      }
+    } catch {
+      // Ignore invalid draft data
+    }
     setPanelOpen(true);
   }
 
@@ -343,6 +385,7 @@ export default function InvoicesPage() {
       return;
     }
     toast.success("Invoice created.");
+    localStorage.removeItem(INVOICE_DRAFT_KEY);
     setPanelOpen(false);
     fetchData();
   }
@@ -379,10 +422,91 @@ export default function InvoicesPage() {
       return;
     }
     toast.success("Invoice updated.");
+    localStorage.removeItem(INVOICE_DRAFT_KEY);
     setPanelOpen(false);
     setEditMode(false);
     setEditInvoiceId(null);
     fetchData();
+  }
+
+  const isInvoiceDirty = useMemo(() => {
+    return Boolean(
+      formClientId ||
+      formServiceType ||
+      formBasePrice > 0 ||
+      formAddOns.length > 0 ||
+      addOnName.trim() ||
+      addOnPrice.trim() ||
+      formNotes.trim() ||
+      dueDatePreset !== "14" ||
+      formDueDate !== defaultDueDate() ||
+      qaFirstName.trim() ||
+      qaLastName.trim() ||
+      qaPhone.trim() ||
+      qaEmail.trim() ||
+      qaStreet.trim() ||
+      qaCity.trim()
+    );
+  }, [
+    formClientId,
+    formServiceType,
+    formBasePrice,
+    formAddOns.length,
+    addOnName,
+    addOnPrice,
+    formNotes,
+    dueDatePreset,
+    formDueDate,
+    qaFirstName,
+    qaLastName,
+    qaPhone,
+    qaEmail,
+    qaStreet,
+    qaCity,
+  ]);
+
+  function closeInvoicePanel() {
+    setPanelOpen(false);
+    setClosePromptOpen(false);
+    setEditMode(false);
+    setEditInvoiceId(null);
+    setQuickAddOpen(false);
+    setQaFirstName("");
+    setQaLastName("");
+    setQaPhone("");
+    setQaEmail("");
+    setQaStreet("");
+    setQaCity("");
+  }
+
+  function requestCloseInvoicePanel() {
+    if (!isInvoiceDirty) {
+      closeInvoicePanel();
+      return;
+    }
+    setClosePromptOpen(true);
+  }
+
+  function saveDraftAndClose() {
+    const draft = {
+      formClientId,
+      formServiceType,
+      formBasePrice,
+      formAddOns,
+      addOnName,
+      addOnPrice,
+      formDueDate,
+      formNotes,
+    };
+    localStorage.setItem(INVOICE_DRAFT_KEY, JSON.stringify(draft));
+    toast.success("Draft saved");
+    closeInvoicePanel();
+  }
+
+  function discardAndClose() {
+    localStorage.removeItem(INVOICE_DRAFT_KEY);
+    resetInvoiceForm();
+    closeInvoicePanel();
   }
 
   // Mark as Paid
@@ -895,15 +1019,12 @@ export default function InvoicesPage() {
       {/* Create Invoice Panel */}
       <SlidePanel
         open={panelOpen}
-        onClose={() => { setPanelOpen(false); setEditMode(false); setEditInvoiceId(null); }}
+        onClose={requestCloseInvoicePanel}
         title={editMode ? "Edit Invoice" : "New Invoice"}
         subtitle={editMode ? "Update invoice details" : "Create and send a new invoice"}
         width="w-full max-w-xl"
         footer={
           <FormActions>
-            <SecondaryButton onClick={() => { setPanelOpen(false); setEditMode(false); setEditInvoiceId(null); }}>
-              Cancel
-            </SecondaryButton>
             <PrimaryButton loading={saving} onClick={editMode ? handleUpdate : handleSave}>
               {editMode ? "Update Invoice" : "Create Invoice"}
             </PrimaryButton>
@@ -1217,6 +1338,39 @@ export default function InvoicesPage() {
           </div>
         </div>
       </SlidePanel>
+
+      {closePromptOpen && (
+        <div className="fixed inset-0 z-[95] flex items-center justify-center bg-black/55 px-4">
+          <div className="w-full max-w-sm rounded-[10px] border border-[var(--mh-border)] bg-[var(--mh-surface)] shadow-[0_10px_40px_rgba(0,0,0,0.45)]">
+            <div className="px-4 py-3.5 border-b border-[var(--mh-divider)]">
+              <p className="text-[14px] font-bold text-[var(--mh-text)]">Save invoice draft?</p>
+              <p className="text-[12px] text-[var(--mh-text-muted)] mt-1">
+                You have unsaved changes. Save this as a draft before closing?
+              </p>
+            </div>
+            <div className="px-4 py-3 grid grid-cols-1 gap-2">
+              <button
+                onClick={saveDraftAndClose}
+                className="w-full h-9 rounded-[8px] bg-[#0071E3] text-white text-[13px] font-semibold"
+              >
+                Save Draft
+              </button>
+              <button
+                onClick={discardAndClose}
+                className="w-full h-9 rounded-[8px] border border-[var(--mh-border)] text-[13px] font-semibold text-[var(--mh-text-muted)]"
+              >
+                Discard
+              </button>
+              <button
+                onClick={() => setClosePromptOpen(false)}
+                className="w-full h-9 rounded-[8px] text-[13px] font-semibold text-[var(--mh-text-subtle)]"
+              >
+                Keep Editing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
