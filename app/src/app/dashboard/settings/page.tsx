@@ -649,14 +649,14 @@ export default function SettingsPage() {
           {activeTab === "business" && (
             <>
               <Card>
-                <CardHeader title="Service Types" description="The cleaning services you offer. These appear in job and estimate forms." />
+                <CardHeader title="Service Types" description="The cleaning services you offer. These appear in job forms and can auto-fill pricing." />
                 <CardBody className="space-y-4">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Input
                       value={newService}
                       onChange={(e) => setNewService(e.target.value)}
                       placeholder="Add a new service type..."
-                      className="flex-1"
+                      className="flex-1 min-w-0"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
@@ -667,14 +667,14 @@ export default function SettingsPage() {
                     <button
                       type="button"
                       onClick={addServiceType}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-[#0071E3] hover:bg-[#0077ED]/90 text-white text-[13px] font-semibold rounded-[6px] transition-colors shrink-0"
+                      className="flex items-center justify-center gap-1.5 px-4 py-2.5 sm:py-2 bg-[#0071E3] hover:bg-[#0077ED]/90 text-white text-[13px] font-semibold rounded-[8px] sm:rounded-[6px] transition-colors shrink-0"
                     >
                       <Plus className="h-3.5 w-3.5" strokeWidth={2} />
                       Add
                     </button>
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     {serviceTypes.map((service, index) => {
                       const isEditing = editingPriceFor === service;
                       const savedPrice = servicePrices[service];
@@ -683,11 +683,24 @@ export default function SettingsPage() {
                       return (
                         <div
                           key={`${service}-${index}`}
-                          className="flex items-center gap-3 px-3 py-2.5 bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)] rounded-[6px] group hover:bg-[var(--mh-hover-overlay)] transition-colors"
+                          className="px-3 py-3 bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)] rounded-[10px] sm:rounded-[6px] hover:bg-[var(--mh-hover-overlay)] transition-colors"
                         >
-                          <div className="h-1.5 w-1.5 rounded-full bg-[var(--mh-text-faint)] shrink-0" />
-                          <span className="flex-1 text-[13px] text-[var(--mh-text)]">{service}</span>
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="h-1.5 w-1.5 rounded-full bg-[var(--mh-text-faint)] shrink-0" />
+                              <span className="text-[13px] font-medium text-[var(--mh-text)] truncate">{service}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeServiceType(index)}
+                              className="h-7 w-7 flex items-center justify-center rounded-[6px] text-[var(--mh-text-subtle)] hover:text-red-500 hover:bg-red-500/10 transition-colors shrink-0"
+                              aria-label={`Remove ${service}`}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="mt-2 flex items-center justify-between gap-2">
                             {isEditing ? (
                               <div className="flex items-center gap-1">
                                 <span className="text-[12px] text-[var(--mh-text-subtle)]">$</span>
@@ -697,42 +710,41 @@ export default function SettingsPage() {
                                   step="5"
                                   autoFocus
                                   value={servicePrices[service] || ""}
-                                  onChange={(e) => setServicePrices(prev => ({ ...prev, [service]: e.target.value }))}
+                                  onChange={(e) => setServicePrices((prev) => ({ ...prev, [service]: e.target.value }))}
                                   onBlur={() => setEditingPriceFor(null)}
-                                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === "Escape") setEditingPriceFor(null); }}
-                                  className="w-20 px-2 py-1 text-[12px] bg-[var(--mh-surface)] border border-[#0071E3]/50 rounded-[4px] text-[var(--mh-text)] outline-none text-right"
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter" || e.key === "Escape") setEditingPriceFor(null);
+                                  }}
+                                  className="w-24 px-2 py-1.5 text-[12px] bg-[var(--mh-surface)] border border-[#0071E3]/50 rounded-[6px] text-[var(--mh-text)] outline-none text-right"
                                 />
                               </div>
                             ) : (
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[13px] font-semibold text-[var(--mh-text)]">
-                                  {displayPrice ? `$${displayPrice}` : <span className="text-[var(--mh-text-faint)]">—</span>}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => { setEditingPriceFor(service); if (!servicePrices[service] && defaultPrice) { setServicePrices(prev => ({ ...prev, [service]: String(defaultPrice) })); } }}
-                                  className="p-1 rounded text-[var(--mh-text-faint)] hover:text-[#0071E3] hover:bg-[#0071E3]/10 opacity-0 group-hover:opacity-100 transition-all"
-                                  title="Edit price"
-                                >
-                                  <Pencil className="h-3 w-3" strokeWidth={2} />
-                                </button>
-                              </div>
+                              <span className="text-[13px] font-semibold text-[var(--mh-text)]">
+                                {displayPrice ? `$${displayPrice}` : <span className="text-[var(--mh-text-faint)]">—</span>}
+                              </span>
                             )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingPriceFor(service);
+                                if (!servicePrices[service] && defaultPrice) {
+                                  setServicePrices((prev) => ({ ...prev, [service]: String(defaultPrice) }));
+                                }
+                              }}
+                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[7px] text-[11px] font-semibold text-[var(--mh-text-muted)] bg-[var(--mh-surface)] border border-[var(--mh-border)] hover:text-[#0071E3] hover:border-[#0071E3]/40 transition-colors"
+                              title="Edit price"
+                            >
+                              <Pencil className="h-3 w-3" strokeWidth={2} />
+                              Edit price
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => removeServiceType(index)}
-                            className="p-1 rounded text-[var(--mh-text-subtle)] hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
                         </div>
                       );
                     })}
                   </div>
 
                   <p className="text-[11px] text-[var(--mh-text-subtle)]">
-                    {serviceTypes.length} service type{serviceTypes.length !== 1 ? "s" : ""} · Prices auto-fill when scheduling a job, always overridable per job
+                    {serviceTypes.length} service type{serviceTypes.length !== 1 ? "s" : ""} · Prices auto-fill when scheduling and are always overridable per job
                   </p>
                 </CardBody>
                 <CardFooter>

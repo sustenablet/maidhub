@@ -1847,10 +1847,11 @@ export default function SchedulePage() {
               </FormSelect>
             </FormField>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <FormField label="Date" required>
                 <FormInput
                   type="date"
+                  className="h-9 px-2.5 text-[12px]"
                   value={formDate}
                   onChange={(e) => setFormDate(e.target.value)}
                 />
@@ -1858,15 +1859,17 @@ export default function SchedulePage() {
               <FormField label="Start Time">
                 <FormInput
                   type="time"
+                  className="h-9 px-2.5 text-[12px]"
                   value={formStartTime}
                   onChange={(e) => setFormStartTime(e.target.value)}
                 />
               </FormField>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <FormField label="Duration">
                 <FormSelect
+                  className="h-9 px-2.5 text-[12px]"
                   value={formDuration}
                   onChange={(e) => setFormDuration(e.target.value)}
                 >
@@ -1880,6 +1883,7 @@ export default function SchedulePage() {
               <FormField label="Price">
                 <FormInput
                   type="number"
+                  className="h-9 px-2.5 text-[12px]"
                   step="0.01"
                   min="0"
                   placeholder="0.00"
@@ -2168,10 +2172,11 @@ export default function SchedulePage() {
                 />
               </FormField>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <FormField label="Start Date" required>
                 <FormInput
                   type="date"
+                  className="h-9 px-2.5 text-[12px]"
                   value={recStartDate}
                   onChange={(e) => setRecStartDate(e.target.value)}
                 />
@@ -2179,6 +2184,7 @@ export default function SchedulePage() {
               <FormField label="End Date">
                 <FormInput
                   type="date"
+                  className="h-9 px-2.5 text-[12px]"
                   value={recEndDate}
                   onChange={(e) => setRecEndDate(e.target.value)}
                 />
@@ -2198,16 +2204,18 @@ export default function SchedulePage() {
                 ))}
               </FormSelect>
             </FormField>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <FormField label="Start Time">
                 <FormInput
                   type="time"
+                  className="h-9 px-2.5 text-[12px]"
                   value={recStartTime}
                   onChange={(e) => setRecStartTime(e.target.value)}
                 />
               </FormField>
               <FormField label="Duration">
                 <FormSelect
+                  className="h-9 px-2.5 text-[12px]"
                   value={recDuration}
                   onChange={(e) => setRecDuration(e.target.value)}
                 >

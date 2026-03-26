@@ -126,7 +126,7 @@ export function FormField({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1.5 min-w-0">
       <label className="text-[12px] font-semibold text-[var(--mh-text-muted)]">
         {label}
         {required && <span className="text-red-400 ml-0.5">*</span>}
