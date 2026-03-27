@@ -253,16 +253,16 @@ export default async function DashboardPage() {
             </div>
           </Link>
 
-          {/* This Month Revenue */}
+          {/* This Week Revenue */}
           <Link href="/dashboard/invoices" className="shrink-0 w-[160px] block">
             <div className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[14px] p-4 h-full">
               <div className="h-8 w-8 rounded-[8px] bg-[#FF9F0A]/10 flex items-center justify-center mb-3">
                 <DollarSign className="h-4 w-4 text-[#FF9F0A]" strokeWidth={1.8} />
               </div>
-              <div className="text-[24px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] mb-1.5 tabular-nums">
-                ${thisMonthRev.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              <div className="text-[30px] font-bold text-[var(--mh-text)] leading-none tracking-[-0.04em] mb-1.5 tabular-nums">
+                ${weekRevenue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
               </div>
-              <p className="text-[11px] font-semibold text-[var(--mh-text-subtle)]">Month Revenue</p>
+              <p className="text-[11px] font-semibold text-[var(--mh-text-subtle)]">Week Revenue</p>
             </div>
           </Link>
 
