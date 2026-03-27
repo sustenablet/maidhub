@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useOrganization } from "@/contexts/organization-context";
 import {
   Bell,
   Briefcase,
@@ -63,6 +64,8 @@ const tabs: { label: string; value: NotifCategory }[] = [
 
 export default function NotificationsPage() {
   const supabase = createClient();
+  const { currentOrgId } = useOrganization();
+
   const [activeTab, setActiveTab] = useState<NotifCategory>("all");
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,11 +107,13 @@ export default function NotificationsPage() {
     const items: ActivityItem[] = [];
 
     // Fetch recent jobs
-    const { data: jobs } = await supabase
+    const jobsQuery = supabase
       .from("jobs")
       .select("id, scheduled_date, start_time, service_type, status, price, created_at, updated_at, clients(first_name, last_name)")
       .order("updated_at", { ascending: false })
       .limit(20);
+    if (currentOrgId) jobsQuery.eq("organization_id", currentOrgId);
+    const { data: jobs } = await jobsQuery;
 
     if (jobs) {
       for (const job of jobs) {
@@ -157,11 +162,13 @@ export default function NotificationsPage() {
     const todayStr = new Date().toISOString().split("T")[0];
 
     // Fetch invoices due today — pinned urgent notifications
-    const { data: dueToday } = await supabase
+    const dueTodayQuery = supabase
       .from("invoices")
       .select("id, total, due_date, clients(first_name, last_name)")
       .eq("status", "unpaid")
       .eq("due_date", todayStr);
+    if (currentOrgId) dueTodayQuery.eq("organization_id", currentOrgId);
+    const { data: dueToday } = await dueTodayQuery;
 
     if (dueToday && dueToday.length > 0) {
       for (const inv of dueToday) {
@@ -183,11 +190,13 @@ export default function NotificationsPage() {
     }
 
     // Fetch recent invoices
-    const { data: invoices } = await supabase
+    const invoicesQuery = supabase
       .from("invoices")
       .select("id, total, status, due_date, payment_date, created_at, updated_at, clients(first_name, last_name)")
       .order("updated_at", { ascending: false })
       .limit(15);
+    if (currentOrgId) invoicesQuery.eq("organization_id", currentOrgId);
+    const { data: invoices } = await invoicesQuery;
 
     if (invoices) {
       for (const inv of invoices) {
@@ -259,7 +268,7 @@ export default function NotificationsPage() {
 
     setActivities(deduped.filter((item) => !dismissedIds.has(item.id)));
     setLoading(false);
-  }, [supabase, readIds, dismissedIds]);
+  }, [supabase, readIds, dismissedIds, currentOrgId]);
 
   useEffect(() => {
     loadActivities();

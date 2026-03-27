@@ -18,6 +18,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useOrganization } from "@/contexts/organization-context";
 import {
   SlidePanel,
   FormSection,
@@ -75,6 +76,7 @@ export default function ClientDetailPage() {
   const params = useParams();
   const router = useRouter();
   const supabase = createClient();
+  const { currentOrgId } = useOrganization();
   const clientId = params.id as string;
 
   const [client, setClient] = useState<Client | null>(null);
@@ -98,6 +100,7 @@ export default function ClientDetailPage() {
   const [editPreferredService, setEditPreferredService] = useState("");
 
   const fetchData = useCallback(async () => {
+    if (!currentOrgId) return;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -108,6 +111,7 @@ export default function ClientDetailPage() {
         .select("*")
         .eq("id", clientId)
         .eq("user_id", user.id)
+        .eq("organization_id", currentOrgId)
         .single();
 
       if (clientError) throw clientError;
@@ -118,7 +122,8 @@ export default function ClientDetailPage() {
         .from("addresses")
         .select("*")
         .eq("client_id", clientId)
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .eq("organization_id", currentOrgId);
 
       setAddresses((addressData as Address[]) || []);
 
@@ -128,6 +133,7 @@ export default function ClientDetailPage() {
         .select("*, addresses(*)")
         .eq("client_id", clientId)
         .eq("user_id", user.id)
+        .eq("organization_id", currentOrgId)
         .order("scheduled_date", { ascending: false });
 
       setJobs((jobsData as Job[]) || []);
@@ -138,6 +144,7 @@ export default function ClientDetailPage() {
         .select("*")
         .eq("client_id", clientId)
         .eq("user_id", user.id)
+        .eq("organization_id", currentOrgId)
         .order("created_at", { ascending: false });
 
       setInvoices((invoicesData as Invoice[]) || []);
@@ -147,7 +154,7 @@ export default function ClientDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase, clientId]);
+  }, [supabase, clientId, currentOrgId]);
 
   useEffect(() => {
     fetchData();
@@ -212,6 +219,7 @@ export default function ClientDetailPage() {
           .insert({
             client_id: clientId,
             user_id: user!.id,
+            organization_id: currentOrgId,
             street: editStreet.trim(),
             city: editCity.trim() || null,
             state: editState.trim() || null,
@@ -296,6 +304,7 @@ export default function ClientDetailPage() {
       const { error: invoiceError } = await supabase.from("invoices").insert({
         client_id: clientId,
         user_id: user.id,
+        organization_id: currentOrgId,
         job_id: job.id,
         line_items: [
           {

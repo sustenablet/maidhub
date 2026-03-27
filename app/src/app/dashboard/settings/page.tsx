@@ -33,6 +33,7 @@ import { SERVICE_TYPES, DEFAULT_SERVICE_PRICES } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme, type Theme } from "@/components/theme-provider";
+import { useOrganization } from "@/contexts/organization-context";
 
 type SettingsTab = "profile" | "business" | "preferences" | "subscription" | "account";
 const DEFAULT_ADDITIONAL_COST_TYPES = [
@@ -216,6 +217,7 @@ function SaveButton({ loading, onClick }: { loading: boolean; onClick?: () => vo
 export default function SettingsPage() {
   const supabase = createClient();
   const { theme, setTheme } = useTheme();
+  const { currentOrgId } = useOrganization();
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -283,63 +285,70 @@ export default function SettingsPage() {
 
       if (data) {
         setDisplayName(data.display_name || "");
-        setBusinessName(data.business_name || "");
-        setPhone(data.phone || "");
         setSubscriptionStatus(data.subscription_status || "trialing");
         setSubscriptionPlan(data.subscription_plan || "solo");
         setTrialStart(data.trial_start_date || "");
 
-        // Parse settings JSON
         const settings = (data.settings || {}) as Record<string, unknown>;
-        const biz = (settings.business || {}) as Record<string, unknown>;
         const notif = (settings.notifications || {}) as Record<string, unknown>;
 
-        // Business settings
-        if (Array.isArray(biz.service_types) && biz.service_types.length > 0) {
-          setServiceTypes(biz.service_types as string[]);
-        }
-        if (Array.isArray(biz.additional_cost_types) && biz.additional_cost_types.length > 0) {
-          setAdditionalCostTypes(biz.additional_cost_types as string[]);
-        }
-        if (biz.additional_cost_prices && typeof biz.additional_cost_prices === "object") {
-          const raw = biz.additional_cost_prices as Record<string, unknown>;
-          const saved = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, String(v)]));
-          setAdditionalCostPrices(saved);
-        }
-        // Pre-fill with DEFAULT_SERVICE_PRICES as baseline, then overlay saved prices
-        const defaultPrices = Object.fromEntries(
-          Object.entries(DEFAULT_SERVICE_PRICES).map(([k, v]) => [k, String(v)])
-        );
-        if (biz.service_type_prices && typeof biz.service_type_prices === "object") {
-          const raw = biz.service_type_prices as Record<string, unknown>;
-          const saved = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, String(v)]));
-          setServicePrices({ ...defaultPrices, ...saved });
-        } else {
-          setServicePrices(defaultPrices);
-        }
-        if (biz.default_rate != null) setDefaultRate(String(biz.default_rate));
-        if (biz.tax_rate != null) setTaxRate(String(biz.tax_rate));
-        if (biz.payment_terms != null) setPaymentTerms(String(biz.payment_terms));
-        if (biz.default_duration != null) setDefaultDuration(String(biz.default_duration));
-
-        // Business address from settings
-        const addr = (biz.business_address || {}) as Record<string, string>;
-        if (addr.street) setBusinessStreet(addr.street);
-        if (addr.city) setBusinessCity(addr.city);
-        if (addr.state) setBusinessState(addr.state);
-        if (addr.zip) setBusinessZip(addr.zip);
-
-        // Notification settings
         if (notif.job_reminder != null) setNotifJobReminder(!!notif.job_reminder);
         if (notif.invoice_reminder != null) setNotifInvoiceReminder(!!notif.invoice_reminder);
         if (notif.payment_received != null) setNotifPaymentReceived(!!notif.payment_received);
         if (notif.new_client != null) setNotifNewClient(!!notif.new_client);
         if (notif.weekly_summary != null) setNotifWeeklySummary(!!notif.weekly_summary);
       }
+
+      if (currentOrgId) {
+        const { data: orgData } = await supabase
+          .from("organizations")
+          .select("name, phone, settings")
+          .eq("id", currentOrgId)
+          .single();
+
+        if (orgData) {
+          setBusinessName(orgData.name || "");
+          setPhone(orgData.phone || "");
+
+          const biz = (((orgData.settings || {}) as Record<string, unknown>).business || {}) as Record<string, unknown>;
+
+          if (Array.isArray(biz.service_types) && biz.service_types.length > 0) {
+            setServiceTypes(biz.service_types as string[]);
+          }
+          if (Array.isArray(biz.additional_cost_types) && biz.additional_cost_types.length > 0) {
+            setAdditionalCostTypes(biz.additional_cost_types as string[]);
+          }
+          if (biz.additional_cost_prices && typeof biz.additional_cost_prices === "object") {
+            const raw = biz.additional_cost_prices as Record<string, unknown>;
+            const saved = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, String(v)]));
+            setAdditionalCostPrices(saved);
+          }
+          const defaultPrices = Object.fromEntries(
+            Object.entries(DEFAULT_SERVICE_PRICES).map(([k, v]) => [k, String(v)])
+          );
+          if (biz.service_type_prices && typeof biz.service_type_prices === "object") {
+            const raw = biz.service_type_prices as Record<string, unknown>;
+            const saved = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, String(v)]));
+            setServicePrices({ ...defaultPrices, ...saved });
+          } else {
+            setServicePrices(defaultPrices);
+          }
+          if (biz.default_rate != null) setDefaultRate(String(biz.default_rate));
+          if (biz.tax_rate != null) setTaxRate(String(biz.tax_rate));
+          if (biz.payment_terms != null) setPaymentTerms(String(biz.payment_terms));
+          if (biz.default_duration != null) setDefaultDuration(String(biz.default_duration));
+
+          const addr = (biz.business_address || {}) as Record<string, string>;
+          if (addr.street) setBusinessStreet(addr.street);
+          if (addr.city) setBusinessCity(addr.city);
+          if (addr.state) setBusinessState(addr.state);
+          if (addr.zip) setBusinessZip(addr.zip);
+        }
+      }
       setInitialLoading(false);
     }
     load();
-  }, [supabase]);
+  }, [supabase, currentOrgId]);
 
   async function handleProfileSave(e: React.FormEvent) {
     e.preventDefault();
@@ -348,46 +357,57 @@ export default function SettingsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setProfileSaving(false); return; }
 
-    // Fetch current settings once so we don't clobber other keys
-    const { data: userData } = await supabase
-      .from("users").select("settings").eq("id", user.id).single();
-    const currentSettings = ((userData?.settings || {}) as Record<string, unknown>);
-    const currentBiz = ((currentSettings.business || {}) as Record<string, unknown>);
-
-    const { error } = await supabase
+    const { error: userError } = await supabase
       .from("users")
       .update({
         display_name: displayName,
-        business_name: businessName,
-        phone,
-        settings: {
-          ...currentSettings,
-          business: {
-            ...currentBiz,
-            business_address: {
-              street: businessStreet,
-              city: businessCity,
-              state: businessState,
-              zip: businessZip,
-            },
-          },
-        },
         updated_at: new Date().toISOString(),
       })
       .eq("id", user.id);
 
-    setProfileSaving(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Profile updated");
+    if (userError) {
+      toast.error(userError.message);
+      setProfileSaving(false);
+      return;
     }
+
+    if (currentOrgId) {
+      const { data: orgData } = await supabase
+        .from("organizations")
+        .select("settings")
+        .eq("id", currentOrgId)
+        .single();
+      const currentOrgSettings = ((orgData?.settings || {}) as Record<string, unknown>);
+      const currentBiz = ((currentOrgSettings.business || {}) as Record<string, unknown>);
+
+      await supabase
+        .from("organizations")
+        .update({
+          name: businessName,
+          phone,
+          settings: {
+            ...currentOrgSettings,
+            business: {
+              ...currentBiz,
+              business_address: {
+                street: businessStreet,
+                city: businessCity,
+                state: businessState,
+                zip: businessZip,
+              },
+            },
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", currentOrgId);
+    }
+
+    setProfileSaving(false);
+    toast.success("Profile updated");
   }
 
   async function handleBusinessSave() {
     setBusinessSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setBusinessSaving(false); return; }
 
     const bizSettings = {
       service_types: serviceTypes,
@@ -414,14 +434,20 @@ export default function SettingsPage() {
       },
     };
 
-    const { data: userData } = await supabase
-      .from("users").select("settings").eq("id", user.id).single();
-    const currentSettings = ((userData?.settings || {}) as Record<string, unknown>);
+    if (!currentOrgId) {
+      toast.error("No active business selected");
+      setBusinessSaving(false);
+      return;
+    }
+
+    const { data: orgData } = await supabase
+      .from("organizations").select("settings").eq("id", currentOrgId).single();
+    const currentOrgSettings = ((orgData?.settings || {}) as Record<string, unknown>);
 
     const { error } = await supabase
-      .from("users")
-      .update({ settings: { ...currentSettings, business: bizSettings }, updated_at: new Date().toISOString() })
-      .eq("id", user.id);
+      .from("organizations")
+      .update({ settings: { ...currentOrgSettings, business: bizSettings }, updated_at: new Date().toISOString() })
+      .eq("id", currentOrgId);
 
     if (error) {
       toast.error("Failed to save business settings");

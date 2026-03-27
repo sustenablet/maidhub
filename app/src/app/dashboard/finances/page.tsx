@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import {
   DollarSign,
@@ -45,6 +46,9 @@ export default async function FinancesPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
+  const cookieStore = await cookies();
+  const currentOrgId = cookieStore.get("mh_org_id")?.value;
+
   // Fetch all financial data in parallel
   const [
     allInvoicesRes,
@@ -55,17 +59,17 @@ export default async function FinancesPage() {
     monthInvoicesRes,
   ] = await Promise.allSettled([
     // All invoices (non-void)
-    supabase.from("invoices").select("total, status").eq("user_id", user.id).neq("status", "void"),
+    supabase.from("invoices").select("total, status").eq("user_id", user.id).eq("organization_id", currentOrgId || "").neq("status", "void"),
     // Paid invoices
-    supabase.from("invoices").select("total").eq("user_id", user.id).eq("status", "paid"),
+    supabase.from("invoices").select("total").eq("user_id", user.id).eq("organization_id", currentOrgId || "").eq("status", "paid"),
     // Unpaid invoices
-    supabase.from("invoices").select("total, due_date").eq("user_id", user.id).eq("status", "unpaid"),
+    supabase.from("invoices").select("total, due_date").eq("user_id", user.id).eq("organization_id", currentOrgId || "").eq("status", "unpaid"),
     // Overdue (unpaid + past due date)
-    supabase.from("invoices").select("total").eq("user_id", user.id).eq("status", "unpaid").lt("due_date", new Date().toISOString().split("T")[0]),
+    supabase.from("invoices").select("total").eq("user_id", user.id).eq("organization_id", currentOrgId || "").eq("status", "unpaid").lt("due_date", new Date().toISOString().split("T")[0]),
     // Recent invoices for table
-    supabase.from("invoices").select("id, total, status, due_date, payment_date, created_at, clients(first_name, last_name)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
+    supabase.from("invoices").select("id, total, status, due_date, payment_date, created_at, clients(first_name, last_name)").eq("user_id", user.id).eq("organization_id", currentOrgId || "").order("created_at", { ascending: false }).limit(10),
     // This month's paid invoices
-    supabase.from("invoices").select("total").eq("user_id", user.id).eq("status", "paid").gte("payment_date", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0]),
+    supabase.from("invoices").select("total").eq("user_id", user.id).eq("organization_id", currentOrgId || "").eq("status", "paid").gte("payment_date", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0]),
   ]);
 
   // Calculate totals

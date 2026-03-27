@@ -17,6 +17,7 @@ import {
   Ban,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useOrganization } from "@/contexts/organization-context";
 import {
   SlidePanel,
   FormSection,
@@ -80,6 +81,7 @@ function todayStr(): string {
 
 export default function InvoicesPage() {
   const searchParams = useSearchParams();
+  const { currentOrgId } = useOrganization();
   const [userId, setUserId] = useState<string | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -135,25 +137,27 @@ export default function InvoicesPage() {
   }, []);
 
   const fetchData = useCallback(async () => {
-    if (!userId) return;
+    if (!userId || !currentOrgId) return;
     setLoading(true);
     const [invRes, clientRes] = await Promise.all([
       supabase
         .from("invoices")
         .select("*, clients(*)")
         .eq("user_id", userId)
+        .eq("organization_id", currentOrgId)
         .order("created_at", { ascending: false }),
       supabase
         .from("clients")
         .select("*")
         .eq("user_id", userId)
+        .eq("organization_id", currentOrgId)
         .eq("status", "active")
         .order("first_name"),
     ]);
     if (invRes.data) setInvoices(invRes.data as Invoice[]);
     if (clientRes.data) setClients(clientRes.data as Client[]);
     setLoading(false);
-  }, [userId]);
+  }, [userId, currentOrgId]);
 
   useEffect(() => {
     fetchData();
@@ -170,11 +174,11 @@ export default function InvoicesPage() {
     }
   }, [searchParams, clients]);
 
-  // Load service types and prices from user settings
+  // Load service types and prices from org settings
   useEffect(() => {
-    if (!userId) return;
+    if (!currentOrgId) return;
     (async () => {
-      const { data } = await supabase.from("users").select("settings").eq("id", userId).single();
+      const { data } = await supabase.from("organizations").select("settings").eq("id", currentOrgId).single();
       const biz = (((data?.settings || {}) as Record<string, unknown>).business || {}) as Record<string, unknown>;
       const types = (biz.service_types as string[]) || [];
       const additionalCosts = (biz.additional_cost_types as string[]) || [];
@@ -185,7 +189,7 @@ export default function InvoicesPage() {
       setAddOnPresetPrices(additionalCostPrices);
       setServicePrices(prices);
     })();
-  }, [userId]);
+  }, [currentOrgId]);
 
   async function handleQuickAddClient() {
     if (!qaFirstName.trim() || !qaLastName.trim()) {
@@ -200,6 +204,7 @@ export default function InvoicesPage() {
         .from("clients")
         .insert({
           user_id: user.id,
+          organization_id: currentOrgId,
           first_name: qaFirstName.trim(),
           last_name: qaLastName.trim(),
           email: qaEmail.trim() || null,
@@ -213,13 +218,14 @@ export default function InvoicesPage() {
         await supabase.from("addresses").insert({
           client_id: newClient.id,
           user_id: user.id,
+          organization_id: currentOrgId,
           street: qaStreet.trim(),
           city: qaCity.trim() || null,
         });
       }
       // Refresh clients list and auto-select new client
       const { data: updatedClients } = await supabase
-        .from("clients").select("*").eq("user_id", user.id).eq("status", "active").order("first_name");
+        .from("clients").select("*").eq("user_id", user.id).eq("organization_id", currentOrgId!).eq("status", "active").order("first_name");
       if (updatedClients) setClients(updatedClients as Client[]);
       setFormClientId(newClient.id);
       setQuickAddOpen(false);
@@ -400,6 +406,7 @@ export default function InvoicesPage() {
     ];
     const { error } = await supabase.from("invoices").insert({
       user_id: userId,
+      organization_id: currentOrgId,
       client_id: formClientId,
       job_id: null,
       line_items: saveLineItems,

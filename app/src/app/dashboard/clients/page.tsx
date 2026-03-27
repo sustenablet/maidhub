@@ -12,6 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useOrganization } from "@/contexts/organization-context";
 import {
   SlidePanel,
   FormSection,
@@ -58,6 +59,7 @@ export default function ClientsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
+  const { currentOrgId } = useOrganization();
 
   const [clients, setClients] = useState<ClientWithMeta[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,18 +84,18 @@ export default function ClientsPage() {
 
   useEffect(() => {
     async function loadServiceTypes() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase.from("users").select("settings").eq("id", user.id).single();
+      if (!currentOrgId) return;
+      const { data } = await supabase.from("organizations").select("settings").eq("id", currentOrgId).single();
       const biz = (((data?.settings || {}) as Record<string, unknown>).business || {}) as Record<string, unknown>;
       if (Array.isArray(biz.service_types) && biz.service_types.length > 0) {
         setServiceTypes(biz.service_types as string[]);
       }
     }
     loadServiceTypes();
-  }, [supabase]);
+  }, [supabase, currentOrgId]);
 
   const fetchClients = useCallback(async () => {
+    if (!currentOrgId) return;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -103,6 +105,7 @@ export default function ClientsPage() {
         .from("clients")
         .select("*")
         .eq("user_id", user.id)
+        .eq("organization_id", currentOrgId)
         .order("created_at", { ascending: false });
 
       if (clientsError) throw clientsError;
@@ -116,6 +119,7 @@ export default function ClientsPage() {
       const { data: addressesData } = await supabase
         .from("addresses")
         .select("*")
+        .eq("organization_id", currentOrgId)
         .in("client_id", clientIds.length > 0 ? clientIds : ["__none__"]);
 
       // Fetch job counts per client
@@ -123,6 +127,7 @@ export default function ClientsPage() {
         .from("jobs")
         .select("client_id")
         .eq("user_id", user.id)
+        .eq("organization_id", currentOrgId)
         .in("client_id", clientIds.length > 0 ? clientIds : ["__none__"]);
 
       const jobCountMap: Record<string, number> = {};
@@ -149,7 +154,7 @@ export default function ClientsPage() {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, currentOrgId]);
 
   useEffect(() => {
     fetchClients();
@@ -202,6 +207,7 @@ export default function ClientsPage() {
         .from("clients")
         .insert({
           user_id: user.id,
+          organization_id: currentOrgId,
           first_name: firstName.trim(),
           last_name: lastName.trim(),
           email: email.trim() || null,
@@ -229,6 +235,7 @@ export default function ClientsPage() {
         .insert({
           client_id: newClient.id,
           user_id: user.id,
+          organization_id: currentOrgId,
           street: street.trim(),
           city: city.trim() || null,
           state: state.trim() || null,

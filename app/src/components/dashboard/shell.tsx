@@ -19,8 +19,13 @@ import {
   Wallet,
   ChevronRight,
   Plus,
+  Check,
+  Building2,
 } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import { useOrganization } from "@/contexts/organization-context";
+import type { Organization } from "@/contexts/organization-context";
+import { toast } from "sonner";
 
 interface Profile {
   display_name: string | null;
@@ -325,6 +330,10 @@ function MobileMoreSheet({
   email,
   initials,
   onSignOut,
+  organizations,
+  currentOrg,
+  switchOrg,
+  onNewBusiness,
 }: {
   open: boolean;
   onClose: () => void;
@@ -332,6 +341,10 @@ function MobileMoreSheet({
   email: string;
   initials: string;
   onSignOut: () => void;
+  organizations: Organization[];
+  currentOrg: Organization | null;
+  switchOrg: (id: string) => void;
+  onNewBusiness: () => void;
 }) {
   const moreItems = [
     { href: "/dashboard/settings", label: "Settings", icon: Settings, desc: "Account & preferences" },
@@ -369,6 +382,37 @@ function MobileMoreSheet({
             <p className="text-[14px] font-semibold text-[var(--mh-text)] truncate">{displayName}</p>
             <p className="text-[11px] text-[var(--mh-text-faint)] truncate">{email}</p>
           </div>
+        </div>
+
+        {/* Org switcher */}
+        <div className="px-3 pt-3 pb-2 border-b border-[var(--mh-divider)]">
+          <p className="px-3 pb-2 text-[10px] font-semibold text-[var(--mh-text-faint)] uppercase tracking-[0.08em]">Business</p>
+          {organizations.map((org) => (
+            <button
+              key={org.id}
+              onClick={() => { switchOrg(org.id); onClose(); }}
+              className="flex w-full items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-[var(--mh-hover-overlay)] transition-colors"
+            >
+              <div className="h-8 w-8 rounded-[8px] bg-[#0071E3]/10 flex items-center justify-center shrink-0">
+                <Building2 className="h-4 w-4 text-[#0071E3]" strokeWidth={1.7} />
+              </div>
+              <p className={`flex-1 text-left text-[14px] font-semibold ${org.id === currentOrg?.id ? "text-[var(--mh-text)]" : "text-[var(--mh-text-muted)]"}`}>
+                {org.name}
+              </p>
+              {org.id === currentOrg?.id && (
+                <Check className="h-4 w-4 text-[#0071E3]" strokeWidth={2.5} />
+              )}
+            </button>
+          ))}
+          <button
+            onClick={() => { onNewBusiness(); onClose(); }}
+            className="flex w-full items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-[var(--mh-hover-overlay)] transition-colors"
+          >
+            <div className="h-8 w-8 rounded-[8px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
+              <Plus className="h-4 w-4 text-[var(--mh-text-muted)]" strokeWidth={1.7} />
+            </div>
+            <p className="text-[14px] font-semibold text-[#0071E3]">New Business</p>
+          </button>
         </div>
 
         {/* Nav items */}
@@ -409,6 +453,89 @@ function MobileMoreSheet({
   );
 }
 
+// ── New Business Modal ────────────────────────────────────────────
+function NewBusinessModal({
+  open,
+  onClose,
+  onCreate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onCreate: (name: string, phone: string) => Promise<void>;
+}) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function handleCreate() {
+    if (!name.trim()) return;
+    setSaving(true);
+    try {
+      await onCreate(name.trim(), phone.trim());
+      setName("");
+      setPhone("");
+      onClose();
+    } catch {
+      // error handled by caller
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (!open) return null;
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div className="fixed left-1/2 top-1/2 z-[90] w-[calc(100vw-32px)] max-w-[360px] -translate-x-1/2 -translate-y-1/2 bg-[var(--mh-surface)] rounded-[12px] border border-[var(--mh-border)] shadow-[var(--mh-shadow-dropdown)] p-5">
+        <h2 className="text-[15px] font-bold text-[var(--mh-text)] mb-4">New Business</h2>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-[12px] font-semibold text-[var(--mh-text-muted)] mb-1.5">Business Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Green Clean LLC"
+              className="w-full px-3 py-2 text-[13px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] text-[var(--mh-text)] placeholder:text-[var(--mh-text-faint)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/30"
+              autoFocus
+              onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+            />
+          </div>
+          <div>
+            <label className="block text-[12px] font-semibold text-[var(--mh-text-muted)] mb-1.5">Phone (optional)</label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="(555) 000-0000"
+              className="w-full px-3 py-2 text-[13px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)] rounded-[6px] text-[var(--mh-text)] placeholder:text-[var(--mh-text-faint)] focus:outline-none focus:ring-2 focus:ring-[#0071E3]/30"
+            />
+          </div>
+        </div>
+        <div className="flex gap-2 mt-5">
+          <button
+            onClick={onClose}
+            className="flex-1 py-2 rounded-[6px] text-[13px] font-semibold text-[var(--mh-text-muted)] border border-[var(--mh-border)] hover:bg-[var(--mh-hover-overlay)] transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleCreate}
+            disabled={!name.trim() || saving}
+            className="flex-1 py-2 rounded-[6px] text-[13px] font-semibold bg-[#0071E3] text-white hover:bg-[#0077ED] disabled:opacity-50 transition-colors"
+          >
+            {saving ? "Creating..." : "Create"}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ── Main shell ───────────────────────────────────────────────────
 export function DashboardShell({
   user,
@@ -422,10 +549,12 @@ export function DashboardShell({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
+  const [newBizOpen, setNewBizOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createClient();
   const pathname = usePathname();
+  const { organizations, currentOrg, switchOrg, createOrg } = useOrganization();
 
   const displayName = profile?.display_name || user.email?.split("@")[0] || "User";
   const initials = getInitials(profile?.display_name, user.email || "U");
@@ -451,6 +580,16 @@ export function DashboardShell({
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
+  }
+
+  async function handleCreateOrg(name: string, phone: string) {
+    try {
+      await createOrg(name, phone || undefined);
+      toast.success(`${name} created`);
+    } catch {
+      toast.error("Failed to create business");
+      throw new Error("Failed");
+    }
   }
 
   return (
@@ -491,6 +630,33 @@ export function DashboardShell({
                 <div className="px-3.5 py-2.5 border-b border-[var(--mh-border)]">
                   <p className="text-[13px] font-semibold text-[var(--mh-text)]">{displayName}</p>
                   <p className="text-[11px] text-[var(--mh-text-faint)] truncate">{user.email}</p>
+                </div>
+                {/* Org switcher */}
+                <div className="py-0.5 border-b border-[var(--mh-border)]">
+                  <p className="px-3.5 pt-2 pb-1 text-[10px] font-semibold text-[var(--mh-text-faint)] uppercase tracking-[0.08em]">Business</p>
+                  {organizations.map((org) => (
+                    <button
+                      key={org.id}
+                      onClick={() => { switchOrg(org.id); setDropdownOpen(false); }}
+                      className="flex w-full items-center gap-2.5 px-3.5 py-2 text-[13px] hover:bg-[var(--mh-hover-overlay)] transition-colors"
+                    >
+                      <div className="h-4 w-4 flex items-center justify-center shrink-0">
+                        {org.id === currentOrg?.id ? (
+                          <Check className="h-3.5 w-3.5 text-[#0071E3]" strokeWidth={2.5} />
+                        ) : null}
+                      </div>
+                      <span className={org.id === currentOrg?.id ? "text-[var(--mh-text)] font-semibold" : "text-[var(--mh-text-muted)]"}>
+                        {org.name}
+                      </span>
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => { setNewBizOpen(true); setDropdownOpen(false); }}
+                    className="flex w-full items-center gap-2.5 px-3.5 py-2 text-[13px] text-[#0071E3] hover:bg-[var(--mh-hover-overlay)] transition-colors"
+                  >
+                    <Plus className="h-3.5 w-3.5" strokeWidth={2} />
+                    New Business
+                  </button>
                 </div>
                 <div className="py-0.5">
                   <Link
@@ -564,6 +730,17 @@ export function DashboardShell({
         email={user.email || ""}
         initials={initials}
         onSignOut={handleSignOut}
+        organizations={organizations}
+        currentOrg={currentOrg}
+        switchOrg={switchOrg}
+        onNewBusiness={() => setNewBizOpen(true)}
+      />
+
+      {/* ── New Business Modal ── */}
+      <NewBusinessModal
+        open={newBizOpen}
+        onClose={() => setNewBizOpen(false)}
+        onCreate={handleCreateOrg}
       />
     </div>
   );

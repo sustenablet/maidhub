@@ -332,6 +332,32 @@ const CSS = `
     background: rgba(12,27,42,0.1);
   }
 
+  .lp-google {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 13px;
+    background: #fff;
+    border: 1.5px solid rgba(12,27,42,0.14);
+    border-radius: 11px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0C1B2A;
+    cursor: pointer;
+    font-family: 'Syne', system-ui, sans-serif;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .lp-google:hover:not(:disabled) {
+    border-color: rgba(12,27,42,0.3);
+    box-shadow: 0 1px 4px rgba(12,27,42,0.08);
+  }
+
+  .lp-google:disabled { opacity: 0.5; cursor: not-allowed; }
+
   @media (max-width: 768px) {
     .lp-brand { display: none; }
     .lp-form-panel { padding: 40px 24px; }
@@ -356,6 +382,18 @@ export default function LoginPage() {
     }
     router.push("/dashboard");
     router.refresh();
+  }
+
+  async function handleGoogleLogin() {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) {
+      toast.error(error.message);
+      setLoading(false);
+    }
   }
 
   return (
@@ -452,6 +490,17 @@ export default function LoginPage() {
                 {loading ? "Signing in…" : "Sign in →"}
               </button>
             </form>
+
+            <div className="lp-divider">or</div>
+            <button type="button" className="lp-google" onClick={handleGoogleLogin} disabled={loading}>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path fill="#4285F4" d="M17.64 9.2a10.34 10.34 0 00-.16-1.84H9v3.48h4.84a4.14 4.14 0 01-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/>
+                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26a5.4 5.4 0 01-8.07-2.85H.96v2.33A9 9 0 009 18z"/>
+                <path fill="#FBBC05" d="M3.97 10.71A5.41 5.41 0 013.69 9c0-.6.1-1.17.28-1.71V4.96H.96A9 9 0 000 9c0 1.45.35 2.82.96 4.04l3.01-2.33z"/>
+                <path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.59C13.46.89 11.43 0 9 0A9 9 0 00.96 4.96l3.01 2.33C4.66 5.1 6.6 3.58 9 3.58z"/>
+              </svg>
+              Continue with Google
+            </button>
 
             <p className="lp-switch">
               Don&apos;t have an account?{" "}

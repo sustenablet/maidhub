@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/shell";
+import { OrganizationProvider } from "@/contexts/organization-context";
 
 export default async function DashboardLayout({
   children,
@@ -23,8 +24,10 @@ export default async function DashboardLayout({
     .single();
 
   return (
-    <DashboardShell user={user} profile={profile}>
-      {children}
-    </DashboardShell>
+    <OrganizationProvider userId={user.id}>
+      <DashboardShell user={user} profile={profile}>
+        {children}
+      </DashboardShell>
+    </OrganizationProvider>
   );
 }

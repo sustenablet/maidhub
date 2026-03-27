@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import {
   Briefcase,
   Clock,
@@ -20,6 +21,9 @@ import type { ServiceDataPoint } from "@/components/dashboard/service-donut";
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  const cookieStore = await cookies();
+  const currentOrgId = cookieStore.get("mh_org_id")?.value;
 
   const { data: profile } = await supabase
     .from("users")
@@ -46,23 +50,25 @@ export default async function DashboardPage() {
   const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split("T")[0];
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
 
+  const orgFilter = currentOrgId || "";
+
   const [
     clientsRes, upcomingJobsRes, unpaidInvRes,
     todayJobsRes, recentJobsRes, recentInvoicesRes,
     paidInvoicesRes, allJobsServiceRes, weekJobsRes,
     thisMonthRevRes, lastMonthRevRes,
   ] = await Promise.allSettled([
-    supabase.from("clients").select("*", { count: "exact", head: true }).eq("user_id", user!.id),
-    supabase.from("jobs").select("*", { count: "exact", head: true }).eq("user_id", user!.id).eq("status", "scheduled").gte("scheduled_date", todayStr).lte("scheduled_date", new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0]),
-    supabase.from("invoices").select("*", { count: "exact", head: true }).eq("user_id", user!.id).eq("status", "unpaid"),
-    supabase.from("jobs").select("*, clients(first_name, last_name)").eq("user_id", user!.id).eq("scheduled_date", todayStr).order("start_time", { ascending: true }).limit(6),
-    supabase.from("jobs").select("*, clients(first_name, last_name)").eq("user_id", user!.id).order("updated_at", { ascending: false }).limit(30),
-    supabase.from("invoices").select("*, clients(first_name, last_name)").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(5),
-    supabase.from("invoices").select("total, payment_date").eq("user_id", user!.id).eq("status", "paid").gte("payment_date", new Date(Date.now() - 180 * 86400000).toISOString().split("T")[0]),
-    supabase.from("jobs").select("service_type, price").eq("user_id", user!.id).in("status", ["completed", "invoiced"]),
-    supabase.from("jobs").select("id, scheduled_date, start_time, service_type, price, status, duration_minutes, clients(first_name, last_name)").eq("user_id", user!.id).gte("scheduled_date", mondayStr).lte("scheduled_date", sundayStr).order("scheduled_date").order("start_time"),
-    supabase.from("invoices").select("total").eq("user_id", user!.id).eq("status", "paid").gte("payment_date", thisMonthStart),
-    supabase.from("invoices").select("total").eq("user_id", user!.id).eq("status", "paid").gte("payment_date", lastMonthStart).lte("payment_date", lastMonthEnd),
+    supabase.from("clients").select("*", { count: "exact", head: true }).eq("user_id", user!.id).eq("organization_id", orgFilter),
+    supabase.from("jobs").select("*", { count: "exact", head: true }).eq("user_id", user!.id).eq("organization_id", orgFilter).eq("status", "scheduled").gte("scheduled_date", todayStr).lte("scheduled_date", new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0]),
+    supabase.from("invoices").select("*", { count: "exact", head: true }).eq("user_id", user!.id).eq("organization_id", orgFilter).eq("status", "unpaid"),
+    supabase.from("jobs").select("*, clients(first_name, last_name)").eq("user_id", user!.id).eq("organization_id", orgFilter).eq("scheduled_date", todayStr).order("start_time", { ascending: true }).limit(6),
+    supabase.from("jobs").select("*, clients(first_name, last_name)").eq("user_id", user!.id).eq("organization_id", orgFilter).order("updated_at", { ascending: false }).limit(30),
+    supabase.from("invoices").select("*, clients(first_name, last_name)").eq("user_id", user!.id).eq("organization_id", orgFilter).order("created_at", { ascending: false }).limit(5),
+    supabase.from("invoices").select("total, payment_date").eq("user_id", user!.id).eq("organization_id", orgFilter).eq("status", "paid").gte("payment_date", new Date(Date.now() - 180 * 86400000).toISOString().split("T")[0]),
+    supabase.from("jobs").select("service_type, price").eq("user_id", user!.id).eq("organization_id", orgFilter).in("status", ["completed", "invoiced"]),
+    supabase.from("jobs").select("id, scheduled_date, start_time, service_type, price, status, duration_minutes, clients(first_name, last_name)").eq("user_id", user!.id).eq("organization_id", orgFilter).gte("scheduled_date", mondayStr).lte("scheduled_date", sundayStr).order("scheduled_date").order("start_time"),
+    supabase.from("invoices").select("total").eq("user_id", user!.id).eq("organization_id", orgFilter).eq("status", "paid").gte("payment_date", thisMonthStart),
+    supabase.from("invoices").select("total").eq("user_id", user!.id).eq("organization_id", orgFilter).eq("status", "paid").gte("payment_date", lastMonthStart).lte("payment_date", lastMonthEnd),
   ]);
 
   const clientCount = clientsRes.status === "fulfilled" ? (clientsRes.value.count ?? 0) : 0;

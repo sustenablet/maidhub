@@ -24,6 +24,7 @@ import {
   X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useOrganization } from "@/contexts/organization-context";
 import {
   SlidePanel,
   FormSection,
@@ -207,6 +208,7 @@ function isPaidDone(job: Job): boolean {
 
 export default function SchedulePage() {
   const supabase = createClient();
+  const { currentOrgId } = useOrganization();
   const searchParams = useSearchParams();
   const today = useMemo(() => {
     const d = new Date();
@@ -332,9 +334,11 @@ export default function SchedulePage() {
   /* ── Data fetching ──────────────────────────────────────────── */
 
   const fetchJobs = useCallback(async () => {
+    if (!currentOrgId) return;
     const { data, error } = await supabase
       .from("jobs")
       .select("*, clients(*), addresses(*), invoices(status)")
+      .eq("organization_id", currentOrgId)
       .gte("scheduled_date", formatDate(weekStart))
       .lte("scheduled_date", formatDate(weekEnd))
       .order("start_time", { ascending: true });
@@ -345,12 +349,14 @@ export default function SchedulePage() {
       return;
     }
     setJobs((data as Job[]) ?? []);
-  }, [supabase, weekStart, weekEnd]);
+  }, [supabase, weekStart, weekEnd, currentOrgId]);
 
   const fetchClients = useCallback(async () => {
+    if (!currentOrgId) return;
     const { data, error } = await supabase
       .from("clients")
       .select("*, addresses:addresses(*)")
+      .eq("organization_id", currentOrgId)
       .eq("status", "active")
       .order("first_name");
 
@@ -359,12 +365,14 @@ export default function SchedulePage() {
       return;
     }
     setClients((data as ClientWithAddresses[]) ?? []);
-  }, [supabase]);
+  }, [supabase, currentOrgId]);
 
   const fetchDueInvoices = useCallback(async () => {
+    if (!currentOrgId) return;
     const { data } = await supabase
       .from("invoices")
       .select("id, due_date, total, status, clients(first_name, last_name)")
+      .eq("organization_id", currentOrgId)
       .eq("status", "unpaid")
       .gte("due_date", formatDate(weekStart))
       .lte("due_date", formatDate(weekEnd))
@@ -374,25 +382,24 @@ export default function SchedulePage() {
       ...inv,
       clients: Array.isArray(inv.clients) ? inv.clients[0] ?? null : inv.clients,
     })) as DueInvoice[]);
-  }, [supabase, weekStart, weekEnd]);
+  }, [supabase, weekStart, weekEnd, currentOrgId]);
 
   useEffect(() => {
     setLoading(true);
     Promise.all([fetchJobs(), fetchClients(), fetchDueInvoices()]).finally(() => setLoading(false));
   }, [fetchJobs, fetchClients, fetchDueInvoices]);
 
-  // Load service pricing defaults from user settings
+  // Load service pricing defaults from org settings
   useEffect(() => {
     async function loadPricing() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase.from("users").select("settings").eq("id", user.id).single();
+      if (!currentOrgId) return;
+      const { data } = await supabase.from("organizations").select("settings").eq("id", currentOrgId).single();
       const biz = (((data?.settings || {}) as Record<string, unknown>).business || {}) as Record<string, unknown>;
       defaultRateRef.current = Number(biz.default_rate) || 0;
       servicePricesRef.current = (biz.service_type_prices || {}) as Record<string, number>;
     }
     loadPricing();
-  }, [supabase]);
+  }, [supabase, currentOrgId]);
 
   // Auto-open form when navigated with clientId or action=new param
   useEffect(() => {
@@ -522,17 +529,19 @@ export default function SchedulePage() {
   }, [filteredMonthJobs]);
 
   const fetchMonthJobs = useCallback(async () => {
+    if (!currentOrgId) return;
     const gridStart = monthGrid[0]?.[0];
     const gridEnd = monthGrid[5]?.[6];
     if (!gridStart || !gridEnd) return;
     const { data } = await supabase
       .from("jobs")
       .select("*, clients(*)")
+      .eq("organization_id", currentOrgId)
       .gte("scheduled_date", formatDate(gridStart))
       .lte("scheduled_date", formatDate(gridEnd))
       .order("start_time", { ascending: true });
     setMonthJobs((data as Job[]) ?? []);
-  }, [supabase, monthGrid]);
+  }, [supabase, monthGrid, currentOrgId]);
 
   useEffect(() => {
     if (viewMode === "month") fetchMonthJobs();
@@ -597,6 +606,7 @@ export default function SchedulePage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rulePayload: Record<string, any> = {
         user_id: user.id,
+        organization_id: currentOrgId,
         client_id: formClientId,
         frequency: formRecFrequency === "twice_weekly" ? "custom" : formRecFrequency,
         custom_interval_days: formRecFrequency === "twice_weekly" ? 3 : formRecFrequency === "custom" ? parseInt(formRecCustomDays) || 14 : null,
@@ -625,6 +635,7 @@ export default function SchedulePage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const firstJobPayload: Record<string, any> = {
         user_id: user.id,
+        organization_id: currentOrgId,
         client_id: formClientId,
         recurring_rule_id: newRule.id,
         scheduled_date: formDate,
@@ -646,6 +657,7 @@ export default function SchedulePage() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const j: Record<string, any> = {
             user_id: user.id,
+            organization_id: currentOrgId,
             client_id: formClientId,
             recurring_rule_id: newRule.id,
             scheduled_date: d,
@@ -668,6 +680,7 @@ export default function SchedulePage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const jobPayload: Record<string, any> = {
         user_id: user.id,
+        organization_id: currentOrgId,
         client_id: formClientId,
         scheduled_date: formDate,
         start_time: formStartTime || null,
@@ -756,12 +769,14 @@ export default function SchedulePage() {
   /* ── Recurring rules ──────────────────────────────────── */
 
   const fetchRecurringRules = useCallback(async () => {
+    if (!currentOrgId) return;
     const { data } = await supabase
       .from("recurring_rules")
       .select("*, clients(*), addresses(*)")
+      .eq("organization_id", currentOrgId)
       .order("created_at", { ascending: false });
     setRecurringRules((data as RecurringRule[]) ?? []);
-  }, [supabase]);
+  }, [supabase, currentOrgId]);
 
   function resetRecurringForm() {
     setRecClientId("");
@@ -787,6 +802,7 @@ export default function SchedulePage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rulePayload: Record<string, any> = {
       user_id: ruleUser.id,
+      organization_id: currentOrgId,
       client_id: recClientId,
       frequency: recFrequency,
       custom_interval_days: recFrequency === "custom" ? parseInt(recCustomDays) || 7 : null,
