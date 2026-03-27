@@ -5,12 +5,15 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const publicPaths = ["/login", "/signup", "/auth/callback", "/auth/confirm", "/forgot-password", "/reset-password"];
-  const marketingPaths = ["/index.html", "/pricing.html", "/features.html", "/how-it-works.html", "/privacy.html", "/terms.html"];
+  const marketingPaths = [
+    "/index.html", "/pricing.html", "/features.html", "/how-it-works.html", "/privacy.html", "/terms.html",
+    "/pricing", "/features", "/how-it-works", "/privacy", "/terms",
+  ];
   const isPublicPath = publicPaths.some((p) => pathname.startsWith(p));
   const isMarketingPath = marketingPaths.includes(pathname);
 
-  // Skip Supabase for root, public paths, and marketing pages
-  if (pathname === "/" || isPublicPath || isMarketingPath) {
+  // Skip Supabase for public auth paths and marketing pages
+  if (isPublicPath || isMarketingPath) {
     return NextResponse.next({ request });
   }
 
