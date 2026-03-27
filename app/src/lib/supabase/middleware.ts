@@ -52,8 +52,17 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (!user) {
+    // Let the root through — the rewrite in next.config.ts serves the landing page
+    if (pathname === "/") return NextResponse.next({ request });
     const url = request.nextUrl.clone();
     url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Logged-in users at root or marketing pages → send to dashboard
+  if (user && (pathname === "/" || isMarketingPath)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
