@@ -397,7 +397,7 @@ function MobileMoreSheet({
                 <Building2 className="h-4 w-4 text-[#0071E3]" strokeWidth={1.7} />
               </div>
               <p className={`flex-1 text-left text-[14px] font-semibold ${org.id === currentOrg?.id ? "text-[var(--mh-text)]" : "text-[var(--mh-text-muted)]"}`}>
-                {org.name}
+                {org.name || "Unnamed Business"}
               </p>
               {org.id === currentOrg?.id && (
                 <Check className="h-4 w-4 text-[#0071E3]" strokeWidth={2.5} />
@@ -655,7 +655,7 @@ export function DashboardShell({
                         ) : null}
                       </div>
                       <span className={org.id === currentOrg?.id ? "text-[var(--mh-text)] font-semibold" : "text-[var(--mh-text-muted)]"}>
-                        {org.name}
+                        {org.name || "Unnamed Business"}
                       </span>
                     </button>
                   ))}

@@ -33,9 +33,9 @@ import { SERVICE_TYPES, DEFAULT_SERVICE_PRICES } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme, type Theme } from "@/components/theme-provider";
-import { useOrganization } from "@/contexts/organization-context";
+import { useOrganization, type Organization } from "@/contexts/organization-context";
 
-type SettingsTab = "profile" | "business" | "preferences" | "subscription" | "account";
+type SettingsTab = "profile" | "business" | "preferences" | "subscription" | "account" | "organizations";
 const DEFAULT_ADDITIONAL_COST_TYPES = [
   "Window Cleaning",
   "Floor Waxing",
@@ -52,6 +52,7 @@ const DEFAULT_ADDITIONAL_COST_TYPES = [
 const tabs: { id: SettingsTab; label: string; icon: React.ElementType; description: string }[] = [
   { id: "profile", label: "Profile", icon: User, description: "Your personal info" },
   { id: "business", label: "Business", icon: Building2, description: "Services & pricing" },
+  { id: "organizations", label: "Organizations", icon: Building2, description: "Manage your businesses" },
   { id: "preferences", label: "Preferences", icon: Bell, description: "Appearance & notifications" },
   { id: "subscription", label: "Subscription", icon: CreditCard, description: "Plan & billing" },
   { id: "account", label: "Account", icon: Shield, description: "Security & data" },
@@ -217,7 +218,18 @@ function SaveButton({ loading, onClick }: { loading: boolean; onClick?: () => vo
 export default function SettingsPage() {
   const supabase = createClient();
   const { theme, setTheme } = useTheme();
-  const { currentOrgId } = useOrganization();
+  const { currentOrgId, organizations, currentOrg, switchOrg, refreshOrgs, createOrg } = useOrganization();
+  const router = useRouter();
+
+  // Org management state
+  const [orgEditingId, setOrgEditingId] = useState<string | null>(null);
+  const [orgEditName, setOrgEditName] = useState("");
+  const [orgSaving, setOrgSaving] = useState(false);
+  const [orgDeleteId, setOrgDeleteId] = useState<string | null>(null);
+  const [orgDeleting, setOrgDeleting] = useState(false);
+  const [newOrgName, setNewOrgName] = useState("");
+  const [addingOrg, setAddingOrg] = useState(false);
+  const [newOrgSaving, setNewOrgSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -268,7 +280,6 @@ export default function SettingsPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     async function load() {
@@ -349,6 +360,48 @@ export default function SettingsPage() {
     }
     load();
   }, [supabase, currentOrgId]);
+
+  async function handleOrgRename(orgId: string) {
+    if (!orgEditName.trim()) return;
+    setOrgSaving(true);
+    const { error } = await supabase
+      .from("organizations")
+      .update({ name: orgEditName.trim(), updated_at: new Date().toISOString() })
+      .eq("id", orgId);
+    if (error) { toast.error("Failed to rename business"); }
+    else { toast.success("Business renamed"); await refreshOrgs(); setOrgEditingId(null); }
+    setOrgSaving(false);
+  }
+
+  async function handleOrgDelete(orgId: string) {
+    if (organizations.length <= 1) { toast.error("You must have at least one business"); return; }
+    setOrgDeleting(true);
+    const { error } = await supabase.from("organizations").delete().eq("id", orgId);
+    if (error) { toast.error("Failed to delete business"); }
+    else {
+      toast.success("Business deleted");
+      if (currentOrgId === orgId) {
+        const next = organizations.find(o => o.id !== orgId);
+        if (next) { switchOrg(next.id); router.refresh(); }
+      }
+      await refreshOrgs();
+    }
+    setOrgDeleting(false);
+    setOrgDeleteId(null);
+  }
+
+  async function handleAddOrg() {
+    if (!newOrgName.trim()) return;
+    setNewOrgSaving(true);
+    try {
+      await createOrg(newOrgName.trim());
+      toast.success(`${newOrgName.trim()} created`);
+      setNewOrgName("");
+      setAddingOrg(false);
+      router.refresh();
+    } catch { toast.error("Failed to create business"); }
+    setNewOrgSaving(false);
+  }
 
   async function handleProfileSave(e: React.FormEvent) {
     e.preventDefault();
@@ -1224,6 +1277,109 @@ export default function SettingsPage() {
             </>
           )}
 
+          {/* ─── ORGANIZATIONS TAB ───────────────────────── */}
+          {activeTab === "organizations" && (
+            <>
+              <Card>
+                <div className="px-6 py-4 border-b border-[var(--mh-border)]">
+                  <h2 className="text-[15px] font-bold text-[var(--mh-text)]">Your Businesses</h2>
+                  <p className="text-[12px] text-[var(--mh-text-muted)] mt-0.5">Switch between businesses or manage them here.</p>
+                </div>
+                <CardBody className="space-y-2">
+                  {organizations.map((org) => (
+                    <div key={org.id} className="flex items-center gap-3 p-3 rounded-[8px] border border-[var(--mh-border)] bg-[var(--mh-surface-raised)]">
+                      <div className="h-9 w-9 rounded-[8px] bg-[#0071E3]/10 flex items-center justify-center shrink-0">
+                        <Building2 className="h-4 w-4 text-[#0071E3]" strokeWidth={1.7} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        {orgEditingId === org.id ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={orgEditName}
+                              onChange={(e) => setOrgEditName(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === "Enter") handleOrgRename(org.id); if (e.key === "Escape") setOrgEditingId(null); }}
+                              autoFocus
+                              className="flex-1 px-2 py-1 text-[13px] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[4px] text-[var(--mh-text)] outline-none focus:border-[#0071E3]/50"
+                            />
+                            <button onClick={() => handleOrgRename(org.id)} disabled={orgSaving} className="px-2.5 py-1 text-[12px] font-semibold bg-[#0071E3] text-white rounded-[4px] disabled:opacity-50">
+                              {orgSaving ? "…" : "Save"}
+                            </button>
+                            <button onClick={() => setOrgEditingId(null)} className="px-2.5 py-1 text-[12px] text-[var(--mh-text-muted)] border border-[var(--mh-border)] rounded-[4px]">
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <p className="text-[13px] font-semibold text-[var(--mh-text)] truncate">{org.name || "Unnamed Business"}</p>
+                            {org.id === currentOrgId && (
+                              <span className="text-[10px] font-bold text-[#0071E3] bg-[#0071E3]/10 px-1.5 py-0.5 rounded-full">Active</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {orgEditingId !== org.id && (
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {org.id !== currentOrgId && (
+                            <button
+                              onClick={() => { switchOrg(org.id); router.refresh(); toast.success(`Switched to ${org.name || "business"}`); }}
+                              className="px-2.5 py-1 text-[12px] font-semibold text-[var(--mh-text-muted)] border border-[var(--mh-border)] rounded-[4px] hover:border-[#0071E3]/40 hover:text-[#0071E3] transition-colors"
+                            >
+                              Switch
+                            </button>
+                          )}
+                          <button
+                            onClick={() => { setOrgEditingId(org.id); setOrgEditName(org.name || ""); }}
+                            className="p-1.5 text-[var(--mh-text-faint)] hover:text-[var(--mh-text-muted)] rounded-[4px] hover:bg-[var(--mh-hover-overlay)] transition-colors"
+                          >
+                            <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} />
+                          </button>
+                          {organizations.length > 1 && (
+                            <button
+                              onClick={() => setOrgDeleteId(org.id)}
+                              className="p-1.5 text-[var(--mh-text-faint)] hover:text-red-400 rounded-[4px] hover:bg-red-500/[0.06] transition-colors"
+                            >
+                              <X className="h-3.5 w-3.5" strokeWidth={1.8} />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Add new org */}
+                  {addingOrg ? (
+                    <div className="flex items-center gap-2 p-3 rounded-[8px] border border-dashed border-[#0071E3]/40 bg-[#0071E3]/[0.03]">
+                      <input
+                        type="text"
+                        value={newOrgName}
+                        onChange={(e) => setNewOrgName(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") handleAddOrg(); if (e.key === "Escape") { setAddingOrg(false); setNewOrgName(""); } }}
+                        placeholder="Business name"
+                        autoFocus
+                        className="flex-1 px-2 py-1 text-[13px] bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[4px] text-[var(--mh-text)] placeholder:text-[var(--mh-text-faint)] outline-none focus:border-[#0071E3]/50"
+                      />
+                      <button onClick={handleAddOrg} disabled={newOrgSaving || !newOrgName.trim()} className="px-2.5 py-1 text-[12px] font-semibold bg-[#0071E3] text-white rounded-[4px] disabled:opacity-50">
+                        {newOrgSaving ? "…" : "Create"}
+                      </button>
+                      <button onClick={() => { setAddingOrg(false); setNewOrgName(""); }} className="px-2.5 py-1 text-[12px] text-[var(--mh-text-muted)] border border-[var(--mh-border)] rounded-[4px]">
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setAddingOrg(true)}
+                      className="flex items-center gap-2 w-full p-3 rounded-[8px] border border-dashed border-[var(--mh-border)] text-[13px] text-[var(--mh-text-muted)] hover:border-[#0071E3]/40 hover:text-[#0071E3] transition-colors"
+                    >
+                      <Plus className="h-4 w-4" strokeWidth={1.8} />
+                      Add another business
+                    </button>
+                  )}
+                </CardBody>
+              </Card>
+            </>
+          )}
+
           {/* ─── ACCOUNT TAB ─────────────────────────────── */}
           {activeTab === "account" && (
             <>
@@ -1315,6 +1471,26 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
+
+      {/* Delete Org Confirmation Modal */}
+      {orgDeleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--mh-overlay-scrim)] px-4" onClick={() => setOrgDeleteId(null)}>
+          <div className="bg-[var(--mh-surface)] border border-[var(--mh-border)] rounded-[8px] shadow-[0_8px_40px_rgba(0,0,0,0.6)] w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-[15px] font-bold text-[var(--mh-text)] mb-2">Delete Business</h2>
+            <p className="text-[13px] text-[var(--mh-text-muted)] leading-relaxed mb-5">
+              This will permanently delete <strong className="text-[var(--mh-text)]">{organizations.find(o => o.id === orgDeleteId)?.name || "this business"}</strong> and all its clients, jobs, and invoices. This cannot be undone.
+            </p>
+            <div className="flex gap-2">
+              <button onClick={() => setOrgDeleteId(null)} className="flex-1 py-2 text-[13px] font-semibold text-[var(--mh-text-muted)] border border-[var(--mh-border)] rounded-[6px] hover:bg-[var(--mh-hover-overlay)] transition-colors">
+                Cancel
+              </button>
+              <button onClick={() => handleOrgDelete(orgDeleteId)} disabled={orgDeleting} className="flex-1 py-2 text-[13px] font-semibold text-white bg-red-500 rounded-[6px] hover:bg-red-600 disabled:opacity-50 transition-colors">
+                {orgDeleting ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Account Modal */}
       {deleteModalOpen && (
