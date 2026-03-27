@@ -36,6 +36,17 @@
       --white:        #FFFFFF;
       --border:       rgba(12,27,42,.09);
       --border-dark:  rgba(255,255,255,.09);
+      /* App design tokens — match real app exactly */
+      --app-bg:      #191919;
+      --app-surface: #1E1E1E;
+      --app-raised:  #252525;
+      --app-sunken:  #141414;
+      --app-border:  #2C2C2C;
+      --app-divider: #252525;
+      --app-text:    #D4D4D4;
+      --app-muted:   #888888;
+      --app-faint:   #555555;
+      --app-accent:  #0071E3;
       --r:            14px;
       --r-lg:         24px;
       --r-xl:         32px;
@@ -233,80 +244,96 @@
       padding: 3px 12px; font-size: 11px; color: rgba(255,255,255,.3);
     }
 
-    .mock-body { display: grid; grid-template-columns: 158px 1fr; min-height: 380px; }
+    .mock-body { display: grid; grid-template-columns: 150px 1fr; min-height: 400px; }
 
     .mock-side {
-      background: rgba(255,255,255,.04);
-      border-right: 1px solid rgba(255,255,255,.06);
-      padding: 14px 10px;
+      background: #141414;
+      border-right: 1px solid #2C2C2C;
+      padding: 0 8px 12px;
       display: flex; flex-direction: column;
     }
     .ms-logo {
       display: flex; align-items: center; gap: 7px;
-      padding: 0 4px 14px;
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      margin-bottom: 10px;
+      padding: 14px 6px 12px;
+      border-bottom: 1px solid #2C2C2C;
+      margin-bottom: 8px;
     }
     .ms-logomark {
-      width: 22px; height: 22px; border-radius: 3px;
+      width: 24px; height: 24px; border-radius: 4px;
       background: #0071E3;
       display: flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 800; color: #fff; flex-shrink: 0;
+      font-size: 11px; font-weight: 800; color: #fff; flex-shrink: 0;
     }
     .ms-logoname {
-      font-size: 12.5px; font-weight: 700; color: rgba(255,255,255,.85);
-      letter-spacing: -.3px;
+      font-size: 13px; font-weight: 700; color: rgba(255,255,255,.9);
+      letter-spacing: -.4px;
     }
     .ms-nav { display: flex; flex-direction: column; gap: 1px; }
     .ms-item {
       display: flex; align-items: center; gap: 7px;
-      padding: 6px 8px; border-radius: 5px;
-      font-size: 11.5px; font-weight: 500; color: rgba(255,255,255,.35);
+      padding: 5.5px 7px; border-radius: 4px;
+      font-size: 11px; font-weight: 500; color: #888888;
       cursor: default;
     }
     .ms-item.active { background: rgba(0,113,227,.14); color: #0071E3; font-weight: 600; }
-    .ms-item svg { width: 13px; height: 13px; flex-shrink: 0; }
-    .ms-section-lbl { font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.2); padding: 8px 8px 4px; margin-top: 6px; }
+    .ms-item svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .ms-section-lbl { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.18); padding: 8px 7px 3px; }
 
-    .mock-main { padding: 20px; }
+    .mock-main { padding: 18px; background: #191919; }
 
     .mock-hd {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 18px;
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 14px;
     }
-    .mock-hd-title { color: rgba(255,255,255,.88); font-size: 13.5px; font-weight: 700; }
-    .mock-hd-date { color: rgba(255,255,255,.35); font-size: 11px; }
+    .mock-hd-title { color: #D4D4D4; font-size: 15px; font-weight: 700; letter-spacing: -.03em; }
+    .mock-hd-date { color: #555555; font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-top: 3px; }
+    .mock-hd-btn { background: #0071E3; color: #fff; font-size: 10px; font-weight: 600; padding: 4px 10px; border-radius: 4px; }
 
     .mock-stats {
-      display: grid; grid-template-columns: repeat(3,1fr);
-      gap: 9px; margin-bottom: 18px;
+      display: grid; grid-template-columns: repeat(4,1fr);
+      gap: 7px; margin-bottom: 14px;
     }
     .mock-stat {
-      background: rgba(255,255,255,.06); border-radius: 10px; padding: 11px;
+      background: #1E1E1E; border: 1px solid #2C2C2C; border-radius: 6px; padding: 10px 11px;
     }
-    .ms-val { color: rgba(255,255,255,.88); font-size: 17px; font-weight: 700; display: block; }
-    .ms-lbl { color: rgba(255,255,255,.35); font-size: 10px; display: block; margin-top: 2px; }
+    .ms-stat-icon { width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; margin-bottom: 7px; }
+    .ms-val { color: #D4D4D4; font-size: 16px; font-weight: 700; display: block; letter-spacing: -.03em; }
+    .ms-lbl { color: #888888; font-size: 9.5px; font-weight: 500; display: block; margin-top: 2px; }
 
-    .job-list { display: flex; flex-direction: column; gap: 8px; }
+    .mock-section-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 14px; border-bottom: 1px solid #252525;
+      background: #1E1E1E;
+    }
+    .mock-section-title { color: #D4D4D4; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .mock-section-badge { background: rgba(0,113,227,.15); color: #0071E3; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 10px; }
+    .mock-section-link { color: #555555; font-size: 9.5px; font-weight: 600; }
+
+    .job-card { background: #1E1E1E; border: 1px solid #2C2C2C; border-radius: 6px; overflow: hidden; margin-bottom: 7px; }
+    .job-list { display: flex; flex-direction: column; }
     .job-row {
-      background: rgba(255,255,255,.06); border-radius: 10px;
-      padding: 11px 13px;
-      display: flex; align-items: center; gap: 11px;
-      border-left: 3px solid transparent;
+      padding: 9px 14px;
+      display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid #252525;
     }
-    .job-row.done   { border-left-color: #28C840; }
-    .job-row.active { border-left-color: var(--lime); }
-    .job-row.next   { border-left-color: rgba(255,255,255,.2); }
-    .jtime { color: rgba(255,255,255,.4); font-size: 10px; min-width: 42px; }
-    .jinfo { flex: 1; }
-    .jclient { color: rgba(255,255,255,.82); font-size: 11.5px; font-weight: 600; }
-    .jaddr   { color: rgba(255,255,255,.35); font-size: 10px; margin-top: 2px; }
+    .job-row:last-child { border-bottom: none; }
+    .jdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .jdot.done   { background: #34C759; }
+    .jdot.active { background: #FF9F0A; }
+    .jdot.next   { background: #0071E3; }
+    .jtime { color: #555555; font-size: 9.5px; font-weight: 600; min-width: 40px; tabular-nums: ; }
+    .jinfo { flex: 1; min-width: 0; }
+    .jclient { color: #D4D4D4; font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .jaddr   { color: #888888; font-size: 9.5px; margin-top: 1px; }
+    .jright { text-align: right; flex-shrink: 0; }
+    .jprice { color: #D4D4D4; font-size: 11px; font-weight: 700; }
+    .jprice.done { color: #34C759; }
     .jbadge {
-      font-size: 9.5px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+      font-size: 9px; font-weight: 600; padding: 2px 7px; border-radius: 100px; display: block; margin-top: 2px;
     }
-    .jbadge.done   { background: rgba(40,200,64,.18); color: #28C840; }
-    .jbadge.active { background: rgba(197,242,68,.18); color: var(--lime); }
-    .jbadge.next   { background: rgba(255,255,255,.1); color: rgba(255,255,255,.45); }
+    .jbadge.done   { background: rgba(52,199,89,.1); color: #34C759; }
+    .jbadge.active { background: rgba(255,159,10,.1); color: #FF9F0A; }
+    .jbadge.next   { background: rgba(0,113,227,.1); color: #60AAFF; }
 
     /* floating toast cards */
     .toast {
@@ -752,118 +779,154 @@
     .tab-btn { font-family: var(--font-b); font-size: 13.5px; font-weight: 600; padding: 10px 22px; border-radius: 100px; background: transparent; border: 1.5px solid var(--border); cursor: pointer; color: var(--muted); display: flex; align-items: center; gap: 7px; transition: all .2s; }
     .tab-btn.active { background: var(--dark); border-color: var(--dark); color: var(--cream); }
     .tab-btn:hover:not(.active) { border-color: rgba(12,27,42,.25); color: var(--text); }
-    .feat-win { background: var(--dark); border-radius: 24px; box-shadow: 0 40px 100px rgba(12,27,42,.22); overflow: hidden; border: 1px solid rgba(255,255,255,.06); }
-    .feat-win-bar { background: rgba(255,255,255,.05); padding: 13px 18px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,.05); }
+    .feat-win { background: var(--app-bg); border-radius: 24px; box-shadow: 0 40px 100px rgba(12,27,42,.22); overflow: hidden; border: 1px solid rgba(255,255,255,.06); }
+    .feat-win-bar { background: rgba(255,255,255,.04); padding: 12px 18px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--app-border); }
     .win-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .win-url { margin: 0 auto; background: rgba(255,255,255,.07); border-radius: 6px; padding: 3px 12px; font-size: 11px; color: rgba(255,255,255,.3); }
+    .win-url { margin: 0 auto; background: rgba(255,255,255,.07); border-radius: 6px; padding: 3px 12px; font-size: 11px; color: rgba(255,255,255,.25); font-family: monospace; }
+    .feat-win-body { display: grid; grid-template-columns: 136px 1fr; min-height: 480px; }
+    .feat-sb { background: var(--app-sunken); border-right: 1px solid var(--app-border); padding: 10px 8px; display: flex; flex-direction: column; gap: 1px; }
+    .feat-sb-logo { display: flex; align-items: center; gap: 6px; padding: 0 4px 10px; margin-bottom: 6px; border-bottom: 1px solid var(--app-border); }
+    .feat-sb-mark { width: 22px; height: 22px; border-radius: 3px; background: #0071E3; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #fff; flex-shrink: 0; font-family: var(--font-b); }
+    .feat-sb-name { font-size: 12px; font-weight: 700; color: rgba(255,255,255,.88); letter-spacing: -.3px; font-family: var(--font-b); }
+    .feat-sb-lbl { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.2); padding: 7px 6px 3px; font-family: var(--font-b); }
+    .feat-sb-item { display: flex; align-items: center; gap: 6px; padding: 5.5px 7px; border-radius: 4px; font-size: 11px; font-weight: 500; color: rgba(255,255,255,.38); cursor: default; font-family: var(--font-b); }
+    .feat-sb-item.active { background: rgba(0,113,227,.14); color: #0071E3; font-weight: 600; }
+    .feat-sb-item svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .feat-panels { position: relative; }
     .fpanel { display: none; }
     .fpanel.active { display: block; animation: panelFade .3s ease; }
-    @keyframes panelFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes panelFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* shared panel utilities */
+    .ap-pg { padding: 18px 20px; }
+    .ap-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .ap-title { font-size: 15px; font-weight: 700; color: var(--app-text); letter-spacing: -.02em; }
+    .ap-sub { font-size: 11px; color: var(--app-muted); margin-top: 2px; }
+    .ap-btn-blue { background: var(--app-accent); color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 11.5px; font-weight: 600; cursor: default; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-family: var(--font-b); }
+    .ap-card { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.4); overflow: hidden; }
+    .ap-toolbar { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-bottom: 1px solid var(--app-divider); }
+    .ap-filter-btn { display: flex; align-items: center; gap: 5px; padding: 5px 10px; background: var(--app-raised); border: 1px solid var(--app-border); border-radius: 6px; font-size: 11.5px; color: var(--app-muted); cursor: default; font-family: var(--font-b); white-space: nowrap; }
+    .ap-search-mock { background: var(--app-raised); border: 1px solid var(--app-border); border-radius: 6px; padding: 5px 10px 5px 26px; font-size: 11.5px; color: var(--app-faint); position: relative; flex: 1; max-width: 180px; }
+
+    /* table */
+    .ap-tbl { width: 100%; border-collapse: collapse; }
+    .ap-tbl thead tr { background: var(--app-sunken); border-bottom: 1px solid var(--app-divider); }
+    .ap-tbl th { padding: 8px 14px; text-align: left; font-size: 10.5px; font-weight: 600; color: var(--app-muted); text-transform: uppercase; letter-spacing: .06em; font-family: var(--font-b); white-space: nowrap; }
+    .ap-tbl tbody tr { border-bottom: 1px solid var(--app-divider); }
+    .ap-tbl tbody tr:last-child { border-bottom: none; }
+    .ap-tbl tbody tr:hover { background: rgba(255,255,255,.02); }
+    .ap-tbl td { padding: 10px 14px; font-size: 12.5px; color: var(--app-text); vertical-align: middle; }
+
+    /* avatars */
+    .av28 { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+    .av-blue   { background: rgba(0,113,227,.12);  color: #0071E3; }
+    .av-purple { background: rgba(168,85,247,.12); color: #C084FC; }
+    .av-orange { background: rgba(255,159,10,.12); color: #FF9F0A; }
+    .av-rose   { background: rgba(239,68,68,.12);  color: #F87171; }
+
+    /* badges */
+    .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 100px; font-size: 10.5px; font-weight: 600; border: 1px solid; font-family: var(--font-b); }
+    .badge-active   { background: rgba(52,199,89,.1);   color: #34C759; border-color: rgba(52,199,89,.2); }
+    .badge-archived { background: rgba(255,255,255,.06); color: var(--app-muted); border-color: var(--app-border); }
+    .badge-paid     { background: rgba(52,199,89,.1);   color: #34C759; border-color: rgba(52,199,89,.2); }
+    .badge-unpaid   { background: rgba(255,159,10,.1);  color: #FF9F0A; border-color: rgba(255,159,10,.2); }
+    .badge-draft    { background: rgba(255,159,10,.1);  color: #FF9F0A; border-color: rgba(255,159,10,.2); }
+
+    /* stat cards */
+    .stat-grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
+    .stat-grid4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+    .stat-card { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: 6px; padding: 13px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.4); }
+    .stat-lbl { font-size: 10px; font-weight: 600; color: var(--app-muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px; font-family: var(--font-b); }
+    .stat-val { font-size: 19px; font-weight: 700; color: var(--app-text); letter-spacing: -.03em; }
+    .stat-val.green { color: #34C759; }
+    .stat-val.amber { color: #FF9F0A; }
 
     /* — Clients panel */
-    .cp-split { display: grid; grid-template-columns: 250px 1fr; min-height: 460px; }
-    .cp-list { border-right: 1px solid rgba(255,255,255,.06); padding: 16px; display: flex; flex-direction: column; gap: 4px; }
-    .cp-search { background: rgba(255,255,255,.06); border-radius: 8px; padding: 9px 12px; font-size: 12px; color: rgba(255,255,255,.3); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-    .cp-lbl { font-size: 10px; color: rgba(255,255,255,.28); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; padding: 0 4px; }
-    .cl-row { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; cursor: pointer; transition: all .2s; }
-    .cl-row:hover { background: rgba(255,255,255,.05); }
-    .cl-row.active { background: rgba(197,242,68,.1); }
-    .cl-av { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--dark); flex-shrink: 0; }
-    .cl-name { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.8); }
-    .cl-meta { font-size: 10.5px; color: rgba(255,255,255,.35); }
-    .cl-dot { width: 7px; height: 7px; border-radius: 50%; margin-left: auto; flex-shrink: 0; }
-    .cl-dot.g { background: #28C840; } .cl-dot.a { background: var(--amber); }
-    .cp-detail { padding: 24px; overflow: auto; }
-    .cp-dh { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
-    .cp-dav { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: var(--dark); flex-shrink: 0; }
-    .cp-dname { font-family: var(--font-d); font-size: 20px; font-weight: 700; color: rgba(255,255,255,.9); }
-    .cp-dsince { font-size: 11.5px; color: rgba(255,255,255,.35); margin-top: 3px; }
-    .cp-dbtn { margin-left: auto; background: var(--lime); color: var(--dark); border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--font-b); white-space: nowrap; }
-    .cp-contacts { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
-    .cp-contact { font-size: 12.5px; color: rgba(255,255,255,.5); display: flex; align-items: center; gap: 8px; }
-    .cp-stitle { font-size: 10px; color: rgba(255,255,255,.28); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
-    .cp-addrs { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
-    .cp-addr { background: rgba(255,255,255,.05); border-radius: 10px; padding: 11px 13px; flex: 1; min-width: 140px; }
-    .cp-addr-name { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.65); margin-bottom: 3px; }
-    .cp-addr-st { font-size: 10.5px; color: rgba(255,255,255,.3); }
-    .cp-notes { background: rgba(255,255,255,.05); border-radius: 10px; padding: 13px; font-size: 12px; color: rgba(255,255,255,.5); line-height: 1.88; }
+    .cp-name-cell { display: flex; align-items: center; gap: 9px; }
+    .cp-icon-cell { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--app-muted); }
 
-    /* — Schedule panel */
+    /* — Schedule panel (list view) */
     .sp-wrap { min-height: 460px; display: flex; flex-direction: column; }
-    .sp-hd { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,.06); }
-    .sp-month { font-size: 14px; font-weight: 700; color: rgba(255,255,255,.8); }
-    .sp-count { font-size: 12px; color: var(--lime); font-weight: 600; }
-    .sp-body { display: flex; flex: 1; overflow: hidden; }
-    .sp-times { display: flex; flex-direction: column; min-width: 52px; padding-top: 32px; border-right: 1px solid rgba(255,255,255,.05); }
-    .sp-time { font-size: 10px; color: rgba(255,255,255,.22); padding: 0 10px; height: 54px; display: flex; align-items: flex-start; padding-top: 4px; }
-    .sp-days { display: grid; grid-template-columns: repeat(5,1fr); flex: 1; }
-    .sp-day { position: relative; border-right: 1px solid rgba(255,255,255,.04); }
-    .sp-day-hd { height: 32px; display: flex; align-items: center; justify-content: center; font-size: 10.5px; color: rgba(255,255,255,.3); border-bottom: 1px solid rgba(255,255,255,.06); }
-    .sp-day.today .sp-day-hd { color: var(--lime); font-weight: 700; }
-    .sp-job { position: absolute; left: 4px; right: 4px; border-radius: 7px; padding: 6px 7px; font-size: 10px; font-weight: 600; overflow: hidden; cursor: default; }
-    .sp-job.done { background: rgba(40,200,64,.18); color: #28C840; }
-    .sp-job.upcoming { background: rgba(197,242,68,.14); color: var(--lime); }
-    .sp-job .jt { opacity: .65; font-weight: 400; display: block; margin-top: 2px; }
+    .sp-hd { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid var(--app-border); flex-wrap: wrap; background: var(--app-bg); }
+    .sp-title { font-size: 15px; font-weight: 700; color: var(--app-text); margin-right: auto; letter-spacing: -.02em; }
+    .sp-nav { display: flex; align-items: center; }
+    .sp-nav-btn { width: 24px; height: 24px; border-radius: 4px; background: var(--app-raised); border: 1px solid var(--app-border); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--app-muted); cursor: default; }
+    .sp-month-lbl { font-size: 12px; font-weight: 600; color: var(--app-text); padding: 0 7px; }
+    .sp-views { display: flex; background: var(--app-raised); border: 1px solid var(--app-border); border-radius: 4px; overflow: hidden; }
+    .sp-view-btn { padding: 4px 9px; font-size: 11px; font-weight: 600; color: var(--app-muted); cursor: default; font-family: var(--font-b); }
+    .sp-view-btn.active { background: var(--app-surface); color: var(--app-text); }
+    .sp-body { flex: 1; }
+    .sp-date-hd { padding: 6px 18px 5px; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--app-faint); border-bottom: 1px solid var(--app-divider); background: rgba(255,255,255,.015); }
+    .sp-date-hd.today { color: var(--app-accent); }
+    .sp-job-row { display: flex; align-items: center; gap: 12px; padding: 10px 18px; border-bottom: 1px solid var(--app-divider); }
+    .sp-job-row:last-child { border-bottom: none; }
+    .sp-job-stripe { width: 3px; height: 34px; border-radius: 2px; flex-shrink: 0; }
+    .sp-job-info { flex: 1; min-width: 0; }
+    .sp-job-name { font-size: 12.5px; font-weight: 600; color: var(--app-text); }
+    .sp-job-meta { font-size: 10.5px; color: var(--app-muted); margin-top: 2px; }
+    .sp-job-right { text-align: right; flex-shrink: 0; }
+    .sp-job-price { font-size: 12.5px; font-weight: 700; color: var(--app-text); }
+    .sp-job-price.done { color: #34C759; }
+    .sp-job-status { font-size: 10px; font-weight: 600; margin-top: 2px; display: block; }
+    .stripe-blue { background: rgba(0,113,227,.7); }
+    .stripe-orange { background: rgba(255,159,10,.7); }
+    .stripe-green { background: rgba(52,199,89,.7); }
+    .text-blue-s { color: #60AAFF; }
+    .text-orange-s { color: #FF9F0A; }
+    .text-green-s { color: #34C759; }
 
     /* — Invoices panel */
-    .ip-wrap { min-height: 460px; display: flex; flex-direction: column; }
-    .ip-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,.06); }
-    .ip-stat { background: rgba(255,255,255,.05); border-radius: 10px; padding: 12px; }
-    .ip-val { font-family: var(--font-d); font-size: 20px; font-weight: 700; color: rgba(255,255,255,.88); display: block; }
-    .ip-lbl { font-size: 10px; color: rgba(255,255,255,.3); display: block; margin-top: 3px; }
-    .ip-list { flex: 1; }
-    .ip-row { display: flex; align-items: center; gap: 14px; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,.04); transition: background .2s; }
-    .ip-row:hover { background: rgba(255,255,255,.03); }
-    .ip-num { font-size: 11px; color: rgba(255,255,255,.3); min-width: 42px; }
-    .ip-client { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.8); flex: 1; }
-    .ip-date { font-size: 11px; color: rgba(255,255,255,.35); min-width: 52px; }
-    .ip-amt { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.88); min-width: 52px; text-align: right; }
-    .ip-badge { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px; min-width: 68px; text-align: center; }
-    .ip-badge.paid    { background: rgba(40,200,64,.18);  color: #28C840; }
-    .ip-badge.unpaid  { background: rgba(245,166,35,.18); color: #F5A623; }
-    .ip-badge.overdue { background: rgba(255,80,80,.18);  color: #FF5A5A; }
-
-    /* — Estimates panel */
-    .ep-wrap { padding: 24px; min-height: 460px; display: flex; flex-direction: column; }
-    .ep-hd { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-    .ep-num { font-family: var(--font-d); font-size: 20px; font-weight: 700; color: rgba(255,255,255,.88); }
-    .ep-for { font-size: 12px; color: rgba(255,255,255,.38); margin-top: 4px; }
-    .ep-status { background: rgba(245,166,35,.18); color: #F5A623; font-size: 10.5px; font-weight: 700; padding: 5px 12px; border-radius: 20px; }
-    .ep-tbl { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
-    .ep-tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,.28); padding: 8px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,.08); }
-    .ep-tbl th:last-child { text-align: right; }
-    .ep-tbl td { padding: 13px 12px; font-size: 13px; color: rgba(255,255,255,.65); border-bottom: 1px solid rgba(255,255,255,.04); }
-    .ep-tbl td:last-child { text-align: right; font-weight: 700; color: rgba(255,255,255,.85); }
-    .ep-total { display: flex; justify-content: space-between; align-items: center; padding: 14px 12px; }
-    .ep-total-lbl { font-size: 13px; color: rgba(255,255,255,.45); }
-    .ep-total-val { font-family: var(--font-d); font-size: 26px; font-weight: 700; color: rgba(255,255,255,.92); }
-    .ep-acts { display: flex; gap: 10px; margin-top: auto; padding-top: 16px; }
-    .ep-btn-sec { flex: 1; padding: 13px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; font-family: var(--font-b); font-size: 13px; color: rgba(255,255,255,.55); cursor: pointer; transition: all .2s; }
-    .ep-btn-sec:hover { background: rgba(255,255,255,.1); }
-    .ep-btn-pri { flex: 2; padding: 13px; background: var(--lime); border: none; border-radius: 10px; font-family: var(--font-b); font-size: 13px; font-weight: 700; color: var(--dark); cursor: pointer; transition: all .2s; }
-    .ep-btn-pri:hover { background: #D0FF60; }
+    .ip-wrap { min-height: 460px; }
+    .inv-num { font-family: monospace; font-size: 12px; font-weight: 500; color: var(--app-text); }
+    .mark-paid-btn { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 100px; font-size: 10px; font-weight: 600; background: rgba(52,199,89,.1); color: #34C759; border: 1px solid rgba(52,199,89,.2); cursor: default; font-family: var(--font-b); white-space: nowrap; }
 
     /* — Finances panel */
-    .fp-wrap { min-height: 460px; display: flex; flex-direction: column; }
-    .fp-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,.06); }
-    .fp-stat { background: rgba(255,255,255,.05); border-radius: 10px; padding: 12px; }
-    .fp-val { font-family: var(--font-d); font-size: 20px; font-weight: 700; color: rgba(255,255,255,.88); display: block; }
-    .fp-lbl { font-size: 10px; color: rgba(255,255,255,.3); display: block; margin-top: 3px; }
-    .fp-chart-area { flex: 1; padding: 20px; }
-    .fp-chart-title { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.35); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 16px; }
-    .fp-bars { display: flex; align-items: flex-end; gap: 8px; height: 140px; }
-    .fp-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
-    .fp-bar { width: 100%; border-radius: 4px 4px 0 0; background: rgba(255,255,255,.1); transition: background .2s; }
-    .fp-bar.current { background: #0071E3; }
-    .fp-bar-lbl { font-size: 9px; color: rgba(255,255,255,.28); }
+    .fp-wrap { min-height: 460px; }
+    .fp-layout { display: grid; grid-template-columns: 1fr 190px; gap: 12px; }
+    .fp-recent-hd { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid var(--app-divider); }
+    .fp-recent-title { font-size: 13px; font-weight: 700; color: var(--app-text); }
+    .fp-recent-link { font-size: 11px; font-weight: 600; color: var(--app-faint); cursor: default; }
+    .fp-tx-row { display: flex; align-items: center; gap: 11px; padding: 10px 14px; border-bottom: 1px solid var(--app-divider); }
+    .fp-tx-row:last-child { border-bottom: none; }
+    .fp-tx-icon { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; }
+    .fp-tx-icon.paid   { background: rgba(52,199,89,.12); }
+    .fp-tx-icon.unpaid { background: rgba(255,159,10,.12); }
+    .fp-tx-info { flex: 1; min-width: 0; }
+    .fp-tx-name { font-size: 12px; font-weight: 600; color: var(--app-text); }
+    .fp-tx-sub  { font-size: 10px; color: var(--app-muted); margin-top: 1px; }
+    .fp-tx-right { text-align: right; flex-shrink: 0; }
+    .fp-tx-amt { font-size: 12.5px; font-weight: 700; color: var(--app-text); }
+    .fp-svc-title { font-size: 11px; font-weight: 700; color: var(--app-text); padding: 11px 12px 7px; }
+    .fp-svc-row { display: flex; align-items: center; gap: 7px; padding: 5px 12px; }
+    .fp-svc-name { font-size: 11px; color: var(--app-muted); white-space: nowrap; min-width: 74px; }
+    .fp-svc-bar-wrap { flex: 1; height: 4px; background: var(--app-raised); border-radius: 2px; }
+    .fp-svc-bar { height: 4px; background: var(--app-accent); border-radius: 2px; }
+    .fp-svc-count { font-size: 10.5px; font-weight: 600; color: var(--app-muted); min-width: 16px; text-align: right; }
+
+    /* — Estimates panel */
+    .estp-wrap { padding: 18px 20px; min-height: 460px; display: flex; flex-direction: column; gap: 12px; }
+    .estp-card { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: 6px; padding: 14px; }
+    .estp-card-hd { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .estp-num { font-size: 13px; font-weight: 700; color: var(--app-text); }
+    .estp-for { font-size: 11px; color: var(--app-muted); margin-top: 3px; }
+    .estp-tbl { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+    .estp-tbl th { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--app-muted); padding: 5px 8px; text-align: left; border-bottom: 1px solid var(--app-divider); font-family: var(--font-b); }
+    .estp-tbl th:last-child { text-align: right; }
+    .estp-tbl td { padding: 8px 8px; font-size: 12px; color: var(--app-text); border-bottom: 1px solid rgba(255,255,255,.03); }
+    .estp-tbl td:last-child { text-align: right; font-weight: 700; }
+    .estp-total { display: flex; justify-content: space-between; align-items: center; padding: 8px 8px 4px; }
+    .estp-total-lbl { font-size: 12px; color: var(--app-muted); }
+    .estp-total-val { font-size: 20px; font-weight: 700; color: var(--app-text); letter-spacing: -.03em; }
+    .estp-acts { display: flex; gap: 7px; margin-top: 10px; }
+    .estp-btn-sec { flex: 1; padding: 9px; background: var(--app-raised); border: 1px solid var(--app-border); border-radius: 6px; font-family: var(--font-b); font-size: 11.5px; color: var(--app-muted); cursor: default; text-align: center; }
+    .estp-btn-pri { flex: 2; padding: 9px; background: var(--app-accent); border: none; border-radius: 6px; font-family: var(--font-b); font-size: 11.5px; font-weight: 700; color: #fff; cursor: default; text-align: center; }
 
     @media (max-width: 900px) {
       .rstack-grid { grid-template-columns: 1fr; gap: 48px; }
       .rstack-divider { flex-direction: row; }
       .rstack-div-line { width: 60px; height: 1px; }
-      .cp-split { grid-template-columns: 1fr; }
-      .cp-list { border-right: none; border-bottom: 1px solid rgba(255,255,255,.06); max-height: 200px; overflow: auto; }
-      .sp-days { grid-template-columns: repeat(5,1fr); }
+      .fp-layout { grid-template-columns: 1fr; }
+      .sp-views { display: none; }
     }
   </style>
 </head>
@@ -959,55 +1022,102 @@
                     <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     <span>Schedule</span>
                   </div>
-                  <div class="ms-section-lbl">Billing</div>
+                  <div class="ms-section-lbl">Finance</div>
+                  <div class="ms-item">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span>Overview</span>
+                  </div>
                   <div class="ms-item">
                     <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     <span>Invoices</span>
                   </div>
+                  <div class="ms-section-lbl">Activity</div>
                   <div class="ms-item">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                    <span>Finances</span>
+                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span>Notifications</span>
+                  </div>
+                  <div class="ms-item">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span>Settings</span>
                   </div>
                 </div>
               </div>
 
-              <!-- main -->
+              <!-- main: Dashboard -->
               <div class="mock-main">
                 <div class="mock-hd">
-                  <span class="mock-hd-title">Today's Schedule</span>
-                  <span class="mock-hd-date">Thu, Mar 27 · 2026</span>
+                  <div>
+                    <div class="mock-hd-title">Dashboard</div>
+                    <div class="mock-hd-date">Thursday · March 27, 2026</div>
+                  </div>
+                  <div class="mock-hd-btn">+ New Invoice</div>
                 </div>
 
                 <div class="mock-stats">
-                  <div class="mock-stat"><span class="ms-val">4</span><span class="ms-lbl">Jobs Today</span></div>
-                  <div class="mock-stat"><span class="ms-val">$560</span><span class="ms-lbl">Revenue</span></div>
-                  <div class="mock-stat"><span class="ms-val">2</span><span class="ms-lbl">Pending</span></div>
+                  <div class="mock-stat">
+                    <div class="ms-stat-icon" style="background:rgba(0,113,227,.1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+                    <span class="ms-val">12</span><span class="ms-lbl">Total Clients</span>
+                  </div>
+                  <div class="mock-stat">
+                    <div class="ms-stat-icon" style="background:rgba(52,199,89,.1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                    <span class="ms-val">4</span><span class="ms-lbl">Upcoming Jobs</span>
+                  </div>
+                  <div class="mock-stat">
+                    <div class="ms-stat-icon" style="background:rgba(255,159,10,.1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+                    <span class="ms-val" style="font-size:13px">$3,240</span><span class="ms-lbl">This Month</span>
+                  </div>
+                  <div class="mock-stat" style="border-color:rgba(248,113,113,.25)">
+                    <div class="ms-stat-icon" style="background:rgba(248,113,113,.1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+                    <span class="ms-val" style="color:#F87171">2</span><span class="ms-lbl">Unpaid Inv.</span>
+                  </div>
                 </div>
 
-                <div class="job-list">
-                  <div class="job-row done">
-                    <span class="jtime">8:00 AM</span>
-                    <div class="jinfo">
-                      <div class="jclient">Sarah Johnson</div>
-                      <div class="jaddr">123 Oak St · Deep Clean</div>
+                <div class="job-card">
+                  <div class="mock-section-hd">
+                    <div class="mock-section-title">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0071E3" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      Today's Schedule
+                      <span class="mock-section-badge">3</span>
                     </div>
-                    <span class="jbadge done">Done</span>
+                    <span class="mock-section-link">Schedule →</span>
                   </div>
-                  <div class="job-row active">
-                    <span class="jtime">11:30 AM</span>
-                    <div class="jinfo">
-                      <div class="jclient">Mike &amp; Lisa Chen</div>
-                      <div class="jaddr">47 Maple Ave · Standard</div>
+                  <div class="job-list">
+                    <div class="job-row">
+                      <div class="jdot done"></div>
+                      <span class="jtime">8:00 AM</span>
+                      <div class="jinfo">
+                        <div class="jclient">Sarah Johnson</div>
+                        <div class="jaddr">Deep Clean · 123 Oak St</div>
+                      </div>
+                      <div class="jright">
+                        <span class="jprice done">$140</span>
+                        <span class="jbadge done">Completed</span>
+                      </div>
                     </div>
-                    <span class="jbadge active">In Progress</span>
-                  </div>
-                  <div class="job-row next">
-                    <span class="jtime">2:30 PM</span>
-                    <div class="jinfo">
-                      <div class="jclient">Ana Torres</div>
-                      <div class="jaddr">891 Cedar Rd · Standard</div>
+                    <div class="job-row">
+                      <div class="jdot active"></div>
+                      <span class="jtime">11:30 AM</span>
+                      <div class="jinfo">
+                        <div class="jclient">Mike &amp; Lisa Chen</div>
+                        <div class="jaddr">Standard · 47 Maple Ave</div>
+                      </div>
+                      <div class="jright">
+                        <span class="jprice">$200</span>
+                        <span class="jbadge active">In Progress</span>
+                      </div>
                     </div>
-                    <span class="jbadge next">Upcoming</span>
+                    <div class="job-row">
+                      <div class="jdot next"></div>
+                      <span class="jtime">2:30 PM</span>
+                      <div class="jinfo">
+                        <div class="jclient">Ana Torres</div>
+                        <div class="jaddr">Standard · 891 Cedar Rd</div>
+                      </div>
+                      <div class="jright">
+                        <span class="jprice">$165</span>
+                        <span class="jbadge next">Scheduled</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1133,219 +1243,446 @@
           <div class="win-dot" style="background:#FF5F57"></div>
           <div class="win-dot" style="background:#FFBD2E"></div>
           <div class="win-dot" style="background:#28C840"></div>
-          <div class="win-url">maidhub.vercel.app/dashboard/clients</div>
+          <div class="win-url" id="feat-url">maidhub.vercel.app/dashboard/clients</div>
         </div>
 
-        <!-- CLIENTS PANEL -->
-        <div class="fpanel active" data-panel="clients">
-          <div class="cp-split">
-            <div class="cp-list">
-              <div class="cp-search">🔍 Search clients...</div>
-              <div class="cp-lbl">All Clients (12)</div>
-              <div class="cl-row active" data-client="sj">
-                <div class="cl-av" style="background:linear-gradient(135deg,#0B8775,#C5F244)">SJ</div>
-                <div><div class="cl-name">Sarah Johnson</div><div class="cl-meta">Next: Thu Mar 27</div></div>
-                <div class="cl-dot g"></div>
-              </div>
-              <div class="cl-row" data-client="mc">
-                <div class="cl-av" style="background:linear-gradient(135deg,#1A6B8A,#5ECFED)">MC</div>
-                <div><div class="cl-name">Mike &amp; Lisa Chen</div><div class="cl-meta">Next: Fri Mar 28</div></div>
-                <div class="cl-dot g"></div>
-              </div>
-              <div class="cl-row" data-client="at">
-                <div class="cl-av" style="background:linear-gradient(135deg,#8B3A62,#E87CA8)">AT</div>
-                <div><div class="cl-name">Ana Torres</div><div class="cl-meta">Next: Mon Mar 31</div></div>
-                <div class="cl-dot g"></div>
-              </div>
-              <div class="cl-row" data-client="rk">
-                <div class="cl-av" style="background:linear-gradient(135deg,#5B4200,#D4A017)">RK</div>
-                <div><div class="cl-name">Robert Kim</div><div class="cl-meta">Last: Mar 11</div></div>
-                <div class="cl-dot a"></div>
-              </div>
+        <div class="feat-win-body">
+          <!-- Shared sidebar -->
+          <div class="feat-sb">
+            <div class="feat-sb-logo">
+              <div class="feat-sb-mark">M</div>
+              <span class="feat-sb-name">MaidHub</span>
             </div>
-            <div class="cp-detail">
-              <div id="cd-sj">
-                <div class="cp-dh">
-                  <div class="cp-dav" style="background:linear-gradient(135deg,#0B8775,#C5F244)">SJ</div>
-                  <div><div class="cp-dname">Sarah Johnson</div><div class="cp-dsince">Client since Jan 2025 · 18 jobs</div></div>
-                  <button class="cp-dbtn">+ Schedule Job</button>
-                </div>
-                <div class="cp-contacts">
-                  <div class="cp-contact">📞 (512) 555-0142</div>
-                  <div class="cp-contact">✉️ sarah.j@email.com</div>
-                </div>
-                <div class="cp-stitle">Addresses (2)</div>
-                <div class="cp-addrs">
-                  <div class="cp-addr"><div class="cp-addr-name">Primary Home</div><div class="cp-addr-st">123 Oak St, Austin TX</div></div>
-                  <div class="cp-addr"><div class="cp-addr-name">Rental</div><div class="cp-addr-st">456 Elm Ct, Apt 2B</div></div>
-                </div>
-                <div class="cp-stitle">Notes</div>
-                <div class="cp-notes">🐕 Two golden retrievers — keep door closed<br>🔑 Gate code: 4821<br>🌸 No strong fragrances<br>💬 Prefers text confirmation day before</div>
-              </div>
-              <div id="cd-mc" style="display:none">
-                <div class="cp-dh">
-                  <div class="cp-dav" style="background:linear-gradient(135deg,#1A6B8A,#5ECFED)">MC</div>
-                  <div><div class="cp-dname">Mike &amp; Lisa Chen</div><div class="cp-dsince">Client since Jun 2024 · 31 jobs</div></div>
-                  <button class="cp-dbtn">+ Schedule Job</button>
-                </div>
-                <div class="cp-contacts">
-                  <div class="cp-contact">📞 (512) 555-0891</div>
-                  <div class="cp-contact">✉️ mchen@email.com</div>
-                </div>
-                <div class="cp-stitle">Addresses (1)</div>
-                <div class="cp-addrs">
-                  <div class="cp-addr"><div class="cp-addr-name">Family Home</div><div class="cp-addr-st">47 Maple Ave, Austin TX</div></div>
-                </div>
-                <div class="cp-stitle">Notes</div>
-                <div class="cp-notes">🐈 One indoor cat<br>🔑 Lockbox: 2277 (front door)<br>💬 Lisa schedules, Mike pays invoices</div>
-              </div>
-              <div id="cd-at" style="display:none">
-                <div class="cp-dh">
-                  <div class="cp-dav" style="background:linear-gradient(135deg,#8B3A62,#E87CA8)">AT</div>
-                  <div><div class="cp-dname">Ana Torres</div><div class="cp-dsince">Client since Mar 2025 · 9 jobs</div></div>
-                  <button class="cp-dbtn">+ Schedule Job</button>
-                </div>
-                <div class="cp-contacts">
-                  <div class="cp-contact">📞 (512) 555-0334</div>
-                  <div class="cp-contact">✉️ a.torres@email.com</div>
-                </div>
-                <div class="cp-stitle">Addresses (3)</div>
-                <div class="cp-addrs">
-                  <div class="cp-addr"><div class="cp-addr-name">Home</div><div class="cp-addr-st">891 Cedar Rd</div></div>
-                  <div class="cp-addr"><div class="cp-addr-name">Office</div><div class="cp-addr-st">200 W 6th St</div></div>
-                </div>
-                <div class="cp-stitle">Notes</div>
-                <div class="cp-notes">🏡 3 properties — schedule separately<br>🔑 Office key from front desk<br>💬 Prefers early morning slots</div>
-              </div>
-              <div id="cd-rk" style="display:none">
-                <div class="cp-dh">
-                  <div class="cp-dav" style="background:linear-gradient(135deg,#5B4200,#D4A017)">RK</div>
-                  <div><div class="cp-dname">Robert Kim</div><div class="cp-dsince">Client since Oct 2024 · 14 jobs</div></div>
-                  <button class="cp-dbtn">+ Schedule Job</button>
-                </div>
-                <div class="cp-contacts">
-                  <div class="cp-contact">📞 (512) 555-0567</div>
-                  <div class="cp-contact">✉️ rob.kim@email.com</div>
-                </div>
-                <div class="cp-stitle">Addresses (1)</div>
-                <div class="cp-addrs">
-                  <div class="cp-addr"><div class="cp-addr-name">Condo</div><div class="cp-addr-st">892 Pine Rd, Unit 5B</div></div>
-                </div>
-                <div class="cp-stitle">Notes</div>
-                <div class="cp-notes">📦 Sometimes has boxes — work around<br>🔑 Fob in lockbox by elevator<br>💬 Monthly billing preferred</div>
-              </div>
+            <div class="feat-sb-lbl">Home</div>
+            <div class="feat-sb-item" data-nav="dashboard">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+              <span>Dashboard</span>
+            </div>
+            <div class="feat-sb-item active" data-nav="clients">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <span>Clients</span>
+            </div>
+            <div class="feat-sb-item" data-nav="schedule">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span>Schedule</span>
+            </div>
+            <div class="feat-sb-lbl">Finance</div>
+            <div class="feat-sb-item" data-nav="finances">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span>Overview</span>
+            </div>
+            <div class="feat-sb-item" data-nav="invoices">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>Invoices</span>
+            </div>
+            <div class="feat-sb-lbl">Activity</div>
+            <div class="feat-sb-item" data-nav="notifications">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span>Notifications</span>
+            </div>
+            <div class="feat-sb-item" data-nav="settings">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <span>Settings</span>
             </div>
           </div>
-        </div>
 
-        <!-- SCHEDULE PANEL -->
-        <div class="fpanel" data-panel="schedule">
-          <div class="sp-wrap">
-            <div class="sp-hd">
-              <span class="sp-month">March 24–28, 2026</span>
-              <span class="sp-count">5 jobs this week · $680 total</span>
-            </div>
-            <div class="sp-body">
-              <div class="sp-times">
-                <div class="sp-time">8 AM</div>
-                <div class="sp-time">9 AM</div>
-                <div class="sp-time">10 AM</div>
-                <div class="sp-time">11 AM</div>
-                <div class="sp-time">12 PM</div>
-                <div class="sp-time">1 PM</div>
-                <div class="sp-time">2 PM</div>
-                <div class="sp-time">3 PM</div>
-              </div>
-              <div class="sp-days">
-                <div class="sp-day">
-                  <div class="sp-day-hd">Mon 24</div>
-                  <div class="sp-job done" style="top:40px;height:70px;"><div>Sarah J.</div><span class="jt">8:00 AM · Done</span></div>
-                </div>
-                <div class="sp-day today">
-                  <div class="sp-day-hd">Tue 25 ✦</div>
-                  <div class="sp-job done" style="top:40px;height:70px;"><div>R. Kim</div><span class="jt">8:00 AM · Done</span></div>
-                  <div class="sp-job upcoming" style="top:214px;height:80px;"><div>D. Park</div><span class="jt">1:30 PM</span></div>
-                </div>
-                <div class="sp-day">
-                  <div class="sp-day-hd">Wed 26</div>
-                </div>
-                <div class="sp-day">
-                  <div class="sp-day-hd">Thu 27</div>
-                  <div class="sp-job upcoming" style="top:108px;height:80px;"><div>Ana Torres</div><span class="jt">10:00 AM</span></div>
-                </div>
-                <div class="sp-day">
-                  <div class="sp-day-hd">Fri 28</div>
-                  <div class="sp-job upcoming" style="top:214px;height:80px;"><div>M. &amp; L. Chen</div><span class="jt">1:00 PM</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          <!-- Panel content area -->
+          <div class="feat-panels">
 
-        <!-- INVOICES PANEL -->
-        <div class="fpanel" data-panel="invoices">
-          <div class="ip-wrap">
-            <div class="ip-stats">
-              <div class="ip-stat"><span class="ip-val">$3,240</span><span class="ip-lbl">This Month</span></div>
-              <div class="ip-stat"><span class="ip-val" style="color:#28C840">$2,740</span><span class="ip-lbl">Paid</span></div>
-              <div class="ip-stat"><span class="ip-val" style="color:#F5A623">$500</span><span class="ip-lbl">Unpaid</span></div>
-            </div>
-            <div class="ip-list">
-              <div class="ip-row"><span class="ip-num">#0047</span><span class="ip-client">Sarah Johnson</span><span class="ip-date">Mar 27</span><span class="ip-amt">$140</span><span class="ip-badge paid">PAID</span></div>
-              <div class="ip-row"><span class="ip-num">#0046</span><span class="ip-client">Mike &amp; Lisa Chen</span><span class="ip-date">Mar 24</span><span class="ip-amt">$200</span><span class="ip-badge paid">PAID</span></div>
-              <div class="ip-row"><span class="ip-num">#0045</span><span class="ip-client">Robert Kim</span><span class="ip-date">Mar 19</span><span class="ip-amt">$165</span><span class="ip-badge unpaid">UNPAID</span></div>
-              <div class="ip-row"><span class="ip-num">#0044</span><span class="ip-client">Ana Torres</span><span class="ip-date">Mar 17</span><span class="ip-amt">$180</span><span class="ip-badge overdue">OVERDUE</span></div>
-              <div class="ip-row"><span class="ip-num">#0043</span><span class="ip-client">David Park</span><span class="ip-date">Mar 12</span><span class="ip-amt">$155</span><span class="ip-badge paid">PAID</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ESTIMATES PANEL -->
-        <div class="fpanel" data-panel="estimates">
-          <div class="ep-wrap">
-            <div class="ep-hd">
-              <div><div class="ep-num">Estimate #E-012</div><div class="ep-for">For: David Park · 789 Cedar Lane</div></div>
-              <div class="ep-status">DRAFT</div>
-            </div>
-            <table class="ep-tbl">
-              <thead><tr><th>Service</th><th>Qty</th><th>Price</th></tr></thead>
-              <tbody>
-                <tr><td>Standard clean (2br/1ba)</td><td>1</td><td>$90.00</td></tr>
-                <tr><td>Deep clean add-on</td><td>1</td><td>$45.00</td></tr>
-                <tr><td>Window cleaning</td><td>1</td><td>$35.00</td></tr>
-              </tbody>
-            </table>
-            <div class="ep-total"><span class="ep-total-lbl">Estimated Total</span><span class="ep-total-val">$170.00</span></div>
-            <div class="ep-acts">
-              <button class="ep-btn-sec">← Edit</button>
-              <button class="ep-btn-sec">Preview</button>
-              <button class="ep-btn-pri">✓ Send to David →</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- FINANCES PANEL -->
-        <div class="fpanel" data-panel="finances">
-          <div class="fp-wrap">
-            <div class="fp-stats">
-              <div class="fp-stat"><span class="fp-val">$3,240</span><span class="fp-lbl">This Month</span></div>
-              <div class="fp-stat"><span class="fp-val" style="color:rgba(255,255,255,.45)">$2,980</span><span class="fp-lbl">Last Month</span></div>
-              <div class="fp-stat"><span class="fp-val" style="color:#28C840">+$260</span><span class="fp-lbl">vs Last Month</span></div>
-            </div>
-            <div class="fp-chart-area">
-              <div class="fp-chart-title">Monthly Revenue — 2026</div>
-              <div class="fp-bars">
-                <div class="fp-bar-wrap"><div class="fp-bar" style="height:52%"></div><div class="fp-bar-lbl">Oct</div></div>
-                <div class="fp-bar-wrap"><div class="fp-bar" style="height:65%"></div><div class="fp-bar-lbl">Nov</div></div>
-                <div class="fp-bar-wrap"><div class="fp-bar" style="height:58%"></div><div class="fp-bar-lbl">Dec</div></div>
-                <div class="fp-bar-wrap"><div class="fp-bar" style="height:70%"></div><div class="fp-bar-lbl">Jan</div></div>
-                <div class="fp-bar-wrap"><div class="fp-bar" style="height:74%"></div><div class="fp-bar-lbl">Feb</div></div>
-                <div class="fp-bar-wrap"><div class="fp-bar current" style="height:88%"></div><div class="fp-bar-lbl">Mar</div></div>
+            <!-- CLIENTS PANEL -->
+            <div class="fpanel active" data-panel="clients">
+              <div class="ap-pg" style="min-height:480px">
+                <div class="ap-hd">
+                  <div>
+                    <div class="ap-title">Clients</div>
+                    <div class="ap-sub">12 clients total</div>
+                  </div>
+                  <button class="ap-btn-blue">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Client
+                  </button>
+                </div>
+                <div class="ap-card">
+                  <div class="ap-toolbar">
+                    <div class="ap-search-mock">Search clients...</div>
+                    <div class="ap-filter-btn">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                      Filter
+                    </div>
+                  </div>
+                  <table class="ap-tbl">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Jobs</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><div class="cp-name-cell"><span class="av28 av-blue">SJ</span><span style="font-weight:600">Sarah Johnson</span></div></td>
+                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> sarah.j@email.com</div></td>
+                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> (512) 555-0142</div></td>
+                        <td style="color:#888;font-size:12px">123 Oak St, Austin TX</td>
+                        <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#252525;color:#D4D4D4;font-size:10px;font-weight:700">18</span></td>
+                        <td><span class="badge badge-active">Active</span></td>
+                      </tr>
+                      <tr>
+                        <td><div class="cp-name-cell"><span class="av28 av-purple">MC</span><span style="font-weight:600">Mike &amp; Lisa Chen</span></div></td>
+                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> mchen@email.com</div></td>
+                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> (512) 555-0891</div></td>
+                        <td style="color:#888;font-size:12px">47 Maple Ave, Austin TX</td>
+                        <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#252525;color:#D4D4D4;font-size:10px;font-weight:700">31</span></td>
+                        <td><span class="badge badge-active">Active</span></td>
+                      </tr>
+                      <tr>
+                        <td><div class="cp-name-cell"><span class="av28 av-orange">AT</span><span style="font-weight:600">Ana Torres</span></div></td>
+                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> a.torres@email.com</div></td>
+                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> (512) 555-0334</div></td>
+                        <td style="color:#888;font-size:12px">891 Cedar Rd, Austin TX</td>
+                        <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#252525;color:#D4D4D4;font-size:10px;font-weight:700">9</span></td>
+                        <td><span class="badge badge-active">Active</span></td>
+                      </tr>
+                      <tr>
+                        <td><div class="cp-name-cell"><span class="av28 av-rose">RK</span><span style="font-weight:600">Robert Kim</span></div></td>
+                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> rob.kim@email.com</div></td>
+                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> (512) 555-0567</div></td>
+                        <td style="color:#888;font-size:12px">892 Pine Rd, Unit 5B</td>
+                        <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#252525;color:#D4D4D4;font-size:10px;font-weight:700">14</span></td>
+                        <td><span class="badge badge-archived">Archived</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
+            <!-- SCHEDULE PANEL -->
+            <div class="fpanel" data-panel="schedule">
+              <div class="sp-wrap">
+                <div class="sp-hd">
+                  <span class="sp-title">Schedule</span>
+                  <div class="sp-nav">
+                    <div class="sp-nav-btn">‹</div>
+                    <span class="sp-month-lbl">Mar 24–30, 2026</span>
+                    <div class="sp-nav-btn">›</div>
+                  </div>
+                  <div class="sp-views">
+                    <span class="sp-view-btn active">Week</span>
+                    <span class="sp-view-btn">Day</span>
+                    <span class="sp-view-btn">List</span>
+                    <span class="sp-view-btn">Month</span>
+                  </div>
+                  <button class="ap-btn-blue" style="margin-left:auto">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Job
+                  </button>
+                </div>
+                <div class="sp-body">
+                  <div class="sp-date-hd today">Monday · March 24, 2026</div>
+                  <div class="sp-job-row">
+                    <div class="sp-job-stripe stripe-green"></div>
+                    <div class="sp-job-info">
+                      <div class="sp-job-name">Sarah Johnson</div>
+                      <div class="sp-job-meta">8:00 AM – 10:00 AM · Deep Clean · 123 Oak St</div>
+                    </div>
+                    <div class="sp-job-right">
+                      <div class="sp-job-price done">$140</div>
+                      <span class="sp-job-status text-green-s">Completed</span>
+                    </div>
+                  </div>
+                  <div class="sp-date-hd">Tuesday · March 25, 2026</div>
+                  <div class="sp-job-row">
+                    <div class="sp-job-stripe stripe-green"></div>
+                    <div class="sp-job-info">
+                      <div class="sp-job-name">Robert Kim</div>
+                      <div class="sp-job-meta">8:00 AM – 9:30 AM · Standard · 892 Pine Rd</div>
+                    </div>
+                    <div class="sp-job-right">
+                      <div class="sp-job-price done">$165</div>
+                      <span class="sp-job-status text-green-s">Completed</span>
+                    </div>
+                  </div>
+                  <div class="sp-job-row">
+                    <div class="sp-job-stripe stripe-orange"></div>
+                    <div class="sp-job-info">
+                      <div class="sp-job-name">David Park</div>
+                      <div class="sp-job-meta">1:30 PM – 3:30 PM · Standard · 789 Cedar Ln</div>
+                    </div>
+                    <div class="sp-job-right">
+                      <div class="sp-job-price">$155</div>
+                      <span class="sp-job-status text-orange-s">In Progress</span>
+                    </div>
+                  </div>
+                  <div class="sp-date-hd">Thursday · March 27, 2026</div>
+                  <div class="sp-job-row">
+                    <div class="sp-job-stripe stripe-blue"></div>
+                    <div class="sp-job-info">
+                      <div class="sp-job-name">Ana Torres</div>
+                      <div class="sp-job-meta">10:00 AM – 12:00 PM · Standard · 891 Cedar Rd</div>
+                    </div>
+                    <div class="sp-job-right">
+                      <div class="sp-job-price">$180</div>
+                      <span class="sp-job-status text-blue-s">Scheduled</span>
+                    </div>
+                  </div>
+                  <div class="sp-date-hd">Friday · March 28, 2026</div>
+                  <div class="sp-job-row">
+                    <div class="sp-job-stripe stripe-blue"></div>
+                    <div class="sp-job-info">
+                      <div class="sp-job-name">Mike &amp; Lisa Chen</div>
+                      <div class="sp-job-meta">1:00 PM – 3:00 PM · Deep Clean · 47 Maple Ave</div>
+                    </div>
+                    <div class="sp-job-right">
+                      <div class="sp-job-price">$200</div>
+                      <span class="sp-job-status text-blue-s">Scheduled</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- INVOICES PANEL -->
+            <div class="fpanel" data-panel="invoices">
+              <div class="ip-wrap">
+                <div class="ap-pg" style="padding-bottom:0">
+                  <div class="ap-hd">
+                    <div>
+                      <div class="ap-title">Invoices</div>
+                      <div class="ap-sub">Track billing and payments</div>
+                    </div>
+                    <button class="ap-btn-blue">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      New Invoice
+                    </button>
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 18px 14px">
+                  <div class="stat-card"><div class="stat-lbl">This Month</div><div class="stat-val">$3,240</div></div>
+                  <div class="stat-card"><div class="stat-lbl">Paid</div><div class="stat-val green">$2,740</div></div>
+                  <div class="stat-card"><div class="stat-lbl">Unpaid</div><div class="stat-val amber">$500</div></div>
+                  <div class="stat-card"><div class="stat-lbl">Overdue</div><div class="stat-val" style="color:#F87171">$180</div></div>
+                </div>
+                <div class="ap-card" style="margin:0 18px 18px">
+                  <div class="ap-toolbar">
+                    <div class="ap-search-mock">Search invoices...</div>
+                    <div class="ap-filter-btn">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                      All Status
+                    </div>
+                  </div>
+                  <table class="ap-tbl">
+                    <thead>
+                      <tr><th>#</th><th>Client</th><th>Date</th><th>Due</th><th>Amount</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><span class="inv-num">INV-047</span></td>
+                        <td><div class="cp-name-cell"><span class="av28 av-blue">SJ</span>Sarah Johnson</div></td>
+                        <td style="color:#888;font-size:12px">Mar 27</td>
+                        <td style="color:#888;font-size:12px">Apr 6</td>
+                        <td style="font-weight:700">$140</td>
+                        <td><span class="badge badge-paid">Paid</span></td>
+                      </tr>
+                      <tr>
+                        <td><span class="inv-num">INV-046</span></td>
+                        <td><div class="cp-name-cell"><span class="av28 av-purple">MC</span>Mike &amp; Lisa Chen</div></td>
+                        <td style="color:#888;font-size:12px">Mar 24</td>
+                        <td style="color:#888;font-size:12px">Apr 3</td>
+                        <td style="font-weight:700">$200</td>
+                        <td><span class="badge badge-paid">Paid</span></td>
+                      </tr>
+                      <tr>
+                        <td><span class="inv-num">INV-045</span></td>
+                        <td><div class="cp-name-cell"><span class="av28 av-rose">RK</span>Robert Kim</div></td>
+                        <td style="color:#888;font-size:12px">Mar 19</td>
+                        <td style="color:#888;font-size:12px">Mar 29</td>
+                        <td style="font-weight:700">$165</td>
+                        <td><span class="badge badge-unpaid">Unpaid</span></td>
+                      </tr>
+                      <tr>
+                        <td><span class="inv-num">INV-044</span></td>
+                        <td><div class="cp-name-cell"><span class="av28 av-orange">AT</span>Ana Torres</div></td>
+                        <td style="color:#888;font-size:12px">Mar 17</td>
+                        <td style="color:#888;font-size:12px">Mar 27</td>
+                        <td style="font-weight:700">$180</td>
+                        <td><span class="badge" style="background:rgba(248,113,113,.1);color:#F87171;border-color:rgba(248,113,113,.25)">Overdue</span></td>
+                      </tr>
+                      <tr>
+                        <td><span class="inv-num">INV-043</span></td>
+                        <td><div class="cp-name-cell"><span class="av28 av-blue">DP</span>David Park</div></td>
+                        <td style="color:#888;font-size:12px">Mar 12</td>
+                        <td style="color:#888;font-size:12px">Mar 22</td>
+                        <td style="font-weight:700">$155</td>
+                        <td><span class="badge badge-paid">Paid</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- ESTIMATES PANEL -->
+            <div class="fpanel" data-panel="estimates">
+              <div class="ap-pg" style="min-height:480px">
+                <div class="ap-hd">
+                  <div>
+                    <div class="ap-title">Estimates</div>
+                    <div class="ap-sub">3 estimates this month</div>
+                  </div>
+                  <button class="ap-btn-blue">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    New Estimate
+                  </button>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div class="estp-card">
+                    <div class="estp-card-hd">
+                      <div>
+                        <div class="estp-num">EST-012</div>
+                        <div class="estp-for">David Park · 789 Cedar Lane</div>
+                      </div>
+                      <span class="badge badge-draft">Draft</span>
+                    </div>
+                    <table class="estp-tbl">
+                      <thead><tr><th>Service</th><th>Qty</th><th style="text-align:right">Price</th></tr></thead>
+                      <tbody>
+                        <tr><td>Standard Clean (2br/1ba)</td><td>1</td><td>$90.00</td></tr>
+                        <tr><td>Deep Clean add-on</td><td>1</td><td>$45.00</td></tr>
+                        <tr><td>Window cleaning</td><td>1</td><td>$35.00</td></tr>
+                      </tbody>
+                    </table>
+                    <div class="estp-total"><span class="estp-total-lbl">Estimated Total</span><span class="estp-total-val">$170.00</span></div>
+                    <div class="estp-acts">
+                      <div class="estp-btn-sec">Edit</div>
+                      <div class="estp-btn-sec">Preview</div>
+                      <div class="estp-btn-pri">Send to David →</div>
+                    </div>
+                  </div>
+                  <div class="estp-card">
+                    <div class="estp-card-hd">
+                      <div>
+                        <div class="estp-num">EST-011</div>
+                        <div class="estp-for">Lisa Wang · New Client</div>
+                      </div>
+                      <span class="badge badge-active" style="background:rgba(52,199,89,.1);color:#34C759;border-color:rgba(52,199,89,.2)">Sent</span>
+                    </div>
+                    <table class="estp-tbl">
+                      <thead><tr><th>Service</th><th>Qty</th><th style="text-align:right">Price</th></tr></thead>
+                      <tbody>
+                        <tr><td>Initial Deep Clean (3br/2ba)</td><td>1</td><td>$220.00</td></tr>
+                        <tr><td>Ongoing Monthly Standard</td><td>1</td><td>$140.00</td></tr>
+                      </tbody>
+                    </table>
+                    <div class="estp-total"><span class="estp-total-lbl">Estimated Total</span><span class="estp-total-val">$360.00</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- FINANCES PANEL -->
+            <div class="fpanel" data-panel="finances">
+              <div class="fp-wrap">
+                <div class="ap-pg" style="padding-bottom:0">
+                  <div class="ap-hd">
+                    <div>
+                      <div class="ap-title">Finances</div>
+                      <div class="ap-sub">Overview of your revenue and invoices</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 18px 14px">
+                  <div class="stat-card"><div class="stat-lbl">This Month</div><div class="stat-val">$3,240</div></div>
+                  <div class="stat-card"><div class="stat-lbl">Paid</div><div class="stat-val green">$2,740</div></div>
+                  <div class="stat-card"><div class="stat-lbl">Outstanding</div><div class="stat-val amber">$500</div></div>
+                  <div class="stat-card"><div class="stat-lbl">Jobs Done</div><div class="stat-val">18</div></div>
+                </div>
+                <div class="fp-layout" style="padding:0 18px 18px">
+                  <div class="ap-card">
+                    <div class="fp-recent-hd">
+                      <span class="fp-recent-title">Recent Invoices</span>
+                      <span class="fp-recent-link">View all →</span>
+                    </div>
+                    <div class="fp-tx-row">
+                      <div class="fp-tx-icon paid">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <div class="fp-tx-info">
+                        <div class="fp-tx-name">Sarah Johnson</div>
+                        <div class="fp-tx-sub">INV-047 · Mar 27</div>
+                      </div>
+                      <div class="fp-tx-right">
+                        <div class="fp-tx-amt">$140</div>
+                        <span class="badge badge-paid" style="font-size:9px;padding:1px 6px">Paid</span>
+                      </div>
+                    </div>
+                    <div class="fp-tx-row">
+                      <div class="fp-tx-icon paid">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <div class="fp-tx-info">
+                        <div class="fp-tx-name">Mike &amp; Lisa Chen</div>
+                        <div class="fp-tx-sub">INV-046 · Mar 24</div>
+                      </div>
+                      <div class="fp-tx-right">
+                        <div class="fp-tx-amt">$200</div>
+                        <span class="badge badge-paid" style="font-size:9px;padding:1px 6px">Paid</span>
+                      </div>
+                    </div>
+                    <div class="fp-tx-row">
+                      <div class="fp-tx-icon unpaid">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                      </div>
+                      <div class="fp-tx-info">
+                        <div class="fp-tx-name">Robert Kim</div>
+                        <div class="fp-tx-sub">INV-045 · Mar 19</div>
+                      </div>
+                      <div class="fp-tx-right">
+                        <div class="fp-tx-amt">$165</div>
+                        <span class="badge badge-unpaid" style="font-size:9px;padding:1px 6px">Unpaid</span>
+                      </div>
+                    </div>
+                    <div class="fp-tx-row">
+                      <div class="fp-tx-icon unpaid">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                      </div>
+                      <div class="fp-tx-info">
+                        <div class="fp-tx-name">Ana Torres</div>
+                        <div class="fp-tx-sub">INV-044 · Mar 17</div>
+                      </div>
+                      <div class="fp-tx-right">
+                        <div class="fp-tx-amt">$180</div>
+                        <span class="badge" style="font-size:9px;padding:1px 6px;background:rgba(248,113,113,.1);color:#F87171;border-color:rgba(248,113,113,.25)">Overdue</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ap-card">
+                    <div class="fp-svc-title">By Service Type</div>
+                    <div class="fp-svc-row">
+                      <span class="fp-svc-name">Deep Clean</span>
+                      <div class="fp-svc-bar-wrap"><div class="fp-svc-bar" style="width:82%"></div></div>
+                      <span class="fp-svc-count">9</span>
+                    </div>
+                    <div class="fp-svc-row">
+                      <span class="fp-svc-name">Standard</span>
+                      <div class="fp-svc-bar-wrap"><div class="fp-svc-bar" style="width:55%"></div></div>
+                      <span class="fp-svc-count">6</span>
+                    </div>
+                    <div class="fp-svc-row">
+                      <span class="fp-svc-name">Move-Out</span>
+                      <div class="fp-svc-bar-wrap"><div class="fp-svc-bar" style="width:27%"></div></div>
+                      <span class="fp-svc-count">3</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /feat-panels -->
+        </div><!-- /feat-win-body -->
       </div><!-- /feat-win -->
 
       <div style="text-align:center;margin-top:36px;" class="reveal">
@@ -1564,7 +1901,21 @@
       el.style.animationDelay = (d ? 0.1 * d : 0.08 + i * 0.05) + 's';
     });
 
-    // Feature tab switching
+    // Feature tab switching + sidebar nav + URL update
+    const urlMap = {
+      clients:   'maidhub.vercel.app/dashboard/clients',
+      schedule:  'maidhub.vercel.app/dashboard/schedule',
+      invoices:  'maidhub.vercel.app/dashboard/invoices',
+      estimates: 'maidhub.vercel.app/dashboard/estimates',
+      finances:  'maidhub.vercel.app/dashboard/finances',
+    };
+    const navMap = {
+      clients:   'clients',
+      schedule:  'schedule',
+      invoices:  'invoices',
+      estimates: 'invoices',
+      finances:  'finances',
+    };
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const tab = btn.dataset.tab;
@@ -1572,17 +1923,16 @@
         document.querySelectorAll('.fpanel').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
         document.querySelector(`[data-panel="${tab}"]`).classList.add('active');
-      });
-    });
-
-    // Client row switching
-    document.querySelectorAll('.cl-row').forEach(row => {
-      row.addEventListener('click', () => {
-        document.querySelectorAll('.cl-row').forEach(r => r.classList.remove('active'));
-        document.querySelectorAll('[id^="cd-"]').forEach(d => d.style.display = 'none');
-        row.classList.add('active');
-        const detail = document.getElementById('cd-' + row.dataset.client);
-        if (detail) detail.style.display = 'block';
+        // Update URL bar
+        const urlEl = document.getElementById('feat-url');
+        if (urlEl && urlMap[tab]) urlEl.textContent = urlMap[tab];
+        // Update sidebar nav
+        document.querySelectorAll('.feat-sb-item').forEach(item => item.classList.remove('active'));
+        const navKey = navMap[tab];
+        if (navKey) {
+          const navItem = document.querySelector(`.feat-sb-item[data-nav="${navKey}"]`);
+          if (navItem) navItem.classList.add('active');
+        }
       });
     });
 
