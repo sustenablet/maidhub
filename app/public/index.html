@@ -233,22 +233,40 @@
       padding: 3px 12px; font-size: 11px; color: rgba(255,255,255,.3);
     }
 
-    .mock-body { display: grid; grid-template-columns: 54px 1fr; min-height: 380px; }
+    .mock-body { display: grid; grid-template-columns: 158px 1fr; min-height: 380px; }
 
     .mock-side {
       background: rgba(255,255,255,.04);
       border-right: 1px solid rgba(255,255,255,.06);
-      padding: 18px 0;
-      display: flex; flex-direction: column; align-items: center; gap: 18px;
+      padding: 14px 10px;
+      display: flex; flex-direction: column;
     }
-    .s-icon {
-      width: 34px; height: 34px;
-      background: rgba(255,255,255,.08);
-      border-radius: 9px;
+    .ms-logo {
+      display: flex; align-items: center; gap: 7px;
+      padding: 0 4px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      margin-bottom: 10px;
+    }
+    .ms-logomark {
+      width: 22px; height: 22px; border-radius: 3px;
+      background: #0071E3;
       display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800; color: #fff; flex-shrink: 0;
     }
-    .s-icon.active { background: var(--lime); }
-    .s-icon svg { width: 15px; height: 15px; }
+    .ms-logoname {
+      font-size: 12.5px; font-weight: 700; color: rgba(255,255,255,.85);
+      letter-spacing: -.3px;
+    }
+    .ms-nav { display: flex; flex-direction: column; gap: 1px; }
+    .ms-item {
+      display: flex; align-items: center; gap: 7px;
+      padding: 6px 8px; border-radius: 5px;
+      font-size: 11.5px; font-weight: 500; color: rgba(255,255,255,.35);
+      cursor: default;
+    }
+    .ms-item.active { background: rgba(0,113,227,.14); color: #0071E3; font-weight: 600; }
+    .ms-item svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .ms-section-lbl { font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.2); padding: 8px 8px 4px; margin-top: 6px; }
 
     .mock-main { padding: 20px; }
 
@@ -825,6 +843,20 @@
     .ep-btn-pri { flex: 2; padding: 13px; background: var(--lime); border: none; border-radius: 10px; font-family: var(--font-b); font-size: 13px; font-weight: 700; color: var(--dark); cursor: pointer; transition: all .2s; }
     .ep-btn-pri:hover { background: #D0FF60; }
 
+    /* — Finances panel */
+    .fp-wrap { min-height: 460px; display: flex; flex-direction: column; }
+    .fp-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,.06); }
+    .fp-stat { background: rgba(255,255,255,.05); border-radius: 10px; padding: 12px; }
+    .fp-val { font-family: var(--font-d); font-size: 20px; font-weight: 700; color: rgba(255,255,255,.88); display: block; }
+    .fp-lbl { font-size: 10px; color: rgba(255,255,255,.3); display: block; margin-top: 3px; }
+    .fp-chart-area { flex: 1; padding: 20px; }
+    .fp-chart-title { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.35); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 16px; }
+    .fp-bars { display: flex; align-items: flex-end; gap: 8px; height: 140px; }
+    .fp-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+    .fp-bar { width: 100%; border-radius: 4px 4px 0 0; background: rgba(255,255,255,.1); transition: background .2s; }
+    .fp-bar.current { background: #0071E3; }
+    .fp-bar-lbl { font-size: 9px; color: rgba(255,255,255,.28); }
+
     @media (max-width: 900px) {
       .rstack-grid { grid-template-columns: 1fr; gap: 48px; }
       .rstack-divider { flex-direction: row; }
@@ -902,24 +934,40 @@
               <div class="mock-dot r"></div>
               <div class="mock-dot y"></div>
               <div class="mock-dot g"></div>
-              <div class="mock-url">app.maidhub.io/dashboard</div>
+              <div class="mock-url">maidhub.vercel.app/dashboard</div>
             </div>
 
             <!-- body -->
             <div class="mock-body">
               <!-- sidebar -->
               <div class="mock-side">
-                <div class="s-icon active">
-                  <svg viewBox="0 0 24 24" stroke="#0C1B2A" fill="none" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                <div class="ms-logo">
+                  <div class="ms-logomark">M</div>
+                  <span class="ms-logoname">MaidHub</span>
                 </div>
-                <div class="s-icon">
-                  <svg viewBox="0 0 24 24" stroke="rgba(255,255,255,.35)" fill="none" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                </div>
-                <div class="s-icon">
-                  <svg viewBox="0 0 24 24" stroke="rgba(255,255,255,.35)" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                </div>
-                <div class="s-icon">
-                  <svg viewBox="0 0 24 24" stroke="rgba(255,255,255,.35)" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <div class="ms-nav">
+                  <div class="ms-section-lbl">Home</div>
+                  <div class="ms-item active">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                    <span>Dashboard</span>
+                  </div>
+                  <div class="ms-item">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <span>Clients</span>
+                  </div>
+                  <div class="ms-item">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>Schedule</span>
+                  </div>
+                  <div class="ms-section-lbl">Billing</div>
+                  <div class="ms-item">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span>Invoices</span>
+                  </div>
+                  <div class="ms-item">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span>Finances</span>
+                  </div>
                 </div>
               </div>
 
@@ -927,7 +975,7 @@
               <div class="mock-main">
                 <div class="mock-hd">
                   <span class="mock-hd-title">Today's Schedule</span>
-                  <span class="mock-hd-date">Tue, Mar 18 · 2025</span>
+                  <span class="mock-hd-date">Thu, Mar 27 · 2026</span>
                 </div>
 
                 <div class="mock-stats">
@@ -941,7 +989,7 @@
                     <span class="jtime">8:00 AM</span>
                     <div class="jinfo">
                       <div class="jclient">Sarah Johnson</div>
-                      <div class="jaddr">123 Oak Street</div>
+                      <div class="jaddr">123 Oak St · Deep Clean</div>
                     </div>
                     <span class="jbadge done">Done</span>
                   </div>
@@ -949,15 +997,15 @@
                     <span class="jtime">11:30 AM</span>
                     <div class="jinfo">
                       <div class="jclient">Mike &amp; Lisa Chen</div>
-                      <div class="jaddr">47 Maple Ave</div>
+                      <div class="jaddr">47 Maple Ave · Standard</div>
                     </div>
-                    <span class="jbadge active">Active</span>
+                    <span class="jbadge active">In Progress</span>
                   </div>
                   <div class="job-row next">
-                    <span class="jtime">2:00 PM</span>
+                    <span class="jtime">2:30 PM</span>
                     <div class="jinfo">
-                      <div class="jclient">Robert Kim</div>
-                      <div class="jaddr">892 Pine Road</div>
+                      <div class="jclient">Ana Torres</div>
+                      <div class="jaddr">891 Cedar Rd · Standard</div>
                     </div>
                     <span class="jbadge next">Upcoming</span>
                   </div>
@@ -1046,9 +1094,9 @@
             <ul class="unified-list">
               <li><span class="unified-ck">✓</span>Client profiles &amp; service addresses</li>
               <li><span class="unified-ck">✓</span>Job scheduling &amp; recurring rules</li>
-              <li><span class="unified-ck">✓</span>Estimates &amp; contracts</li>
               <li><span class="unified-ck">✓</span>Invoicing &amp; payment tracking</li>
-              <li><span class="unified-ck">✓</span>Automated email reminders</li>
+              <li><span class="unified-ck">✓</span>Finances &amp; revenue overview</li>
+              <li><span class="unified-ck">✓</span>Multiple businesses, one login</li>
             </ul>
             <a href="/features" class="btn-pill" style="font-size:13px;padding:10px 22px;">See all features →</a>
           </div>
@@ -1076,6 +1124,7 @@
         <button class="tab-btn" data-tab="schedule">📅 Schedule</button>
         <button class="tab-btn" data-tab="invoices">🧾 Invoices</button>
         <button class="tab-btn" data-tab="estimates">📋 Estimates</button>
+        <button class="tab-btn" data-tab="finances">📈 Finances</button>
       </div>
 
       <!-- App window -->
@@ -1084,7 +1133,7 @@
           <div class="win-dot" style="background:#FF5F57"></div>
           <div class="win-dot" style="background:#FFBD2E"></div>
           <div class="win-dot" style="background:#28C840"></div>
-          <div class="win-url">app.maidhub.io/dashboard</div>
+          <div class="win-url">maidhub.vercel.app/dashboard/clients</div>
         </div>
 
         <!-- CLIENTS PANEL -->
@@ -1095,22 +1144,22 @@
               <div class="cp-lbl">All Clients (12)</div>
               <div class="cl-row active" data-client="sj">
                 <div class="cl-av" style="background:linear-gradient(135deg,#0B8775,#C5F244)">SJ</div>
-                <div><div class="cl-name">Sarah Johnson</div><div class="cl-meta">Next: Thu Mar 20</div></div>
+                <div><div class="cl-name">Sarah Johnson</div><div class="cl-meta">Next: Thu Mar 27</div></div>
                 <div class="cl-dot g"></div>
               </div>
               <div class="cl-row" data-client="mc">
                 <div class="cl-av" style="background:linear-gradient(135deg,#1A6B8A,#5ECFED)">MC</div>
-                <div><div class="cl-name">Mike &amp; Lisa Chen</div><div class="cl-meta">Next: Fri Mar 21</div></div>
+                <div><div class="cl-name">Mike &amp; Lisa Chen</div><div class="cl-meta">Next: Fri Mar 28</div></div>
                 <div class="cl-dot g"></div>
               </div>
               <div class="cl-row" data-client="at">
                 <div class="cl-av" style="background:linear-gradient(135deg,#8B3A62,#E87CA8)">AT</div>
-                <div><div class="cl-name">Ana Torres</div><div class="cl-meta">Next: Mon Mar 24</div></div>
+                <div><div class="cl-name">Ana Torres</div><div class="cl-meta">Next: Mon Mar 31</div></div>
                 <div class="cl-dot g"></div>
               </div>
               <div class="cl-row" data-client="rk">
                 <div class="cl-av" style="background:linear-gradient(135deg,#5B4200,#D4A017)">RK</div>
-                <div><div class="cl-name">Robert Kim</div><div class="cl-meta">Last: Mar 10</div></div>
+                <div><div class="cl-name">Robert Kim</div><div class="cl-meta">Last: Mar 11</div></div>
                 <div class="cl-dot a"></div>
               </div>
             </div>
@@ -1118,7 +1167,7 @@
               <div id="cd-sj">
                 <div class="cp-dh">
                   <div class="cp-dav" style="background:linear-gradient(135deg,#0B8775,#C5F244)">SJ</div>
-                  <div><div class="cp-dname">Sarah Johnson</div><div class="cp-dsince">Client since Jan 2024 · 18 jobs</div></div>
+                  <div><div class="cp-dname">Sarah Johnson</div><div class="cp-dsince">Client since Jan 2025 · 18 jobs</div></div>
                   <button class="cp-dbtn">+ Schedule Job</button>
                 </div>
                 <div class="cp-contacts">
@@ -1136,7 +1185,7 @@
               <div id="cd-mc" style="display:none">
                 <div class="cp-dh">
                   <div class="cp-dav" style="background:linear-gradient(135deg,#1A6B8A,#5ECFED)">MC</div>
-                  <div><div class="cp-dname">Mike &amp; Lisa Chen</div><div class="cp-dsince">Client since Jun 2023 · 31 jobs</div></div>
+                  <div><div class="cp-dname">Mike &amp; Lisa Chen</div><div class="cp-dsince">Client since Jun 2024 · 31 jobs</div></div>
                   <button class="cp-dbtn">+ Schedule Job</button>
                 </div>
                 <div class="cp-contacts">
@@ -1153,7 +1202,7 @@
               <div id="cd-at" style="display:none">
                 <div class="cp-dh">
                   <div class="cp-dav" style="background:linear-gradient(135deg,#8B3A62,#E87CA8)">AT</div>
-                  <div><div class="cp-dname">Ana Torres</div><div class="cp-dsince">Client since Mar 2024 · 9 jobs</div></div>
+                  <div><div class="cp-dname">Ana Torres</div><div class="cp-dsince">Client since Mar 2025 · 9 jobs</div></div>
                   <button class="cp-dbtn">+ Schedule Job</button>
                 </div>
                 <div class="cp-contacts">
@@ -1171,7 +1220,7 @@
               <div id="cd-rk" style="display:none">
                 <div class="cp-dh">
                   <div class="cp-dav" style="background:linear-gradient(135deg,#5B4200,#D4A017)">RK</div>
-                  <div><div class="cp-dname">Robert Kim</div><div class="cp-dsince">Client since Oct 2023 · 14 jobs</div></div>
+                  <div><div class="cp-dname">Robert Kim</div><div class="cp-dsince">Client since Oct 2024 · 14 jobs</div></div>
                   <button class="cp-dbtn">+ Schedule Job</button>
                 </div>
                 <div class="cp-contacts">
@@ -1193,8 +1242,8 @@
         <div class="fpanel" data-panel="schedule">
           <div class="sp-wrap">
             <div class="sp-hd">
-              <span class="sp-month">March 17–21, 2025</span>
-              <span class="sp-count">4 jobs this week · $560 total</span>
+              <span class="sp-month">March 24–28, 2026</span>
+              <span class="sp-count">5 jobs this week · $680 total</span>
             </div>
             <div class="sp-body">
               <div class="sp-times">
@@ -1208,21 +1257,24 @@
                 <div class="sp-time">3 PM</div>
               </div>
               <div class="sp-days">
-                <div class="sp-day"><div class="sp-day-hd">Mon 17</div></div>
-                <div class="sp-day today">
-                  <div class="sp-day-hd">Tue 18 ✦</div>
+                <div class="sp-day">
+                  <div class="sp-day-hd">Mon 24</div>
                   <div class="sp-job done" style="top:40px;height:70px;"><div>Sarah J.</div><span class="jt">8:00 AM · Done</span></div>
                 </div>
-                <div class="sp-day">
-                  <div class="sp-day-hd">Wed 19</div>
-                  <div class="sp-job done" style="top:56px;height:70px;"><div>R. Kim</div><span class="jt">8:30 AM · Done</span></div>
+                <div class="sp-day today">
+                  <div class="sp-day-hd">Tue 25 ✦</div>
+                  <div class="sp-job done" style="top:40px;height:70px;"><div>R. Kim</div><span class="jt">8:00 AM · Done</span></div>
+                  <div class="sp-job upcoming" style="top:214px;height:80px;"><div>D. Park</div><span class="jt">1:30 PM</span></div>
                 </div>
                 <div class="sp-day">
-                  <div class="sp-day-hd">Thu 20</div>
+                  <div class="sp-day-hd">Wed 26</div>
+                </div>
+                <div class="sp-day">
+                  <div class="sp-day-hd">Thu 27</div>
                   <div class="sp-job upcoming" style="top:108px;height:80px;"><div>Ana Torres</div><span class="jt">10:00 AM</span></div>
                 </div>
                 <div class="sp-day">
-                  <div class="sp-day-hd">Fri 21</div>
+                  <div class="sp-day-hd">Fri 28</div>
                   <div class="sp-job upcoming" style="top:214px;height:80px;"><div>M. &amp; L. Chen</div><span class="jt">1:00 PM</span></div>
                 </div>
               </div>
@@ -1234,16 +1286,16 @@
         <div class="fpanel" data-panel="invoices">
           <div class="ip-wrap">
             <div class="ip-stats">
-              <div class="ip-stat"><span class="ip-val">$2,840</span><span class="ip-lbl">This Month</span></div>
-              <div class="ip-stat"><span class="ip-val" style="color:#28C840">$2,340</span><span class="ip-lbl">Paid</span></div>
-              <div class="ip-stat"><span class="ip-val" style="color:#F5A623">$500</span><span class="ip-lbl">Pending</span></div>
+              <div class="ip-stat"><span class="ip-val">$3,240</span><span class="ip-lbl">This Month</span></div>
+              <div class="ip-stat"><span class="ip-val" style="color:#28C840">$2,740</span><span class="ip-lbl">Paid</span></div>
+              <div class="ip-stat"><span class="ip-val" style="color:#F5A623">$500</span><span class="ip-lbl">Unpaid</span></div>
             </div>
             <div class="ip-list">
-              <div class="ip-row"><span class="ip-num">#0047</span><span class="ip-client">Sarah Johnson</span><span class="ip-date">Mar 18</span><span class="ip-amt">$140</span><span class="ip-badge paid">PAID</span></div>
-              <div class="ip-row"><span class="ip-num">#0046</span><span class="ip-client">Mike &amp; Lisa Chen</span><span class="ip-date">Mar 15</span><span class="ip-amt">$200</span><span class="ip-badge paid">PAID</span></div>
-              <div class="ip-row"><span class="ip-num">#0045</span><span class="ip-client">Robert Kim</span><span class="ip-date">Mar 10</span><span class="ip-amt">$165</span><span class="ip-badge unpaid">UNPAID</span></div>
-              <div class="ip-row"><span class="ip-num">#0044</span><span class="ip-client">Ana Torres</span><span class="ip-date">Mar 8</span><span class="ip-amt">$180</span><span class="ip-badge overdue">OVERDUE</span></div>
-              <div class="ip-row"><span class="ip-num">#0043</span><span class="ip-client">David Park</span><span class="ip-date">Mar 5</span><span class="ip-amt">$155</span><span class="ip-badge paid">PAID</span></div>
+              <div class="ip-row"><span class="ip-num">#0047</span><span class="ip-client">Sarah Johnson</span><span class="ip-date">Mar 27</span><span class="ip-amt">$140</span><span class="ip-badge paid">PAID</span></div>
+              <div class="ip-row"><span class="ip-num">#0046</span><span class="ip-client">Mike &amp; Lisa Chen</span><span class="ip-date">Mar 24</span><span class="ip-amt">$200</span><span class="ip-badge paid">PAID</span></div>
+              <div class="ip-row"><span class="ip-num">#0045</span><span class="ip-client">Robert Kim</span><span class="ip-date">Mar 19</span><span class="ip-amt">$165</span><span class="ip-badge unpaid">UNPAID</span></div>
+              <div class="ip-row"><span class="ip-num">#0044</span><span class="ip-client">Ana Torres</span><span class="ip-date">Mar 17</span><span class="ip-amt">$180</span><span class="ip-badge overdue">OVERDUE</span></div>
+              <div class="ip-row"><span class="ip-num">#0043</span><span class="ip-client">David Park</span><span class="ip-date">Mar 12</span><span class="ip-amt">$155</span><span class="ip-badge paid">PAID</span></div>
             </div>
           </div>
         </div>
@@ -1268,6 +1320,28 @@
               <button class="ep-btn-sec">← Edit</button>
               <button class="ep-btn-sec">Preview</button>
               <button class="ep-btn-pri">✓ Send to David →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- FINANCES PANEL -->
+        <div class="fpanel" data-panel="finances">
+          <div class="fp-wrap">
+            <div class="fp-stats">
+              <div class="fp-stat"><span class="fp-val">$3,240</span><span class="fp-lbl">This Month</span></div>
+              <div class="fp-stat"><span class="fp-val" style="color:rgba(255,255,255,.45)">$2,980</span><span class="fp-lbl">Last Month</span></div>
+              <div class="fp-stat"><span class="fp-val" style="color:#28C840">+$260</span><span class="fp-lbl">vs Last Month</span></div>
+            </div>
+            <div class="fp-chart-area">
+              <div class="fp-chart-title">Monthly Revenue — 2026</div>
+              <div class="fp-bars">
+                <div class="fp-bar-wrap"><div class="fp-bar" style="height:52%"></div><div class="fp-bar-lbl">Oct</div></div>
+                <div class="fp-bar-wrap"><div class="fp-bar" style="height:65%"></div><div class="fp-bar-lbl">Nov</div></div>
+                <div class="fp-bar-wrap"><div class="fp-bar" style="height:58%"></div><div class="fp-bar-lbl">Dec</div></div>
+                <div class="fp-bar-wrap"><div class="fp-bar" style="height:70%"></div><div class="fp-bar-lbl">Jan</div></div>
+                <div class="fp-bar-wrap"><div class="fp-bar" style="height:74%"></div><div class="fp-bar-lbl">Feb</div></div>
+                <div class="fp-bar-wrap"><div class="fp-bar current" style="height:88%"></div><div class="fp-bar-lbl">Mar</div></div>
+              </div>
             </div>
           </div>
         </div>
@@ -1299,7 +1373,7 @@
         <div class="step reveal d1">
           <div class="step-n">2</div>
           <div class="step-title">Schedule your jobs</div>
-          <p class="step-desc">Create one-time or recurring jobs. Set pricing, duration, and start time — MaidHub handles the rest.</p>
+          <p class="step-desc">Create one-time or recurring jobs. Set pricing, service type, and start time. One-time or recurring — it's all tracked automatically.</p>
         </div>
         <div class="step reveal d2">
           <div class="step-n">3</div>
@@ -1339,10 +1413,10 @@
         <ul class="price-feats">
           <li><span class="pf-check">✓</span>Unlimited clients &amp; service addresses</li>
           <li><span class="pf-check">✓</span>Job scheduling + recurring rules</li>
-          <li><span class="pf-check">✓</span>Calendar view (day, week, month)</li>
-          <li><span class="pf-check">✓</span>Estimates with contract text blocks</li>
-          <li><span class="pf-check">✓</span>Invoicing &amp; receipt generation</li>
-          <li><span class="pf-check">✓</span>Automated email reminders</li>
+          <li><span class="pf-check">✓</span>Invoicing &amp; payment tracking</li>
+          <li><span class="pf-check">✓</span>Revenue &amp; finances overview</li>
+          <li><span class="pf-check">✓</span>Estimates builder</li>
+          <li><span class="pf-check">✓</span>Multiple businesses, one account</li>
           <li><span class="pf-check">✓</span>Mobile-optimized interface</li>
           <li><span class="pf-check">✓</span>Secure cloud backup</li>
         </ul>
@@ -1463,7 +1537,7 @@
       </div>
 
       <div class="footer-bot">
-        <p class="f-copy">© 2025 MaidHub. All rights reserved.</p>
+        <p class="f-copy">© 2026 MaidHub. All rights reserved.</p>
         <div class="f-legal">
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
