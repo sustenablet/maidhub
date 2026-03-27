@@ -390,7 +390,7 @@ function MobileMoreSheet({
           {organizations.map((org) => (
             <button
               key={org.id}
-              onClick={() => { switchOrg(org.id); onClose(); }}
+              onClick={() => switchOrg(org.id)}
               className="flex w-full items-center gap-3 px-3 py-2.5 rounded-[10px] hover:bg-[var(--mh-hover-overlay)] transition-colors"
             >
               <div className="h-8 w-8 rounded-[8px] bg-[#0071E3]/10 flex items-center justify-center shrink-0">
@@ -582,10 +582,17 @@ export function DashboardShell({
     router.refresh();
   }
 
+  function handleSwitchOrg(id: string) {
+    switchOrg(id);
+    setDropdownOpen(false);
+    router.refresh();
+  }
+
   async function handleCreateOrg(name: string, phone: string) {
     try {
       await createOrg(name, phone || undefined);
       toast.success(`${name} created`);
+      router.refresh();
     } catch (err) {
       console.error("[handleCreateOrg] error:", err);
       const msg = (err as { message?: string })?.message;
@@ -639,7 +646,7 @@ export function DashboardShell({
                   {organizations.map((org) => (
                     <button
                       key={org.id}
-                      onClick={() => { switchOrg(org.id); setDropdownOpen(false); }}
+                      onClick={() => handleSwitchOrg(org.id)}
                       className="flex w-full items-center gap-2.5 px-3.5 py-2 text-[13px] hover:bg-[var(--mh-hover-overlay)] transition-colors"
                     >
                       <div className="h-4 w-4 flex items-center justify-center shrink-0">
@@ -734,7 +741,7 @@ export function DashboardShell({
         onSignOut={handleSignOut}
         organizations={organizations}
         currentOrg={currentOrg}
-        switchOrg={switchOrg}
+        switchOrg={(id) => { switchOrg(id); setMoreOpen(false); router.refresh(); }}
         onNewBusiness={() => setNewBizOpen(true)}
       />
 

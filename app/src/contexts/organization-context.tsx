@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export interface Organization {
@@ -47,7 +47,7 @@ export function OrganizationProvider({
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [currentOrgId, setCurrentOrgId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const userIdRef = useRef(userId);
 
   const loadOrgs = useCallback(async () => {
