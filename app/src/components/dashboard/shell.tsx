@@ -586,9 +586,11 @@ export function DashboardShell({
     try {
       await createOrg(name, phone || undefined);
       toast.success(`${name} created`);
-    } catch {
-      toast.error("Failed to create business");
-      throw new Error("Failed");
+    } catch (err) {
+      console.error("[handleCreateOrg] error:", err);
+      const msg = (err as { message?: string })?.message;
+      toast.error(msg ? `Failed: ${msg}` : "Failed to create business");
+      throw err;
     }
   }
 

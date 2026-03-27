@@ -84,7 +84,10 @@ export function OrganizationProvider({
         .insert({ user_id: userIdRef.current, name, phone: phone || null, settings: {} })
         .select()
         .single();
-      if (error) throw error;
+      if (error) {
+        console.error("[createOrg] Supabase error:", error);
+        throw error;
+      }
       const org = data as Organization;
       setOrganizations((prev) => [...prev, org]);
       switchOrg(org.id);
