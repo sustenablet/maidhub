@@ -155,7 +155,9 @@
     }
     .btn-outline-dark:hover { border-color: var(--text); background: rgba(12,27,42,.04); }
 
-    /* hamburger */
+    /* hamburger + mobile nav right */
+    .nav-mobile-right { display: none; align-items: center; gap: 10px; }
+    .nav-mob-cta { font-size: 12.5px !important; padding: 9px 16px !important; }
     .hamburger {
       display: none; flex-direction: column; gap: 5px;
       cursor: pointer; background: none; border: none; padding: 4px;
@@ -732,18 +734,246 @@
       .pain-grid { grid-template-columns: repeat(2,1fr); }
       .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
     }
+
+    /* ─── MOBILE MENU ─────────────────────────────────────────── */
+    .mob-menu {
+      position: fixed; inset: 0; z-index: 300;
+      background: var(--cream);
+      display: flex; flex-direction: column;
+      padding: 0;
+      transform: translateX(100%);
+      transition: transform .32s cubic-bezier(.4,0,.2,1);
+      overflow-y: auto;
+    }
+    .mob-menu.open { transform: translateX(0); }
+    .mob-menu-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .mob-menu-close {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(12,27,42,.08); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text); font-size: 20px; line-height: 1;
+    }
+    .mob-menu-body { padding: 12px 24px 48px; flex: 1; }
+    .mob-menu-links {
+      list-style: none; display: flex; flex-direction: column; gap: 0;
+      margin-bottom: 36px;
+    }
+    .mob-menu-links a {
+      font-family: var(--font-d); font-size: 32px; font-weight: 700;
+      color: var(--text); text-decoration: none; letter-spacing: -.6px;
+      display: block; padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      transition: color .2s;
+    }
+    .mob-menu-links a:hover { color: var(--teal); }
+    .mob-menu-cta { display: flex; flex-direction: column; gap: 12px; }
+    .mob-menu-cta .btn-pill {
+      text-align: center; justify-content: center;
+      font-size: 15px; padding: 15px 24px; width: 100%;
+    }
+    .mob-menu-login {
+      text-align: center; font-family: var(--font-b); font-size: 14px;
+      font-weight: 600; color: var(--muted); text-decoration: none;
+      padding: 12px; display: block; transition: color .2s;
+    }
+    .mob-menu-login:hover { color: var(--text); }
+
+    /* ─── FULL MOBILE OVERHAUL (≤ 768px) ─────────────────────── */
     @media (max-width: 768px) {
-      .nav-links, .nav-right .btn-ghost { display: none; }
+      /* --- Globals --- */
+      .container { padding: 0 20px; }
+      section { padding: 72px 0; }
+
+      /* --- Navigation --- */
+      .nav-links { display: none; }
+      .nav-right { display: none; }
+      .nav-mobile-right { display: flex; }
       .hamburger { display: flex; }
-      section { padding: 80px 0; }
-      .hero { padding: 130px 0 80px; }
-      .steps { grid-template-columns: 1fr; }
+      #nav { padding: 14px 0; }
+      #nav.scrolled { padding: 10px 0; }
+      .nav-inner { gap: 0; }
+
+      /* --- Hero --- */
+      .hero { padding: 96px 0 64px; }
+      .hero-grid { grid-template-columns: 1fr; gap: 44px; }
+      .hero h1 { font-size: clamp(36px, 9.5vw, 54px); letter-spacing: -1.4px; margin-bottom: 18px; }
+      .hero-sub { font-size: 15.5px; line-height: 1.62; margin-bottom: 32px; }
+      .hero-btns { flex-direction: column; align-items: stretch; gap: 10px; }
+      .hero-btns .btn-pill { text-align: center; justify-content: center; font-size: 15px; padding: 15px 24px; }
+      .hero-btns .btn-outline-dark { text-align: center; justify-content: center; font-size: 14px; padding: 13px 24px; }
+      .hero-eyebrow { font-size: 11.5px; }
+
+      /* Hero mockup on mobile */
+      .toast { display: none; }
+      .mockup-wrap { max-width: 100%; }
+      .mockup-window { transform: none !important; border-radius: 16px; }
+      .float-anim { animation: none !important; }
+      .mock-side { display: none; }
+      .mock-body { grid-template-columns: 1fr; min-height: auto; }
+      .mock-main { padding: 14px; background: #191919; }
+      .mock-hd-btn { display: none; }
+      .mock-hd-title { font-size: 13px; }
+      .mock-hd-date { font-size: 9px; }
+      .mock-stats { grid-template-columns: repeat(2,1fr); gap: 6px; margin-bottom: 12px; }
+      .mock-stat { padding: 9px 10px; }
+      .ms-stat-icon { width: 18px; height: 18px; margin-bottom: 5px; }
+      .ms-val { font-size: 14px; }
+      .ms-lbl { font-size: 9px; }
+      .mock-section-hd { padding: 9px 12px; }
+      .mock-section-title { font-size: 11px; gap: 5px; }
+      .mock-section-badge { font-size: 8px; }
+      .mock-section-link { display: none; }
+      .job-row { padding: 8px 12px; gap: 8px; }
+      .jtime { font-size: 9px; min-width: 34px; }
+      .jclient { font-size: 10.5px; }
+      .jaddr { font-size: 9px; }
+      .jprice { font-size: 10.5px; }
+      .jbadge { font-size: 8.5px; padding: 2px 6px; }
+      .mock-bar { padding: 9px 12px; gap: 6px; }
+      .mock-dot { width: 8px; height: 8px; }
+      .mock-url { font-size: 9px; padding: 2px 8px; }
+
+      /* --- Trust strip --- */
+      .strip { padding: 18px 0; }
+
+      /* --- Replace stack --- */
+      .rstack { padding: 72px 0; }
+      .rstack-grid { grid-template-columns: 1fr; gap: 40px; }
+      .rstack-divider { flex-direction: row; }
+      .rstack-div-line { width: 50px; height: 1px; }
+      .rstack-h { font-size: clamp(24px, 7vw, 36px); }
+      .tool-chips { max-width: 100%; }
+      .unified-box { padding: 24px 20px; border-radius: 18px; }
+
+      /* --- Feature tabs --- */
+      .ftabs { padding: 72px 0; }
+      .ftabs-hd { margin-bottom: 36px; }
+      .tab-row {
+        flex-wrap: nowrap; overflow-x: auto;
+        margin-bottom: 16px; padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; gap: 6px;
+      }
+      .tab-row::-webkit-scrollbar { display: none; }
+      .tab-btn { white-space: nowrap; flex-shrink: 0; font-size: 12.5px; padding: 8px 16px; }
+      .feat-win { border-radius: 14px; }
+      .feat-win-bar { padding: 10px 14px; }
+      .win-url { font-size: 10px; padding: 2px 8px; }
+      /* Hide sidebar in feature window */
+      .feat-sb { display: none; }
+      .feat-win-body { grid-template-columns: 1fr; min-height: auto; }
+      /* Panel internals */
+      .ap-pg { padding: 12px 12px; }
+      .ap-hd { flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+      .ap-title { font-size: 13.5px; }
+      .ap-sub { font-size: 10px; }
+      .ap-btn-blue { font-size: 10.5px; padding: 5px 10px; }
+      .ap-toolbar { padding: 7px 10px; gap: 6px; }
+      .ap-search-mock { font-size: 10.5px; padding: 4px 8px; }
+      .ap-filter-btn { font-size: 10.5px; padding: 4px 8px; }
+      /* Hide non-essential table columns in clients panel */
+      [data-panel="clients"] .ap-tbl th:nth-child(2),
+      [data-panel="clients"] .ap-tbl td:nth-child(2),
+      [data-panel="clients"] .ap-tbl th:nth-child(3),
+      [data-panel="clients"] .ap-tbl td:nth-child(3),
+      [data-panel="clients"] .ap-tbl th:nth-child(4),
+      [data-panel="clients"] .ap-tbl td:nth-child(4),
+      [data-panel="clients"] .ap-tbl th:nth-child(5),
+      [data-panel="clients"] .ap-tbl td:nth-child(5) { display: none; }
+      /* Hide non-essential invoice table columns */
+      [data-panel="invoices"] .ap-tbl th:nth-child(3),
+      [data-panel="invoices"] .ap-tbl td:nth-child(3),
+      [data-panel="invoices"] .ap-tbl th:nth-child(4),
+      [data-panel="invoices"] .ap-tbl td:nth-child(4) { display: none; }
+      /* Stat grids in panels */
+      .feat-stat-grid { grid-template-columns: repeat(2,1fr) !important; padding: 0 12px 12px !important; gap: 7px !important; }
+      .stat-card { padding: 10px 11px; }
+      .stat-val { font-size: 16px; }
+      .stat-lbl { font-size: 9px; }
+      /* Invoice table card */
+      [data-panel="invoices"] .ap-card { margin: 0 12px 12px !important; }
+      /* Schedule panel */
+      .sp-hd { padding: 10px 12px; flex-wrap: wrap; gap: 6px; }
+      .sp-title { font-size: 13px; }
+      .sp-month-lbl { font-size: 10.5px; }
+      .sp-views { display: none; }
+      .sp-nav-btn { width: 20px; height: 20px; }
+      .sp-date-hd { padding: 5px 12px 4px; font-size: 9.5px; }
+      .sp-job-row { padding: 9px 12px; gap: 9px; }
+      .sp-job-stripe { height: 28px; }
+      .sp-job-name { font-size: 11.5px; }
+      .sp-job-meta { font-size: 9.5px; }
+      .sp-job-price { font-size: 11.5px; }
+      .sp-job-status { font-size: 9px; }
+      /* Finance panel */
+      .feat-fp-grid { grid-template-columns: 1fr !important; gap: 8px !important; padding: 0 12px 12px !important; }
+      .fp-recent-hd { padding: 9px 12px; }
+      .fp-recent-title { font-size: 12px; }
+      .fp-tx-row { padding: 8px 12px; gap: 9px; }
+      .fp-tx-icon { width: 26px; height: 26px; }
+      .fp-tx-name { font-size: 11.5px; }
+      .fp-tx-sub { font-size: 9.5px; }
+      .fp-tx-amt { font-size: 11.5px; }
+      .fp-svc-title { font-size: 10.5px; padding: 9px 10px 6px; }
+      .fp-svc-name { font-size: 10px; min-width: 64px; }
+      /* Estimates panel */
+      .estp-wrap { padding: 12px; }
+      .estp-card { padding: 12px; }
+      .estp-num { font-size: 12px; }
+      .estp-for { font-size: 10px; }
+      .estp-total-val { font-size: 17px; }
+      /* ap-tbl global */
+      .ap-tbl th { padding: 6px 10px; font-size: 9.5px; }
+      .ap-tbl td { padding: 8px 10px; font-size: 11.5px; }
+      .av28 { width: 24px; height: 24px; font-size: 9px; }
+      .cp-name-cell { gap: 7px; }
+      .inv-num { font-size: 11px; }
+
+      /* --- How it works --- */
+      .steps { grid-template-columns: 1fr; gap: 32px; }
       .steps::before { display: none; }
-      .testi-grid { grid-template-columns: 1fr; }
-      .price-card { padding: 36px 26px; }
-      .pain-grid { grid-template-columns: 1fr; }
-      .footer-grid { grid-template-columns: 1fr; }
-      .footer-bot { flex-direction: column; gap: 16px; text-align: center; }
+      .step { text-align: left; display: flex; align-items: flex-start; gap: 20px; }
+      .step-n { flex-shrink: 0; width: 52px; height: 52px; font-size: 18px; margin: 0; }
+      .step-title { font-size: 18px; margin-bottom: 8px; }
+      .step-desc { font-size: 13.5px; }
+
+      /* --- Pricing --- */
+      .price-card { padding: 32px 22px; }
+      .p-num { font-size: 58px; }
+      .price-name { font-size: 22px; }
+      .price-feats li { font-size: 13.5px; }
+
+      /* --- Testimonials --- */
+      .testi-grid { grid-template-columns: 1fr; gap: 16px; }
+      .t-text { font-size: 14.5px; }
+
+      /* --- Pain cards --- */
+      .pain-grid { grid-template-columns: 1fr; gap: 14px; }
+      .pain-card { padding: 26px 22px; }
+
+      /* --- CTA --- */
+      .cta-title { font-size: clamp(30px, 8.5vw, 48px); letter-spacing: -1px; }
+      .cta-sub { font-size: 15px; }
+      .cta-btns { flex-direction: column; align-items: stretch; gap: 10px; }
+      .btn-pill-dark { text-align: center; justify-content: center; font-size: 15px; padding: 15px 28px; }
+      .btn-ghost-light { text-align: center; justify-content: center; font-size: 14px; }
+
+      /* --- Footer --- */
+      .footer-grid { grid-template-columns: 1fr; gap: 36px; }
+      .footer-bot { flex-direction: column; gap: 14px; text-align: center; }
+      footer { padding: 64px 0 32px; }
+      .f-legal { flex-wrap: wrap; justify-content: center; }
+    }
+
+    /* extra small screens */
+    @media (max-width: 400px) {
+      .container { padding: 0 16px; }
+      .hero h1 { font-size: 34px; }
+      .mock-stats { grid-template-columns: repeat(2,1fr); }
     }
 
     /* ─── REPLACE STACK SECTION ─────────────────────────────── */
@@ -927,6 +1157,8 @@
       .rstack-div-line { width: 60px; height: 1px; }
       .fp-layout { grid-template-columns: 1fr; }
       .sp-views { display: none; }
+      .feat-win-body { grid-template-columns: 1fr; }
+      .feat-sb { display: none; }
     }
   </style>
 </head>
@@ -952,12 +1184,34 @@
           <a href="/signup" class="btn-pill">Start free trial →</a>
         </div>
 
-        <button class="hamburger" aria-label="Open menu">
-          <span></span><span></span><span></span>
-        </button>
+        <div class="nav-mobile-right">
+          <a href="/signup" class="btn-pill nav-mob-cta">Get started →</a>
+          <button class="hamburger" aria-label="Open menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
       </div>
     </div>
   </nav>
+
+  <!-- Mobile menu overlay -->
+  <div class="mob-menu" id="mob-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
+    <div class="mob-menu-hd">
+      <a href="/" class="nav-logo">MaidHub<span class="logo-mark"></span></a>
+      <button class="mob-menu-close" id="mob-menu-close" aria-label="Close menu">×</button>
+    </div>
+    <div class="mob-menu-body">
+      <ul class="mob-menu-links">
+        <li><a href="/features">Features</a></li>
+        <li><a href="/how-it-works">How it works</a></li>
+        <li><a href="/pricing">Pricing</a></li>
+      </ul>
+      <div class="mob-menu-cta">
+        <a href="/signup" class="btn-pill">Start free trial →</a>
+        <a href="/login" class="mob-menu-login">Log in</a>
+      </div>
+    </div>
+  </div>
 
 
   <!-- ───────────────────────────────────────────────────────────
@@ -1460,7 +1714,7 @@
                     </button>
                   </div>
                 </div>
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 18px 14px">
+                <div class="feat-stat-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 18px 14px">
                   <div class="stat-card"><div class="stat-lbl">This Month</div><div class="stat-val">$3,240</div></div>
                   <div class="stat-card"><div class="stat-lbl">Paid</div><div class="stat-val green">$2,740</div></div>
                   <div class="stat-card"><div class="stat-lbl">Unpaid</div><div class="stat-val amber">$500</div></div>
@@ -1594,13 +1848,13 @@
                     </div>
                   </div>
                 </div>
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 18px 14px">
+                <div class="feat-stat-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 18px 14px">
                   <div class="stat-card"><div class="stat-lbl">This Month</div><div class="stat-val">$3,240</div></div>
                   <div class="stat-card"><div class="stat-lbl">Paid</div><div class="stat-val green">$2,740</div></div>
                   <div class="stat-card"><div class="stat-lbl">Outstanding</div><div class="stat-val amber">$500</div></div>
                   <div class="stat-card"><div class="stat-lbl">Jobs Done</div><div class="stat-val">18</div></div>
                 </div>
-                <div class="fp-layout" style="padding:0 18px 18px">
+                <div class="fp-layout feat-fp-grid" style="padding:0 18px 18px">
                   <div class="ap-card">
                     <div class="fp-recent-hd">
                       <span class="fp-recent-title">Recent Invoices</span>
@@ -1936,11 +2190,36 @@
       });
     });
 
+    // Mobile menu
+    const mobMenu = document.getElementById('mob-menu');
+    const hamburger = document.querySelector('.hamburger');
+    const mobClose = document.getElementById('mob-menu-close');
+    function openMobMenu() {
+      mobMenu.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      hamburger.setAttribute('aria-expanded', 'true');
+    }
+    function closeMobMenu() {
+      mobMenu.classList.remove('open');
+      document.body.style.overflow = '';
+      hamburger.setAttribute('aria-expanded', 'false');
+    }
+    if (hamburger) hamburger.addEventListener('click', openMobMenu);
+    if (mobClose) mobClose.addEventListener('click', closeMobMenu);
+    // Close on backdrop click
+    mobMenu.addEventListener('click', e => { if (e.target === mobMenu) closeMobMenu(); });
+    // Close on escape
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobMenu(); });
+    // Close when a link is tapped
+    mobMenu.querySelectorAll('a').forEach(a => {
+      if (!a.href.includes('#')) a.addEventListener('click', closeMobMenu);
+    });
+
     // Smooth anchor scroll
     document.querySelectorAll('a[href^="#"]').forEach(a => {
       a.addEventListener('click', e => {
         const target = document.querySelector(a.getAttribute('href'));
-        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+        if (target) { e.preventDefault(); closeMobMenu(); target.scrollIntoView({ behavior: 'smooth' }); }
       });
     });
   </script>
