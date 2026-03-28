@@ -850,88 +850,7 @@
       .unified-box { padding: 24px 20px; border-radius: 18px; }
 
       /* --- Feature tabs --- */
-      .ftabs { padding: 72px 0; }
-      .ftabs-hd { margin-bottom: 36px; }
-      .tab-row {
-        flex-wrap: nowrap; overflow-x: auto;
-        margin-bottom: 16px; padding-bottom: 4px;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none; gap: 6px;
-      }
-      .tab-row::-webkit-scrollbar { display: none; }
-      .tab-btn { white-space: nowrap; flex-shrink: 0; font-size: 12.5px; padding: 8px 16px; }
-      .feat-win { border-radius: 14px; }
-      .feat-win-bar { padding: 10px 14px; }
-      .win-url { font-size: 10px; padding: 2px 8px; }
-      /* Hide sidebar in feature window */
-      .feat-sb { display: none; }
-      .feat-win-body { grid-template-columns: 1fr; min-height: auto; }
-      /* Panel internals */
-      .ap-pg { padding: 12px 12px; }
-      .ap-hd { flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-      .ap-title { font-size: 13.5px; }
-      .ap-sub { font-size: 10px; }
-      .ap-btn-blue { font-size: 10.5px; padding: 5px 10px; }
-      .ap-toolbar { padding: 7px 10px; gap: 6px; }
-      .ap-search-mock { font-size: 10.5px; padding: 4px 8px; }
-      .ap-filter-btn { font-size: 10.5px; padding: 4px 8px; }
-      /* Hide non-essential table columns in clients panel */
-      [data-panel="clients"] .ap-tbl th:nth-child(2),
-      [data-panel="clients"] .ap-tbl td:nth-child(2),
-      [data-panel="clients"] .ap-tbl th:nth-child(3),
-      [data-panel="clients"] .ap-tbl td:nth-child(3),
-      [data-panel="clients"] .ap-tbl th:nth-child(4),
-      [data-panel="clients"] .ap-tbl td:nth-child(4),
-      [data-panel="clients"] .ap-tbl th:nth-child(5),
-      [data-panel="clients"] .ap-tbl td:nth-child(5) { display: none; }
-      /* Hide non-essential invoice table columns */
-      [data-panel="invoices"] .ap-tbl th:nth-child(3),
-      [data-panel="invoices"] .ap-tbl td:nth-child(3),
-      [data-panel="invoices"] .ap-tbl th:nth-child(4),
-      [data-panel="invoices"] .ap-tbl td:nth-child(4) { display: none; }
-      /* Stat grids in panels */
-      .feat-stat-grid { grid-template-columns: repeat(2,1fr) !important; padding: 0 12px 12px !important; gap: 7px !important; }
-      .stat-card { padding: 10px 11px; }
-      .stat-val { font-size: 16px; }
-      .stat-lbl { font-size: 9px; }
-      /* Invoice table card */
-      [data-panel="invoices"] .ap-card { margin: 0 12px 12px !important; }
-      /* Schedule panel */
-      .sp-hd { padding: 10px 12px; flex-wrap: wrap; gap: 6px; }
-      .sp-title { font-size: 13px; }
-      .sp-month-lbl { font-size: 10.5px; }
-      .sp-views { display: none; }
-      .sp-nav-btn { width: 20px; height: 20px; }
-      .sp-date-hd { padding: 5px 12px 4px; font-size: 9.5px; }
-      .sp-job-row { padding: 9px 12px; gap: 9px; }
-      .sp-job-stripe { height: 28px; }
-      .sp-job-name { font-size: 11.5px; }
-      .sp-job-meta { font-size: 9.5px; }
-      .sp-job-price { font-size: 11.5px; }
-      .sp-job-status { font-size: 9px; }
-      /* Finance panel */
-      .feat-fp-grid { grid-template-columns: 1fr !important; gap: 8px !important; padding: 0 12px 12px !important; }
-      .fp-recent-hd { padding: 9px 12px; }
-      .fp-recent-title { font-size: 12px; }
-      .fp-tx-row { padding: 8px 12px; gap: 9px; }
-      .fp-tx-icon { width: 26px; height: 26px; }
-      .fp-tx-name { font-size: 11.5px; }
-      .fp-tx-sub { font-size: 9.5px; }
-      .fp-tx-amt { font-size: 11.5px; }
-      .fp-svc-title { font-size: 10.5px; padding: 9px 10px 6px; }
-      .fp-svc-name { font-size: 10px; min-width: 64px; }
-      /* Estimates panel */
-      .estp-wrap { padding: 12px; }
-      .estp-card { padding: 12px; }
-      .estp-num { font-size: 12px; }
-      .estp-for { font-size: 10px; }
-      .estp-total-val { font-size: 17px; }
-      /* ap-tbl global */
-      .ap-tbl th { padding: 6px 10px; font-size: 9.5px; }
-      .ap-tbl td { padding: 8px 10px; font-size: 11.5px; }
-      .av28 { width: 24px; height: 24px; font-size: 9px; }
-      .cp-name-cell { gap: 7px; }
-      .inv-num { font-size: 11px; }
+      /* Tab row, window chrome, sidebar handled in mobile panel CSS block above */
 
       /* --- How it works --- */
       .steps { grid-template-columns: 1fr; gap: 32px; }
@@ -1159,6 +1078,153 @@
       .sp-views { display: none; }
       .feat-win-body { grid-template-columns: 1fr; }
       .feat-sb { display: none; }
+    }
+
+    /* ─── MOBILE PANEL LAYOUTS ──────────────────────────────── */
+    /* Hidden by default — only show on mobile */
+    .panel-mobile { display: none; }
+
+    /* Shared mobile panel building blocks */
+    .mp-pg { display: flex; flex-direction: column; min-height: 400px; }
+    .mp-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 15px; border-bottom: 1px solid var(--app-border);
+    }
+    .mp-title { font-size: 14px; font-weight: 700; color: var(--app-text); letter-spacing: -.02em; }
+    .mp-sub { font-size: 10px; color: var(--app-muted); margin-top: 2px; }
+    .mp-btn {
+      background: var(--app-accent); color: #fff; border: none; border-radius: 7px;
+      padding: 6px 11px; font-size: 11px; font-weight: 600; cursor: default;
+      font-family: var(--font-b); display: inline-flex; align-items: center; gap: 4px;
+    }
+    .mp-search { padding: 9px 15px; border-bottom: 1px solid var(--app-divider); }
+    .mp-search-bar {
+      background: var(--app-raised); border: 1px solid var(--app-border);
+      border-radius: 8px; padding: 7px 12px; font-size: 11.5px;
+      color: var(--app-faint); width: 100%; font-family: var(--font-b);
+    }
+
+    /* Mobile list rows (clients, invoices, finances) */
+    .mp-row {
+      display: flex; align-items: center; gap: 11px;
+      padding: 11px 15px; border-bottom: 1px solid var(--app-divider);
+    }
+    .mp-row:last-child { border-bottom: none; }
+    .mp-row-info { flex: 1; min-width: 0; }
+    .mp-row-name { font-size: 12.5px; font-weight: 600; color: var(--app-text); }
+    .mp-row-sub { font-size: 10.5px; color: var(--app-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mp-row-right { text-align: right; flex-shrink: 0; }
+    .mp-row-val { font-size: 12.5px; font-weight: 700; color: var(--app-text); }
+
+    /* Mobile 2×2 stat grid */
+    .mp-stats {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      padding: 12px 15px 0;
+    }
+    .mp-stat {
+      background: var(--app-raised); border: 1px solid var(--app-border);
+      border-radius: 8px; padding: 10px 12px;
+    }
+    .mp-stat-lbl {
+      font-size: 9.5px; font-weight: 600; color: var(--app-muted);
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px;
+      font-family: var(--font-b);
+    }
+    .mp-stat-val { font-size: 18px; font-weight: 700; color: var(--app-text); letter-spacing: -.03em; }
+    .mp-stat-val.green { color: #34C759; }
+    .mp-stat-val.amber { color: #FF9F0A; }
+    .mp-stat-val.red   { color: #F87171; }
+
+    /* Mobile section date headers */
+    .mp-section-hd {
+      padding: 6px 15px 5px; font-size: 9.5px; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase; color: var(--app-faint);
+      border-bottom: 1px solid var(--app-divider);
+      background: rgba(255,255,255,.015);
+    }
+    .mp-section-hd.today { color: var(--app-accent); }
+
+    /* Mobile schedule rows */
+    .mp-sched-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 15px; border-bottom: 1px solid var(--app-divider);
+    }
+    .mp-sched-row:last-child { border-bottom: none; }
+    .mp-sched-stripe { width: 3px; min-height: 34px; align-self: stretch; border-radius: 2px; flex-shrink: 0; }
+    .mp-sched-info { flex: 1; min-width: 0; }
+    .mp-sched-name { font-size: 12.5px; font-weight: 600; color: var(--app-text); }
+    .mp-sched-meta { font-size: 10.5px; color: var(--app-muted); margin-top: 2px; }
+    .mp-sched-right { text-align: right; flex-shrink: 0; }
+    .mp-sched-price { font-size: 12.5px; font-weight: 700; color: var(--app-text); }
+    .mp-sched-price.done { color: #34C759; }
+    .mp-sched-status { font-size: 9.5px; font-weight: 600; margin-top: 2px; display: block; }
+
+    /* Mobile estimate cards */
+    .mp-est-card {
+      background: var(--app-raised); border: 1px solid var(--app-border);
+      border-radius: 10px; margin: 10px 14px; padding: 13px;
+    }
+    .mp-est-hd { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+    .mp-est-num { font-size: 12.5px; font-weight: 700; color: var(--app-text); }
+    .mp-est-for { font-size: 10.5px; color: var(--app-muted); margin-top: 2px; }
+    .mp-est-items { margin-bottom: 10px; display: flex; flex-direction: column; gap: 5px; }
+    .mp-est-item { display: flex; justify-content: space-between; align-items: center; }
+    .mp-est-item-name { font-size: 11.5px; color: var(--app-muted); }
+    .mp-est-item-price { font-size: 11.5px; font-weight: 600; color: var(--app-text); }
+    .mp-est-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 8px; border-top: 1px solid var(--app-divider);
+    }
+    .mp-est-total-lbl { font-size: 11px; color: var(--app-muted); }
+    .mp-est-total-val { font-size: 18px; font-weight: 700; color: var(--app-text); letter-spacing: -.02em; }
+    .mp-est-acts { display: flex; gap: 6px; margin-top: 10px; }
+    .mp-est-btn-sec {
+      flex: 1; padding: 8px; background: var(--app-surface); border: 1px solid var(--app-border);
+      border-radius: 6px; font-family: var(--font-b); font-size: 11px; color: var(--app-muted);
+      cursor: default; text-align: center;
+    }
+    .mp-est-btn-pri {
+      flex: 2; padding: 8px; background: var(--app-accent); border: none; border-radius: 6px;
+      font-family: var(--font-b); font-size: 11px; font-weight: 700; color: #fff; cursor: default; text-align: center;
+    }
+
+    /* Mobile finances */
+    .mp-svc-section { padding: 10px 15px 14px; }
+    .mp-svc-hd { font-size: 11.5px; font-weight: 700; color: var(--app-text); margin-bottom: 9px; }
+    .mp-svc-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+    .mp-svc-name { font-size: 11px; color: var(--app-muted); min-width: 72px; }
+    .mp-svc-bar-wrap { flex: 1; height: 4px; background: rgba(255,255,255,.07); border-radius: 2px; }
+    .mp-svc-bar { height: 4px; background: var(--app-accent); border-radius: 2px; }
+    .mp-svc-count { font-size: 10.5px; font-weight: 600; color: var(--app-muted); min-width: 16px; text-align: right; }
+
+    /* ─── MOBILE SHOW/HIDE ───────────────────────────────────── */
+    @media (max-width: 768px) {
+      /* Swap desktop↔mobile panel content */
+      .panel-desktop { display: none !important; }
+      .panel-mobile  { display: block !important; }
+
+      /* Feature window chrome */
+      .feat-win { border-radius: 16px; box-shadow: 0 20px 56px rgba(12,27,42,.28); }
+      .feat-win-bar { padding: 8px 12px; gap: 6px; }
+      .win-dot { width: 9px; height: 9px; }
+      .win-url { font-size: 10px; padding: 2px 8px; }
+      /* Hide sidebar — panels are full-width */
+      .feat-sb { display: none !important; }
+      .feat-win-body { grid-template-columns: 1fr !important; min-height: auto; }
+
+      /* Tab row */
+      .tab-row {
+        flex-wrap: nowrap; overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; gap: 6px;
+        padding-bottom: 2px; margin-bottom: 14px;
+      }
+      .tab-row::-webkit-scrollbar { display: none; }
+      .tab-btn { white-space: nowrap; flex-shrink: 0; font-size: 12px; padding: 7px 14px; }
+
+      /* Feature section */
+      .ftabs { padding: 56px 0; }
+      .ftabs-hd { margin-bottom: 28px; }
     }
   </style>
 </head>
@@ -1545,394 +1611,791 @@
 
             <!-- CLIENTS PANEL -->
             <div class="fpanel active" data-panel="clients">
-              <div class="ap-pg" style="min-height:480px">
-                <div class="ap-hd">
-                  <div>
-                    <div class="ap-title">Clients</div>
-                    <div class="ap-sub">12 clients total</div>
-                  </div>
-                  <button class="ap-btn-blue">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Add Client
-                  </button>
-                </div>
-                <div class="ap-card">
-                  <div class="ap-toolbar">
-                    <div class="ap-search-mock">Search clients...</div>
-                    <div class="ap-filter-btn">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-                      Filter
+
+              <!-- Desktop layout -->
+              <div class="panel-desktop">
+                <div class="ap-pg" style="min-height:480px">
+                  <div class="ap-hd">
+                    <div>
+                      <div class="ap-title">Clients</div>
+                      <div class="ap-sub">12 clients total</div>
                     </div>
+                    <button class="ap-btn-blue">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      Add Client
+                    </button>
                   </div>
-                  <table class="ap-tbl">
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Address</th>
-                        <th>Jobs</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td><div class="cp-name-cell"><span class="av28 av-blue">SJ</span><span style="font-weight:600">Sarah Johnson</span></div></td>
-                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> sarah.j@email.com</div></td>
-                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> (512) 555-0142</div></td>
-                        <td style="color:#888;font-size:12px">123 Oak St, Austin TX</td>
-                        <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#252525;color:#D4D4D4;font-size:10px;font-weight:700">18</span></td>
-                        <td><span class="badge badge-active">Active</span></td>
-                      </tr>
-                      <tr>
-                        <td><div class="cp-name-cell"><span class="av28 av-purple">MC</span><span style="font-weight:600">Mike &amp; Lisa Chen</span></div></td>
-                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> mchen@email.com</div></td>
-                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> (512) 555-0891</div></td>
-                        <td style="color:#888;font-size:12px">47 Maple Ave, Austin TX</td>
-                        <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#252525;color:#D4D4D4;font-size:10px;font-weight:700">31</span></td>
-                        <td><span class="badge badge-active">Active</span></td>
-                      </tr>
-                      <tr>
-                        <td><div class="cp-name-cell"><span class="av28 av-orange">AT</span><span style="font-weight:600">Ana Torres</span></div></td>
-                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> a.torres@email.com</div></td>
-                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> (512) 555-0334</div></td>
-                        <td style="color:#888;font-size:12px">891 Cedar Rd, Austin TX</td>
-                        <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#252525;color:#D4D4D4;font-size:10px;font-weight:700">9</span></td>
-                        <td><span class="badge badge-active">Active</span></td>
-                      </tr>
-                      <tr>
-                        <td><div class="cp-name-cell"><span class="av28 av-rose">RK</span><span style="font-weight:600">Robert Kim</span></div></td>
-                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> rob.kim@email.com</div></td>
-                        <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> (512) 555-0567</div></td>
-                        <td style="color:#888;font-size:12px">892 Pine Rd, Unit 5B</td>
-                        <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#252525;color:#D4D4D4;font-size:10px;font-weight:700">14</span></td>
-                        <td><span class="badge badge-archived">Archived</span></td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <div class="ap-card">
+                    <div class="ap-toolbar">
+                      <div class="ap-search-mock">Search clients...</div>
+                      <div class="ap-filter-btn">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                        Filter
+                      </div>
+                    </div>
+                    <table class="ap-tbl">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Phone</th>
+                          <th>Address</th>
+                          <th>Jobs</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><div class="cp-name-cell"><span class="av28 av-blue">SJ</span><span style="font-weight:600">Sarah Johnson</span></div></td>
+                          <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> sarah.j@email.com</div></td>
+                          <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> (512) 555-0142</div></td>
+                          <td style="color:#888;font-size:12px">123 Oak St, Austin TX</td>
+                          <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#252525;color:#D4D4D4;font-size:10px;font-weight:700">18</span></td>
+                          <td><span class="badge badge-active">Active</span></td>
+                        </tr>
+                        <tr>
+                          <td><div class="cp-name-cell"><span class="av28 av-purple">MC</span><span style="font-weight:600">Mike &amp; Lisa Chen</span></div></td>
+                          <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> mchen@email.com</div></td>
+                          <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> (512) 555-0891</div></td>
+                          <td style="color:#888;font-size:12px">47 Maple Ave, Austin TX</td>
+                          <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#252525;color:#D4D4D4;font-size:10px;font-weight:700">31</span></td>
+                          <td><span class="badge badge-active">Active</span></td>
+                        </tr>
+                        <tr>
+                          <td><div class="cp-name-cell"><span class="av28 av-orange">AT</span><span style="font-weight:600">Ana Torres</span></div></td>
+                          <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> a.torres@email.com</div></td>
+                          <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> (512) 555-0334</div></td>
+                          <td style="color:#888;font-size:12px">891 Cedar Rd, Austin TX</td>
+                          <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#252525;color:#D4D4D4;font-size:10px;font-weight:700">9</span></td>
+                          <td><span class="badge badge-active">Active</span></td>
+                        </tr>
+                        <tr>
+                          <td><div class="cp-name-cell"><span class="av28 av-rose">RK</span><span style="font-weight:600">Robert Kim</span></div></td>
+                          <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> rob.kim@email.com</div></td>
+                          <td><div class="cp-icon-cell"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> (512) 555-0567</div></td>
+                          <td style="color:#888;font-size:12px">892 Pine Rd, Unit 5B</td>
+                          <td><span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#252525;color:#D4D4D4;font-size:10px;font-weight:700">14</span></td>
+                          <td><span class="badge badge-archived">Archived</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
+
+              <!-- Mobile layout -->
+              <div class="panel-mobile">
+                <div class="mp-pg">
+                  <div class="mp-hd">
+                    <div>
+                      <div class="mp-title">Clients</div>
+                      <div class="mp-sub">12 clients total</div>
+                    </div>
+                    <div class="mp-btn">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      Add Client
+                    </div>
+                  </div>
+                  <div class="mp-search">
+                    <div class="mp-search-bar">Search clients...</div>
+                  </div>
+                  <div class="mp-row">
+                    <span class="av28 av-blue">SJ</span>
+                    <div class="mp-row-info">
+                      <div class="mp-row-name">Sarah Johnson</div>
+                      <div class="mp-row-sub">123 Oak St · 18 jobs</div>
+                    </div>
+                    <div class="mp-row-right">
+                      <span class="badge badge-active">Active</span>
+                    </div>
+                  </div>
+                  <div class="mp-row">
+                    <span class="av28 av-purple">MC</span>
+                    <div class="mp-row-info">
+                      <div class="mp-row-name">Mike &amp; Lisa Chen</div>
+                      <div class="mp-row-sub">47 Maple Ave · 31 jobs</div>
+                    </div>
+                    <div class="mp-row-right">
+                      <span class="badge badge-active">Active</span>
+                    </div>
+                  </div>
+                  <div class="mp-row">
+                    <span class="av28 av-orange">AT</span>
+                    <div class="mp-row-info">
+                      <div class="mp-row-name">Ana Torres</div>
+                      <div class="mp-row-sub">891 Cedar Rd · 9 jobs</div>
+                    </div>
+                    <div class="mp-row-right">
+                      <span class="badge badge-active">Active</span>
+                    </div>
+                  </div>
+                  <div class="mp-row">
+                    <span class="av28 av-rose">RK</span>
+                    <div class="mp-row-info">
+                      <div class="mp-row-name">Robert Kim</div>
+                      <div class="mp-row-sub">892 Pine Rd · 14 jobs</div>
+                    </div>
+                    <div class="mp-row-right">
+                      <span class="badge badge-archived">Archived</span>
+                    </div>
+                  </div>
+                  <div class="mp-row" style="justify-content:center;padding:12px 15px;">
+                    <span style="font-size:11px;color:var(--app-faint)">+ 8 more clients</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             <!-- SCHEDULE PANEL -->
             <div class="fpanel" data-panel="schedule">
-              <div class="sp-wrap">
-                <div class="sp-hd">
-                  <span class="sp-title">Schedule</span>
-                  <div class="sp-nav">
-                    <div class="sp-nav-btn">‹</div>
-                    <span class="sp-month-lbl">Mar 24–30, 2026</span>
-                    <div class="sp-nav-btn">›</div>
+
+              <!-- Desktop layout -->
+              <div class="panel-desktop">
+                <div class="sp-wrap">
+                  <div class="sp-hd">
+                    <span class="sp-title">Schedule</span>
+                    <div class="sp-nav">
+                      <div class="sp-nav-btn">‹</div>
+                      <span class="sp-month-lbl">Mar 24–30, 2026</span>
+                      <div class="sp-nav-btn">›</div>
+                    </div>
+                    <div class="sp-views">
+                      <span class="sp-view-btn active">Week</span>
+                      <span class="sp-view-btn">Day</span>
+                      <span class="sp-view-btn">List</span>
+                      <span class="sp-view-btn">Month</span>
+                    </div>
+                    <button class="ap-btn-blue" style="margin-left:auto">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      Add Job
+                    </button>
                   </div>
-                  <div class="sp-views">
-                    <span class="sp-view-btn active">Week</span>
-                    <span class="sp-view-btn">Day</span>
-                    <span class="sp-view-btn">List</span>
-                    <span class="sp-view-btn">Month</span>
-                  </div>
-                  <button class="ap-btn-blue" style="margin-left:auto">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Add Job
-                  </button>
-                </div>
-                <div class="sp-body">
-                  <div class="sp-date-hd today">Monday · March 24, 2026</div>
-                  <div class="sp-job-row">
-                    <div class="sp-job-stripe stripe-green"></div>
-                    <div class="sp-job-info">
-                      <div class="sp-job-name">Sarah Johnson</div>
-                      <div class="sp-job-meta">8:00 AM – 10:00 AM · Deep Clean · 123 Oak St</div>
+                  <div class="sp-body">
+                    <div class="sp-date-hd today">Monday · March 24, 2026</div>
+                    <div class="sp-job-row">
+                      <div class="sp-job-stripe stripe-green"></div>
+                      <div class="sp-job-info">
+                        <div class="sp-job-name">Sarah Johnson</div>
+                        <div class="sp-job-meta">8:00 AM – 10:00 AM · Deep Clean · 123 Oak St</div>
+                      </div>
+                      <div class="sp-job-right">
+                        <div class="sp-job-price done">$140</div>
+                        <span class="sp-job-status text-green-s">Completed</span>
+                      </div>
                     </div>
-                    <div class="sp-job-right">
-                      <div class="sp-job-price done">$140</div>
-                      <span class="sp-job-status text-green-s">Completed</span>
+                    <div class="sp-date-hd">Tuesday · March 25, 2026</div>
+                    <div class="sp-job-row">
+                      <div class="sp-job-stripe stripe-green"></div>
+                      <div class="sp-job-info">
+                        <div class="sp-job-name">Robert Kim</div>
+                        <div class="sp-job-meta">8:00 AM – 9:30 AM · Standard · 892 Pine Rd</div>
+                      </div>
+                      <div class="sp-job-right">
+                        <div class="sp-job-price done">$165</div>
+                        <span class="sp-job-status text-green-s">Completed</span>
+                      </div>
                     </div>
-                  </div>
-                  <div class="sp-date-hd">Tuesday · March 25, 2026</div>
-                  <div class="sp-job-row">
-                    <div class="sp-job-stripe stripe-green"></div>
-                    <div class="sp-job-info">
-                      <div class="sp-job-name">Robert Kim</div>
-                      <div class="sp-job-meta">8:00 AM – 9:30 AM · Standard · 892 Pine Rd</div>
+                    <div class="sp-job-row">
+                      <div class="sp-job-stripe stripe-orange"></div>
+                      <div class="sp-job-info">
+                        <div class="sp-job-name">David Park</div>
+                        <div class="sp-job-meta">1:30 PM – 3:30 PM · Standard · 789 Cedar Ln</div>
+                      </div>
+                      <div class="sp-job-right">
+                        <div class="sp-job-price">$155</div>
+                        <span class="sp-job-status text-orange-s">In Progress</span>
+                      </div>
                     </div>
-                    <div class="sp-job-right">
-                      <div class="sp-job-price done">$165</div>
-                      <span class="sp-job-status text-green-s">Completed</span>
+                    <div class="sp-date-hd">Thursday · March 27, 2026</div>
+                    <div class="sp-job-row">
+                      <div class="sp-job-stripe stripe-blue"></div>
+                      <div class="sp-job-info">
+                        <div class="sp-job-name">Ana Torres</div>
+                        <div class="sp-job-meta">10:00 AM – 12:00 PM · Standard · 891 Cedar Rd</div>
+                      </div>
+                      <div class="sp-job-right">
+                        <div class="sp-job-price">$180</div>
+                        <span class="sp-job-status text-blue-s">Scheduled</span>
+                      </div>
                     </div>
-                  </div>
-                  <div class="sp-job-row">
-                    <div class="sp-job-stripe stripe-orange"></div>
-                    <div class="sp-job-info">
-                      <div class="sp-job-name">David Park</div>
-                      <div class="sp-job-meta">1:30 PM – 3:30 PM · Standard · 789 Cedar Ln</div>
-                    </div>
-                    <div class="sp-job-right">
-                      <div class="sp-job-price">$155</div>
-                      <span class="sp-job-status text-orange-s">In Progress</span>
-                    </div>
-                  </div>
-                  <div class="sp-date-hd">Thursday · March 27, 2026</div>
-                  <div class="sp-job-row">
-                    <div class="sp-job-stripe stripe-blue"></div>
-                    <div class="sp-job-info">
-                      <div class="sp-job-name">Ana Torres</div>
-                      <div class="sp-job-meta">10:00 AM – 12:00 PM · Standard · 891 Cedar Rd</div>
-                    </div>
-                    <div class="sp-job-right">
-                      <div class="sp-job-price">$180</div>
-                      <span class="sp-job-status text-blue-s">Scheduled</span>
-                    </div>
-                  </div>
-                  <div class="sp-date-hd">Friday · March 28, 2026</div>
-                  <div class="sp-job-row">
-                    <div class="sp-job-stripe stripe-blue"></div>
-                    <div class="sp-job-info">
-                      <div class="sp-job-name">Mike &amp; Lisa Chen</div>
-                      <div class="sp-job-meta">1:00 PM – 3:00 PM · Deep Clean · 47 Maple Ave</div>
-                    </div>
-                    <div class="sp-job-right">
-                      <div class="sp-job-price">$200</div>
-                      <span class="sp-job-status text-blue-s">Scheduled</span>
+                    <div class="sp-date-hd">Friday · March 28, 2026</div>
+                    <div class="sp-job-row">
+                      <div class="sp-job-stripe stripe-blue"></div>
+                      <div class="sp-job-info">
+                        <div class="sp-job-name">Mike &amp; Lisa Chen</div>
+                        <div class="sp-job-meta">1:00 PM – 3:00 PM · Deep Clean · 47 Maple Ave</div>
+                      </div>
+                      <div class="sp-job-right">
+                        <div class="sp-job-price">$200</div>
+                        <span class="sp-job-status text-blue-s">Scheduled</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              <!-- Mobile layout -->
+              <div class="panel-mobile">
+                <div class="mp-pg">
+                  <div class="mp-hd">
+                    <div>
+                      <div class="mp-title">Schedule</div>
+                      <div class="mp-sub">Mar 24–30, 2026</div>
+                    </div>
+                    <div class="mp-btn">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      Add Job
+                    </div>
+                  </div>
+                  <div class="mp-section-hd today">Mon · March 24</div>
+                  <div class="mp-sched-row">
+                    <div class="mp-sched-stripe stripe-green"></div>
+                    <div class="mp-sched-info">
+                      <div class="mp-sched-name">Sarah Johnson</div>
+                      <div class="mp-sched-meta">8:00 – 10:00 AM · Deep Clean</div>
+                    </div>
+                    <div class="mp-sched-right">
+                      <div class="mp-sched-price done">$140</div>
+                      <span class="mp-sched-status text-green-s">Completed</span>
+                    </div>
+                  </div>
+                  <div class="mp-section-hd">Tue · March 25</div>
+                  <div class="mp-sched-row">
+                    <div class="mp-sched-stripe stripe-green"></div>
+                    <div class="mp-sched-info">
+                      <div class="mp-sched-name">Robert Kim</div>
+                      <div class="mp-sched-meta">8:00 – 9:30 AM · Standard</div>
+                    </div>
+                    <div class="mp-sched-right">
+                      <div class="mp-sched-price done">$165</div>
+                      <span class="mp-sched-status text-green-s">Completed</span>
+                    </div>
+                  </div>
+                  <div class="mp-sched-row">
+                    <div class="mp-sched-stripe stripe-orange"></div>
+                    <div class="mp-sched-info">
+                      <div class="mp-sched-name">David Park</div>
+                      <div class="mp-sched-meta">1:30 – 3:30 PM · Standard</div>
+                    </div>
+                    <div class="mp-sched-right">
+                      <div class="mp-sched-price">$155</div>
+                      <span class="mp-sched-status text-orange-s">In Progress</span>
+                    </div>
+                  </div>
+                  <div class="mp-section-hd">Thu · March 27</div>
+                  <div class="mp-sched-row">
+                    <div class="mp-sched-stripe stripe-blue"></div>
+                    <div class="mp-sched-info">
+                      <div class="mp-sched-name">Ana Torres</div>
+                      <div class="mp-sched-meta">10:00 AM – 12:00 PM · Standard</div>
+                    </div>
+                    <div class="mp-sched-right">
+                      <div class="mp-sched-price">$180</div>
+                      <span class="mp-sched-status text-blue-s">Scheduled</span>
+                    </div>
+                  </div>
+                  <div class="mp-section-hd">Fri · March 28</div>
+                  <div class="mp-sched-row">
+                    <div class="mp-sched-stripe stripe-blue"></div>
+                    <div class="mp-sched-info">
+                      <div class="mp-sched-name">Mike &amp; Lisa Chen</div>
+                      <div class="mp-sched-meta">1:00 – 3:00 PM · Deep Clean</div>
+                    </div>
+                    <div class="mp-sched-right">
+                      <div class="mp-sched-price">$200</div>
+                      <span class="mp-sched-status text-blue-s">Scheduled</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             <!-- INVOICES PANEL -->
             <div class="fpanel" data-panel="invoices">
-              <div class="ip-wrap">
-                <div class="ap-pg" style="padding-bottom:0">
-                  <div class="ap-hd">
-                    <div>
-                      <div class="ap-title">Invoices</div>
-                      <div class="ap-sub">Track billing and payments</div>
-                    </div>
-                    <button class="ap-btn-blue">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                      New Invoice
-                    </button>
-                  </div>
-                </div>
-                <div class="feat-stat-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 18px 14px">
-                  <div class="stat-card"><div class="stat-lbl">This Month</div><div class="stat-val">$3,240</div></div>
-                  <div class="stat-card"><div class="stat-lbl">Paid</div><div class="stat-val green">$2,740</div></div>
-                  <div class="stat-card"><div class="stat-lbl">Unpaid</div><div class="stat-val amber">$500</div></div>
-                  <div class="stat-card"><div class="stat-lbl">Overdue</div><div class="stat-val" style="color:#F87171">$180</div></div>
-                </div>
-                <div class="ap-card" style="margin:0 18px 18px">
-                  <div class="ap-toolbar">
-                    <div class="ap-search-mock">Search invoices...</div>
-                    <div class="ap-filter-btn">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
-                      All Status
+
+              <!-- Desktop layout -->
+              <div class="panel-desktop">
+                <div class="ip-wrap">
+                  <div class="ap-pg" style="padding-bottom:0">
+                    <div class="ap-hd">
+                      <div>
+                        <div class="ap-title">Invoices</div>
+                        <div class="ap-sub">Track billing and payments</div>
+                      </div>
+                      <button class="ap-btn-blue">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        New Invoice
+                      </button>
                     </div>
                   </div>
-                  <table class="ap-tbl">
-                    <thead>
-                      <tr><th>#</th><th>Client</th><th>Date</th><th>Due</th><th>Amount</th><th>Status</th></tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td><span class="inv-num">INV-047</span></td>
-                        <td><div class="cp-name-cell"><span class="av28 av-blue">SJ</span>Sarah Johnson</div></td>
-                        <td style="color:#888;font-size:12px">Mar 27</td>
-                        <td style="color:#888;font-size:12px">Apr 6</td>
-                        <td style="font-weight:700">$140</td>
-                        <td><span class="badge badge-paid">Paid</span></td>
-                      </tr>
-                      <tr>
-                        <td><span class="inv-num">INV-046</span></td>
-                        <td><div class="cp-name-cell"><span class="av28 av-purple">MC</span>Mike &amp; Lisa Chen</div></td>
-                        <td style="color:#888;font-size:12px">Mar 24</td>
-                        <td style="color:#888;font-size:12px">Apr 3</td>
-                        <td style="font-weight:700">$200</td>
-                        <td><span class="badge badge-paid">Paid</span></td>
-                      </tr>
-                      <tr>
-                        <td><span class="inv-num">INV-045</span></td>
-                        <td><div class="cp-name-cell"><span class="av28 av-rose">RK</span>Robert Kim</div></td>
-                        <td style="color:#888;font-size:12px">Mar 19</td>
-                        <td style="color:#888;font-size:12px">Mar 29</td>
-                        <td style="font-weight:700">$165</td>
-                        <td><span class="badge badge-unpaid">Unpaid</span></td>
-                      </tr>
-                      <tr>
-                        <td><span class="inv-num">INV-044</span></td>
-                        <td><div class="cp-name-cell"><span class="av28 av-orange">AT</span>Ana Torres</div></td>
-                        <td style="color:#888;font-size:12px">Mar 17</td>
-                        <td style="color:#888;font-size:12px">Mar 27</td>
-                        <td style="font-weight:700">$180</td>
-                        <td><span class="badge" style="background:rgba(248,113,113,.1);color:#F87171;border-color:rgba(248,113,113,.25)">Overdue</span></td>
-                      </tr>
-                      <tr>
-                        <td><span class="inv-num">INV-043</span></td>
-                        <td><div class="cp-name-cell"><span class="av28 av-blue">DP</span>David Park</div></td>
-                        <td style="color:#888;font-size:12px">Mar 12</td>
-                        <td style="color:#888;font-size:12px">Mar 22</td>
-                        <td style="font-weight:700">$155</td>
-                        <td><span class="badge badge-paid">Paid</span></td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <div class="feat-stat-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 18px 14px">
+                    <div class="stat-card"><div class="stat-lbl">This Month</div><div class="stat-val">$3,240</div></div>
+                    <div class="stat-card"><div class="stat-lbl">Paid</div><div class="stat-val green">$2,740</div></div>
+                    <div class="stat-card"><div class="stat-lbl">Unpaid</div><div class="stat-val amber">$500</div></div>
+                    <div class="stat-card"><div class="stat-lbl">Overdue</div><div class="stat-val" style="color:#F87171">$180</div></div>
+                  </div>
+                  <div class="ap-card" style="margin:0 18px 18px">
+                    <div class="ap-toolbar">
+                      <div class="ap-search-mock">Search invoices...</div>
+                      <div class="ap-filter-btn">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                        All Status
+                      </div>
+                    </div>
+                    <table class="ap-tbl">
+                      <thead>
+                        <tr><th>#</th><th>Client</th><th>Date</th><th>Due</th><th>Amount</th><th>Status</th></tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><span class="inv-num">INV-047</span></td>
+                          <td><div class="cp-name-cell"><span class="av28 av-blue">SJ</span>Sarah Johnson</div></td>
+                          <td style="color:#888;font-size:12px">Mar 27</td>
+                          <td style="color:#888;font-size:12px">Apr 6</td>
+                          <td style="font-weight:700">$140</td>
+                          <td><span class="badge badge-paid">Paid</span></td>
+                        </tr>
+                        <tr>
+                          <td><span class="inv-num">INV-046</span></td>
+                          <td><div class="cp-name-cell"><span class="av28 av-purple">MC</span>Mike &amp; Lisa Chen</div></td>
+                          <td style="color:#888;font-size:12px">Mar 24</td>
+                          <td style="color:#888;font-size:12px">Apr 3</td>
+                          <td style="font-weight:700">$200</td>
+                          <td><span class="badge badge-paid">Paid</span></td>
+                        </tr>
+                        <tr>
+                          <td><span class="inv-num">INV-045</span></td>
+                          <td><div class="cp-name-cell"><span class="av28 av-rose">RK</span>Robert Kim</div></td>
+                          <td style="color:#888;font-size:12px">Mar 19</td>
+                          <td style="color:#888;font-size:12px">Mar 29</td>
+                          <td style="font-weight:700">$165</td>
+                          <td><span class="badge badge-unpaid">Unpaid</span></td>
+                        </tr>
+                        <tr>
+                          <td><span class="inv-num">INV-044</span></td>
+                          <td><div class="cp-name-cell"><span class="av28 av-orange">AT</span>Ana Torres</div></td>
+                          <td style="color:#888;font-size:12px">Mar 17</td>
+                          <td style="color:#888;font-size:12px">Mar 27</td>
+                          <td style="font-weight:700">$180</td>
+                          <td><span class="badge" style="background:rgba(248,113,113,.1);color:#F87171;border-color:rgba(248,113,113,.25)">Overdue</span></td>
+                        </tr>
+                        <tr>
+                          <td><span class="inv-num">INV-043</span></td>
+                          <td><div class="cp-name-cell"><span class="av28 av-blue">DP</span>David Park</div></td>
+                          <td style="color:#888;font-size:12px">Mar 12</td>
+                          <td style="color:#888;font-size:12px">Mar 22</td>
+                          <td style="font-weight:700">$155</td>
+                          <td><span class="badge badge-paid">Paid</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
+
+              <!-- Mobile layout -->
+              <div class="panel-mobile">
+                <div class="mp-pg">
+                  <div class="mp-hd">
+                    <div>
+                      <div class="mp-title">Invoices</div>
+                      <div class="mp-sub">Track billing and payments</div>
+                    </div>
+                    <div class="mp-btn">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      New Invoice
+                    </div>
+                  </div>
+                  <div class="mp-stats">
+                    <div class="mp-stat"><div class="mp-stat-lbl">This Month</div><div class="mp-stat-val">$3,240</div></div>
+                    <div class="mp-stat"><div class="mp-stat-lbl">Paid</div><div class="mp-stat-val green">$2,740</div></div>
+                    <div class="mp-stat"><div class="mp-stat-lbl">Unpaid</div><div class="mp-stat-val amber">$500</div></div>
+                    <div class="mp-stat"><div class="mp-stat-lbl">Overdue</div><div class="mp-stat-val red">$180</div></div>
+                  </div>
+                  <div class="mp-search" style="margin-top:12px">
+                    <div class="mp-search-bar">Search invoices...</div>
+                  </div>
+                  <div class="mp-row">
+                    <span class="av28 av-blue">SJ</span>
+                    <div class="mp-row-info">
+                      <div class="mp-row-name">Sarah Johnson</div>
+                      <div class="mp-row-sub">INV-047 · Mar 27 → Apr 6</div>
+                    </div>
+                    <div class="mp-row-right">
+                      <div class="mp-row-val">$140</div>
+                      <span class="badge badge-paid" style="font-size:9.5px;margin-top:3px;display:block">Paid</span>
+                    </div>
+                  </div>
+                  <div class="mp-row">
+                    <span class="av28 av-purple">MC</span>
+                    <div class="mp-row-info">
+                      <div class="mp-row-name">Mike &amp; Lisa Chen</div>
+                      <div class="mp-row-sub">INV-046 · Mar 24 → Apr 3</div>
+                    </div>
+                    <div class="mp-row-right">
+                      <div class="mp-row-val">$200</div>
+                      <span class="badge badge-paid" style="font-size:9.5px;margin-top:3px;display:block">Paid</span>
+                    </div>
+                  </div>
+                  <div class="mp-row">
+                    <span class="av28 av-rose">RK</span>
+                    <div class="mp-row-info">
+                      <div class="mp-row-name">Robert Kim</div>
+                      <div class="mp-row-sub">INV-045 · Mar 19 → Mar 29</div>
+                    </div>
+                    <div class="mp-row-right">
+                      <div class="mp-row-val">$165</div>
+                      <span class="badge badge-unpaid" style="font-size:9.5px;margin-top:3px;display:block">Unpaid</span>
+                    </div>
+                  </div>
+                  <div class="mp-row">
+                    <span class="av28 av-orange">AT</span>
+                    <div class="mp-row-info">
+                      <div class="mp-row-name">Ana Torres</div>
+                      <div class="mp-row-sub">INV-044 · Mar 17 → Mar 27</div>
+                    </div>
+                    <div class="mp-row-right">
+                      <div class="mp-row-val">$180</div>
+                      <span class="badge" style="font-size:9.5px;margin-top:3px;display:block;background:rgba(248,113,113,.1);color:#F87171;border-color:rgba(248,113,113,.25)">Overdue</span>
+                    </div>
+                  </div>
+                  <div class="mp-row">
+                    <span class="av28 av-blue">DP</span>
+                    <div class="mp-row-info">
+                      <div class="mp-row-name">David Park</div>
+                      <div class="mp-row-sub">INV-043 · Mar 12 → Mar 22</div>
+                    </div>
+                    <div class="mp-row-right">
+                      <div class="mp-row-val">$155</div>
+                      <span class="badge badge-paid" style="font-size:9.5px;margin-top:3px;display:block">Paid</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             <!-- ESTIMATES PANEL -->
             <div class="fpanel" data-panel="estimates">
-              <div class="ap-pg" style="min-height:480px">
-                <div class="ap-hd">
-                  <div>
-                    <div class="ap-title">Estimates</div>
-                    <div class="ap-sub">3 estimates this month</div>
+
+              <!-- Desktop layout -->
+              <div class="panel-desktop">
+                <div class="ap-pg" style="min-height:480px">
+                  <div class="ap-hd">
+                    <div>
+                      <div class="ap-title">Estimates</div>
+                      <div class="ap-sub">3 estimates this month</div>
+                    </div>
+                    <button class="ap-btn-blue">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      New Estimate
+                    </button>
                   </div>
-                  <button class="ap-btn-blue">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    New Estimate
-                  </button>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:10px">
-                  <div class="estp-card">
-                    <div class="estp-card-hd">
-                      <div>
-                        <div class="estp-num">EST-012</div>
-                        <div class="estp-for">David Park · 789 Cedar Lane</div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <div class="estp-card">
+                      <div class="estp-card-hd">
+                        <div>
+                          <div class="estp-num">EST-012</div>
+                          <div class="estp-for">David Park · 789 Cedar Lane</div>
+                        </div>
+                        <span class="badge badge-draft">Draft</span>
                       </div>
-                      <span class="badge badge-draft">Draft</span>
-                    </div>
-                    <table class="estp-tbl">
-                      <thead><tr><th>Service</th><th>Qty</th><th style="text-align:right">Price</th></tr></thead>
-                      <tbody>
-                        <tr><td>Standard Clean (2br/1ba)</td><td>1</td><td>$90.00</td></tr>
-                        <tr><td>Deep Clean add-on</td><td>1</td><td>$45.00</td></tr>
-                        <tr><td>Window cleaning</td><td>1</td><td>$35.00</td></tr>
-                      </tbody>
-                    </table>
-                    <div class="estp-total"><span class="estp-total-lbl">Estimated Total</span><span class="estp-total-val">$170.00</span></div>
-                    <div class="estp-acts">
-                      <div class="estp-btn-sec">Edit</div>
-                      <div class="estp-btn-sec">Preview</div>
-                      <div class="estp-btn-pri">Send to David →</div>
-                    </div>
-                  </div>
-                  <div class="estp-card">
-                    <div class="estp-card-hd">
-                      <div>
-                        <div class="estp-num">EST-011</div>
-                        <div class="estp-for">Lisa Wang · New Client</div>
+                      <table class="estp-tbl">
+                        <thead><tr><th>Service</th><th>Qty</th><th style="text-align:right">Price</th></tr></thead>
+                        <tbody>
+                          <tr><td>Standard Clean (2br/1ba)</td><td>1</td><td>$90.00</td></tr>
+                          <tr><td>Deep Clean add-on</td><td>1</td><td>$45.00</td></tr>
+                          <tr><td>Window cleaning</td><td>1</td><td>$35.00</td></tr>
+                        </tbody>
+                      </table>
+                      <div class="estp-total"><span class="estp-total-lbl">Estimated Total</span><span class="estp-total-val">$170.00</span></div>
+                      <div class="estp-acts">
+                        <div class="estp-btn-sec">Edit</div>
+                        <div class="estp-btn-sec">Preview</div>
+                        <div class="estp-btn-pri">Send to David →</div>
                       </div>
-                      <span class="badge badge-active" style="background:rgba(52,199,89,.1);color:#34C759;border-color:rgba(52,199,89,.2)">Sent</span>
                     </div>
-                    <table class="estp-tbl">
-                      <thead><tr><th>Service</th><th>Qty</th><th style="text-align:right">Price</th></tr></thead>
-                      <tbody>
-                        <tr><td>Initial Deep Clean (3br/2ba)</td><td>1</td><td>$220.00</td></tr>
-                        <tr><td>Ongoing Monthly Standard</td><td>1</td><td>$140.00</td></tr>
-                      </tbody>
-                    </table>
-                    <div class="estp-total"><span class="estp-total-lbl">Estimated Total</span><span class="estp-total-val">$360.00</span></div>
+                    <div class="estp-card">
+                      <div class="estp-card-hd">
+                        <div>
+                          <div class="estp-num">EST-011</div>
+                          <div class="estp-for">Lisa Wang · New Client</div>
+                        </div>
+                        <span class="badge badge-active" style="background:rgba(52,199,89,.1);color:#34C759;border-color:rgba(52,199,89,.2)">Sent</span>
+                      </div>
+                      <table class="estp-tbl">
+                        <thead><tr><th>Service</th><th>Qty</th><th style="text-align:right">Price</th></tr></thead>
+                        <tbody>
+                          <tr><td>Initial Deep Clean (3br/2ba)</td><td>1</td><td>$220.00</td></tr>
+                          <tr><td>Ongoing Monthly Standard</td><td>1</td><td>$140.00</td></tr>
+                        </tbody>
+                      </table>
+                      <div class="estp-total"><span class="estp-total-lbl">Estimated Total</span><span class="estp-total-val">$360.00</span></div>
+                    </div>
                   </div>
                 </div>
               </div>
+
+              <!-- Mobile layout -->
+              <div class="panel-mobile">
+                <div class="mp-pg">
+                  <div class="mp-hd">
+                    <div>
+                      <div class="mp-title">Estimates</div>
+                      <div class="mp-sub">3 estimates this month</div>
+                    </div>
+                    <div class="mp-btn">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      New Estimate
+                    </div>
+                  </div>
+
+                  <div class="mp-est-card">
+                    <div class="mp-est-hd">
+                      <div>
+                        <div class="mp-est-num">EST-012</div>
+                        <div class="mp-est-for">David Park · 789 Cedar Lane</div>
+                      </div>
+                      <span class="badge badge-draft">Draft</span>
+                    </div>
+                    <div class="mp-est-items">
+                      <div class="mp-est-item">
+                        <span class="mp-est-item-name">Standard Clean (2br/1ba)</span>
+                        <span class="mp-est-item-price">$90</span>
+                      </div>
+                      <div class="mp-est-item">
+                        <span class="mp-est-item-name">Deep Clean add-on</span>
+                        <span class="mp-est-item-price">$45</span>
+                      </div>
+                      <div class="mp-est-item">
+                        <span class="mp-est-item-name">Window cleaning</span>
+                        <span class="mp-est-item-price">$35</span>
+                      </div>
+                    </div>
+                    <div class="mp-est-total">
+                      <span class="mp-est-total-lbl">Estimated Total</span>
+                      <span class="mp-est-total-val">$170.00</span>
+                    </div>
+                    <div class="mp-est-acts">
+                      <div class="mp-est-btn-sec">Edit</div>
+                      <div class="mp-est-btn-sec">Preview</div>
+                      <div class="mp-est-btn-pri">Send to David →</div>
+                    </div>
+                  </div>
+
+                  <div class="mp-est-card">
+                    <div class="mp-est-hd">
+                      <div>
+                        <div class="mp-est-num">EST-011</div>
+                        <div class="mp-est-for">Lisa Wang · New Client</div>
+                      </div>
+                      <span class="badge badge-active" style="background:rgba(52,199,89,.1);color:#34C759;border-color:rgba(52,199,89,.2)">Sent</span>
+                    </div>
+                    <div class="mp-est-items">
+                      <div class="mp-est-item">
+                        <span class="mp-est-item-name">Initial Deep Clean (3br/2ba)</span>
+                        <span class="mp-est-item-price">$220</span>
+                      </div>
+                      <div class="mp-est-item">
+                        <span class="mp-est-item-name">Ongoing Monthly Standard</span>
+                        <span class="mp-est-item-price">$140</span>
+                      </div>
+                    </div>
+                    <div class="mp-est-total">
+                      <span class="mp-est-total-lbl">Estimated Total</span>
+                      <span class="mp-est-total-val">$360.00</span>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
             </div>
 
             <!-- FINANCES PANEL -->
             <div class="fpanel" data-panel="finances">
-              <div class="fp-wrap">
-                <div class="ap-pg" style="padding-bottom:0">
-                  <div class="ap-hd">
-                    <div>
-                      <div class="ap-title">Finances</div>
-                      <div class="ap-sub">Overview of your revenue and invoices</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="feat-stat-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 18px 14px">
-                  <div class="stat-card"><div class="stat-lbl">This Month</div><div class="stat-val">$3,240</div></div>
-                  <div class="stat-card"><div class="stat-lbl">Paid</div><div class="stat-val green">$2,740</div></div>
-                  <div class="stat-card"><div class="stat-lbl">Outstanding</div><div class="stat-val amber">$500</div></div>
-                  <div class="stat-card"><div class="stat-lbl">Jobs Done</div><div class="stat-val">18</div></div>
-                </div>
-                <div class="fp-layout feat-fp-grid" style="padding:0 18px 18px">
-                  <div class="ap-card">
-                    <div class="fp-recent-hd">
-                      <span class="fp-recent-title">Recent Invoices</span>
-                      <span class="fp-recent-link">View all →</span>
-                    </div>
-                    <div class="fp-tx-row">
-                      <div class="fp-tx-icon paid">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                      </div>
-                      <div class="fp-tx-info">
-                        <div class="fp-tx-name">Sarah Johnson</div>
-                        <div class="fp-tx-sub">INV-047 · Mar 27</div>
-                      </div>
-                      <div class="fp-tx-right">
-                        <div class="fp-tx-amt">$140</div>
-                        <span class="badge badge-paid" style="font-size:9px;padding:1px 6px">Paid</span>
-                      </div>
-                    </div>
-                    <div class="fp-tx-row">
-                      <div class="fp-tx-icon paid">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                      </div>
-                      <div class="fp-tx-info">
-                        <div class="fp-tx-name">Mike &amp; Lisa Chen</div>
-                        <div class="fp-tx-sub">INV-046 · Mar 24</div>
-                      </div>
-                      <div class="fp-tx-right">
-                        <div class="fp-tx-amt">$200</div>
-                        <span class="badge badge-paid" style="font-size:9px;padding:1px 6px">Paid</span>
-                      </div>
-                    </div>
-                    <div class="fp-tx-row">
-                      <div class="fp-tx-icon unpaid">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                      </div>
-                      <div class="fp-tx-info">
-                        <div class="fp-tx-name">Robert Kim</div>
-                        <div class="fp-tx-sub">INV-045 · Mar 19</div>
-                      </div>
-                      <div class="fp-tx-right">
-                        <div class="fp-tx-amt">$165</div>
-                        <span class="badge badge-unpaid" style="font-size:9px;padding:1px 6px">Unpaid</span>
-                      </div>
-                    </div>
-                    <div class="fp-tx-row">
-                      <div class="fp-tx-icon unpaid">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                      </div>
-                      <div class="fp-tx-info">
-                        <div class="fp-tx-name">Ana Torres</div>
-                        <div class="fp-tx-sub">INV-044 · Mar 17</div>
-                      </div>
-                      <div class="fp-tx-right">
-                        <div class="fp-tx-amt">$180</div>
-                        <span class="badge" style="font-size:9px;padding:1px 6px;background:rgba(248,113,113,.1);color:#F87171;border-color:rgba(248,113,113,.25)">Overdue</span>
+
+              <!-- Desktop layout -->
+              <div class="panel-desktop">
+                <div class="fp-wrap">
+                  <div class="ap-pg" style="padding-bottom:0">
+                    <div class="ap-hd">
+                      <div>
+                        <div class="ap-title">Finances</div>
+                        <div class="ap-sub">Overview of your revenue and invoices</div>
                       </div>
                     </div>
                   </div>
-                  <div class="ap-card">
-                    <div class="fp-svc-title">By Service Type</div>
-                    <div class="fp-svc-row">
-                      <span class="fp-svc-name">Deep Clean</span>
-                      <div class="fp-svc-bar-wrap"><div class="fp-svc-bar" style="width:82%"></div></div>
-                      <span class="fp-svc-count">9</span>
+                  <div class="feat-stat-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 18px 14px">
+                    <div class="stat-card"><div class="stat-lbl">This Month</div><div class="stat-val">$3,240</div></div>
+                    <div class="stat-card"><div class="stat-lbl">Paid</div><div class="stat-val green">$2,740</div></div>
+                    <div class="stat-card"><div class="stat-lbl">Outstanding</div><div class="stat-val amber">$500</div></div>
+                    <div class="stat-card"><div class="stat-lbl">Jobs Done</div><div class="stat-val">18</div></div>
+                  </div>
+                  <div class="fp-layout feat-fp-grid" style="padding:0 18px 18px">
+                    <div class="ap-card">
+                      <div class="fp-recent-hd">
+                        <span class="fp-recent-title">Recent Invoices</span>
+                        <span class="fp-recent-link">View all →</span>
+                      </div>
+                      <div class="fp-tx-row">
+                        <div class="fp-tx-icon paid">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div class="fp-tx-info">
+                          <div class="fp-tx-name">Sarah Johnson</div>
+                          <div class="fp-tx-sub">INV-047 · Mar 27</div>
+                        </div>
+                        <div class="fp-tx-right">
+                          <div class="fp-tx-amt">$140</div>
+                          <span class="badge badge-paid" style="font-size:9px;padding:1px 6px">Paid</span>
+                        </div>
+                      </div>
+                      <div class="fp-tx-row">
+                        <div class="fp-tx-icon paid">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div class="fp-tx-info">
+                          <div class="fp-tx-name">Mike &amp; Lisa Chen</div>
+                          <div class="fp-tx-sub">INV-046 · Mar 24</div>
+                        </div>
+                        <div class="fp-tx-right">
+                          <div class="fp-tx-amt">$200</div>
+                          <span class="badge badge-paid" style="font-size:9px;padding:1px 6px">Paid</span>
+                        </div>
+                      </div>
+                      <div class="fp-tx-row">
+                        <div class="fp-tx-icon unpaid">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                        <div class="fp-tx-info">
+                          <div class="fp-tx-name">Robert Kim</div>
+                          <div class="fp-tx-sub">INV-045 · Mar 19</div>
+                        </div>
+                        <div class="fp-tx-right">
+                          <div class="fp-tx-amt">$165</div>
+                          <span class="badge badge-unpaid" style="font-size:9px;padding:1px 6px">Unpaid</span>
+                        </div>
+                      </div>
+                      <div class="fp-tx-row">
+                        <div class="fp-tx-icon unpaid">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                        <div class="fp-tx-info">
+                          <div class="fp-tx-name">Ana Torres</div>
+                          <div class="fp-tx-sub">INV-044 · Mar 17</div>
+                        </div>
+                        <div class="fp-tx-right">
+                          <div class="fp-tx-amt">$180</div>
+                          <span class="badge" style="font-size:9px;padding:1px 6px;background:rgba(248,113,113,.1);color:#F87171;border-color:rgba(248,113,113,.25)">Overdue</span>
+                        </div>
+                      </div>
                     </div>
-                    <div class="fp-svc-row">
-                      <span class="fp-svc-name">Standard</span>
-                      <div class="fp-svc-bar-wrap"><div class="fp-svc-bar" style="width:55%"></div></div>
-                      <span class="fp-svc-count">6</span>
-                    </div>
-                    <div class="fp-svc-row">
-                      <span class="fp-svc-name">Move-Out</span>
-                      <div class="fp-svc-bar-wrap"><div class="fp-svc-bar" style="width:27%"></div></div>
-                      <span class="fp-svc-count">3</span>
+                    <div class="ap-card">
+                      <div class="fp-svc-title">By Service Type</div>
+                      <div class="fp-svc-row">
+                        <span class="fp-svc-name">Deep Clean</span>
+                        <div class="fp-svc-bar-wrap"><div class="fp-svc-bar" style="width:82%"></div></div>
+                        <span class="fp-svc-count">9</span>
+                      </div>
+                      <div class="fp-svc-row">
+                        <span class="fp-svc-name">Standard</span>
+                        <div class="fp-svc-bar-wrap"><div class="fp-svc-bar" style="width:55%"></div></div>
+                        <span class="fp-svc-count">6</span>
+                      </div>
+                      <div class="fp-svc-row">
+                        <span class="fp-svc-name">Move-Out</span>
+                        <div class="fp-svc-bar-wrap"><div class="fp-svc-bar" style="width:27%"></div></div>
+                        <span class="fp-svc-count">3</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              <!-- Mobile layout -->
+              <div class="panel-mobile">
+                <div class="mp-pg">
+                  <div class="mp-hd">
+                    <div>
+                      <div class="mp-title">Finances</div>
+                      <div class="mp-sub">Revenue overview · March 2026</div>
+                    </div>
+                  </div>
+                  <div class="mp-stats">
+                    <div class="mp-stat"><div class="mp-stat-lbl">This Month</div><div class="mp-stat-val">$3,240</div></div>
+                    <div class="mp-stat"><div class="mp-stat-lbl">Paid</div><div class="mp-stat-val green">$2,740</div></div>
+                    <div class="mp-stat"><div class="mp-stat-lbl">Outstanding</div><div class="mp-stat-val amber">$500</div></div>
+                    <div class="mp-stat"><div class="mp-stat-lbl">Jobs Done</div><div class="mp-stat-val">18</div></div>
+                  </div>
+
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 15px 8px">
+                    <span style="font-size:12px;font-weight:700;color:var(--app-text)">Recent Invoices</span>
+                    <span style="font-size:11px;color:var(--app-faint)">View all →</span>
+                  </div>
+                  <div class="mp-row">
+                    <div class="fp-tx-icon paid" style="width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(52,199,89,.12)">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="mp-row-info">
+                      <div class="mp-row-name">Sarah Johnson</div>
+                      <div class="mp-row-sub">INV-047 · Mar 27</div>
+                    </div>
+                    <div class="mp-row-right">
+                      <div class="mp-row-val">$140</div>
+                      <span class="badge badge-paid" style="font-size:9.5px;margin-top:3px;display:block">Paid</span>
+                    </div>
+                  </div>
+                  <div class="mp-row">
+                    <div style="width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(52,199,89,.12)">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34C759" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="mp-row-info">
+                      <div class="mp-row-name">Mike &amp; Lisa Chen</div>
+                      <div class="mp-row-sub">INV-046 · Mar 24</div>
+                    </div>
+                    <div class="mp-row-right">
+                      <div class="mp-row-val">$200</div>
+                      <span class="badge badge-paid" style="font-size:9.5px;margin-top:3px;display:block">Paid</span>
+                    </div>
+                  </div>
+                  <div class="mp-row">
+                    <div style="width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,159,10,.12)">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF9F0A" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    <div class="mp-row-info">
+                      <div class="mp-row-name">Ana Torres</div>
+                      <div class="mp-row-sub">INV-044 · Mar 17</div>
+                    </div>
+                    <div class="mp-row-right">
+                      <div class="mp-row-val">$180</div>
+                      <span class="badge" style="font-size:9.5px;margin-top:3px;display:block;background:rgba(248,113,113,.1);color:#F87171;border-color:rgba(248,113,113,.25)">Overdue</span>
+                    </div>
+                  </div>
+
+                  <div class="mp-svc-section" style="border-top:1px solid var(--app-divider);margin-top:4px">
+                    <div class="mp-svc-hd">By Service Type</div>
+                    <div class="mp-svc-row">
+                      <span class="mp-svc-name">Deep Clean</span>
+                      <div class="mp-svc-bar-wrap"><div class="mp-svc-bar" style="width:82%"></div></div>
+                      <span class="mp-svc-count">9</span>
+                    </div>
+                    <div class="mp-svc-row">
+                      <span class="mp-svc-name">Standard</span>
+                      <div class="mp-svc-bar-wrap"><div class="mp-svc-bar" style="width:55%"></div></div>
+                      <span class="mp-svc-count">6</span>
+                    </div>
+                    <div class="mp-svc-row">
+                      <span class="mp-svc-name">Move-Out</span>
+                      <div class="mp-svc-bar-wrap"><div class="mp-svc-bar" style="width:27%"></div></div>
+                      <span class="mp-svc-count">3</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
           </div><!-- /feat-panels -->
