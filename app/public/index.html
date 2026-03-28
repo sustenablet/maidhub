@@ -57,7 +57,7 @@
       --sh-lg:        0 28px 72px rgba(12,27,42,.18);
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; background: #070E16; }
 
     body {
       font-family: var(--font-b);
@@ -90,10 +90,10 @@
       transition: background .3s, border-color .3s, padding .3s;
     }
     #nav.scrolled {
-      background: rgba(246,243,236,.94);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border);
+      background: rgba(246,243,236,.76);
+      backdrop-filter: blur(22px) saturate(1.4);
+      -webkit-backdrop-filter: blur(22px) saturate(1.4);
+      border-bottom: 1px solid rgba(12,27,42,.08);
       padding: 14px 0;
     }
     .nav-inner { display: flex; align-items: center; justify-content: space-between; }
@@ -736,49 +736,69 @@
     }
 
     /* ─── MOBILE MENU ─────────────────────────────────────────── */
+    /* Backdrop — blurs page content behind the menu */
+    .mob-backdrop {
+      position: fixed; inset: 0; z-index: 299;
+      background: rgba(12,27,42,.38);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s ease;
+    }
+    .mob-backdrop.open { opacity: 1; pointer-events: auto; }
+
     .mob-menu {
-      position: fixed; inset: 0; z-index: 300;
-      background: var(--cream);
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: min(320px, 88vw);
+      z-index: 300;
+      background: rgba(246,243,236,.96);
+      backdrop-filter: blur(28px) saturate(1.6);
+      -webkit-backdrop-filter: blur(28px) saturate(1.6);
       display: flex; flex-direction: column;
       padding: 0;
       transform: translateX(100%);
       transition: transform .32s cubic-bezier(.4,0,.2,1);
       overflow-y: auto;
+      border-left: 1px solid rgba(12,27,42,.08);
+      box-shadow: -24px 0 64px rgba(12,27,42,.18);
     }
     .mob-menu.open { transform: translateX(0); }
     .mob-menu-hd {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 24px;
+      padding: 16px 22px;
       border-bottom: 1px solid var(--border);
     }
     .mob-menu-close {
-      width: 38px; height: 38px; border-radius: 50%;
+      width: 34px; height: 34px; border-radius: 50%;
       background: rgba(12,27,42,.08); border: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      color: var(--text); font-size: 20px; line-height: 1;
+      color: var(--text); font-size: 18px; line-height: 1;
     }
-    .mob-menu-body { padding: 12px 24px 48px; flex: 1; }
+    .mob-menu-body { padding: 8px 22px 44px; flex: 1; }
     .mob-menu-links {
       list-style: none; display: flex; flex-direction: column; gap: 0;
-      margin-bottom: 36px;
+      margin-bottom: 28px;
     }
     .mob-menu-links a {
-      font-family: var(--font-d); font-size: 32px; font-weight: 700;
-      color: var(--text); text-decoration: none; letter-spacing: -.6px;
-      display: block; padding: 16px 0;
+      font-family: var(--font-b); font-size: 17px; font-weight: 600;
+      color: var(--text); text-decoration: none; letter-spacing: -.2px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 15px 0;
       border-bottom: 1px solid var(--border);
       transition: color .2s;
     }
+    .mob-menu-links a::after { content: '→'; color: var(--muted); font-size: 14px; transition: transform .2s; }
     .mob-menu-links a:hover { color: var(--teal); }
-    .mob-menu-cta { display: flex; flex-direction: column; gap: 12px; }
+    .mob-menu-links a:hover::after { transform: translateX(3px); }
+    .mob-menu-cta { display: flex; flex-direction: column; gap: 10px; }
     .mob-menu-cta .btn-pill {
       text-align: center; justify-content: center;
-      font-size: 15px; padding: 15px 24px; width: 100%;
+      font-size: 14.5px; padding: 14px 22px; width: 100%;
     }
     .mob-menu-login {
       text-align: center; font-family: var(--font-b); font-size: 14px;
       font-weight: 600; color: var(--muted); text-decoration: none;
-      padding: 12px; display: block; transition: color .2s;
+      padding: 11px; display: block; transition: color .2s;
     }
     .mob-menu-login:hover { color: var(--text); }
 
@@ -840,25 +860,129 @@
       /* --- Trust strip --- */
       .strip { padding: 18px 0; }
 
-      /* --- Replace stack --- */
-      .rstack { padding: 72px 0; }
-      .rstack-grid { grid-template-columns: 1fr; gap: 40px; }
-      .rstack-divider { flex-direction: row; }
-      .rstack-div-line { width: 50px; height: 1px; }
-      .rstack-h { font-size: clamp(24px, 7vw, 36px); }
-      .tool-chips { max-width: 100%; }
-      .unified-box { padding: 24px 20px; border-radius: 18px; }
+      /* --- Replace stack mobile --- */
+      .rstack { padding: 60px 0; }
+      .rstack-grid { display: none; } /* Hide desktop grid */
+      .rstack-mobile { display: flex !important; flex-direction: column; gap: 0; }
+      .rm-label {
+        font-size: 10.5px; font-weight: 700; letter-spacing: 1.4px;
+        text-transform: uppercase; margin-bottom: 10px; display: block;
+      }
+      .rm-label.bad  { color: rgba(255,90,90,.75); }
+      .rm-label.good { color: var(--lime); }
+      .rm-panel {
+        border-radius: 18px; padding: 22px 20px; position: relative; overflow: hidden;
+      }
+      .rm-panel.old {
+        background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+        margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+        border-bottom: none;
+      }
+      .rm-panel.new {
+        background: rgba(197,242,68,.07); border: 1.5px solid rgba(197,242,68,.2);
+        border-top-left-radius: 0; border-top-right-radius: 0;
+      }
+      .rm-title {
+        font-family: var(--font-d); font-size: 22px; font-weight: 700;
+        letter-spacing: -.5px; color: rgba(255,255,255,.88); margin-bottom: 14px; line-height: 1.15;
+      }
+      .rm-chips {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 12px;
+      }
+      .rm-chip {
+        background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+        border-radius: 8px; padding: 8px 10px; font-size: 12px; color: rgba(255,255,255,.55);
+        display: flex; align-items: center; gap: 6px;
+      }
+      .rm-caption { font-size: 12px; color: rgba(255,255,255,.28); font-style: italic; }
+      .rm-divider {
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(197,242,68,.15); border-left: 1.5px solid rgba(197,242,68,.2);
+        border-right: 1.5px solid rgba(197,242,68,.2);
+        padding: 10px 20px; gap: 12px;
+      }
+      .rm-div-line { flex: 1; height: 1px; background: rgba(197,242,68,.2); }
+      .rm-div-icon {
+        width: 34px; height: 34px; border-radius: 50%;
+        background: rgba(197,242,68,.18); border: 1px solid rgba(197,242,68,.3);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--lime); font-size: 16px; flex-shrink: 0;
+      }
+      .rm-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+      .rm-list li {
+        display: flex; align-items: center; gap: 10px;
+        font-size: 13.5px; color: rgba(255,255,255,.7);
+      }
+      .rm-ck {
+        width: 17px; height: 17px; border-radius: 50%;
+        background: rgba(197,242,68,.2); flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--lime); font-size: 9.5px;
+      }
 
       /* --- Feature tabs --- */
       /* Tab row, window chrome, sidebar handled in mobile panel CSS block above */
 
-      /* --- How it works --- */
-      .steps { grid-template-columns: 1fr; gap: 32px; }
+      /* --- How it works — progress-tab slider --- */
       .steps::before { display: none; }
-      .step { text-align: left; display: flex; align-items: flex-start; gap: 20px; }
-      .step-n { flex-shrink: 0; width: 52px; height: 52px; font-size: 18px; margin: 0; }
-      .step-title { font-size: 18px; margin-bottom: 8px; }
-      .step-desc { font-size: 13.5px; }
+      .steps { display: block !important; position: relative; grid-template-columns: none !important; }
+      /* Override display:contents for track on mobile */
+      .steps-track { display: block !important; overflow: hidden; }
+      .steps-inner { display: flex !important; transition: transform .4s cubic-bezier(.4,0,.2,1); }
+      /* Numbered progress bar */
+      .steps-indicator { display: flex !important; align-items: center; margin-bottom: 24px; }
+      .step-ind-item {
+        display: flex; align-items: center; flex: 1; cursor: pointer;
+      }
+      .step-ind-num {
+        width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--font-d); font-size: 14px; font-weight: 700;
+        background: var(--cream-dark); color: var(--muted); border: 2px solid var(--border);
+        transition: all .3s; position: relative; z-index: 1;
+      }
+      .step-ind-item.active .step-ind-num {
+        background: var(--teal); color: #fff; border-color: var(--teal);
+        box-shadow: 0 0 0 4px rgba(11,135,117,.15);
+      }
+      .step-ind-line { flex: 1; height: 2px; background: var(--border); transition: background .3s; }
+      .step-ind-item.active ~ .step-ind-item .step-ind-line { background: var(--border); }
+      .step-ind-item.passed .step-ind-line { background: var(--teal); }
+      /* Slider track */
+      .steps-track { overflow: hidden; }
+      .steps-inner {
+        display: flex;
+        transition: transform .4s cubic-bezier(.4,0,.2,1);
+      }
+      .step {
+        flex: 0 0 100%;
+        display: block !important;
+        text-align: left;
+        padding: 0 2px;
+      }
+      .step-n { display: none !important; } /* Number shown in indicator above */
+      .step-body-label {
+        font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+        text-transform: uppercase; color: var(--teal); margin-bottom: 10px; display: block;
+      }
+      .step-title { font-size: 22px; margin-bottom: 10px; }
+      .step-desc { font-size: 14.5px; line-height: 1.7; }
+      .steps-nav-btns {
+        display: flex !important; align-items: center; justify-content: space-between;
+        margin-top: 22px;
+      }
+      .steps-nav-btn {
+        width: 40px; height: 40px; border-radius: 50%;
+        background: var(--white); border: 1.5px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 18px; color: var(--text);
+        transition: all .2s;
+      }
+      .steps-nav-btn:hover { border-color: var(--text); background: var(--cream-dark); }
+      .steps-nav-btn:disabled { opacity: .35; cursor: default; }
+      .steps-counter {
+        font-size: 13px; font-weight: 600; color: var(--muted);
+      }
 
       /* --- Pricing --- */
       .price-card { padding: 32px 22px; }
@@ -866,9 +990,33 @@
       .price-name { font-size: 22px; }
       .price-feats li { font-size: 13.5px; }
 
-      /* --- Testimonials --- */
-      .testi-grid { grid-template-columns: 1fr; gap: 16px; }
+      /* --- Testimonials carousel --- */
+      .testi-grid {
+        display: flex !important;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 12px;
+        padding: 0 20px 4px;
+        margin: 0 -20px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .testi-grid::-webkit-scrollbar { display: none; }
+      .t-card {
+        flex: 0 0 82vw;
+        max-width: 320px;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+      }
       .t-text { font-size: 14.5px; }
+      .testi-dots { display: flex !important; justify-content: center; gap: 7px; margin-top: 20px; }
+      .testi-dot {
+        height: 6px; border-radius: 3px;
+        background: rgba(12,27,42,.15); transition: all .35s ease;
+        cursor: pointer;
+      }
+      .testi-dot.active { background: var(--teal); width: 22px !important; }
+      .testi-dot:not(.active) { width: 6px; }
 
       /* --- Pain cards --- */
       .pain-grid { grid-template-columns: 1fr; gap: 14px; }
@@ -1080,6 +1228,22 @@
       .feat-sb { display: none; }
     }
 
+    /* Mobile-only elements hidden by default */
+    .testi-dots { display: none; }
+    .steps-indicator { display: none; }
+    .steps-nav-btns { display: none; }
+    /* On desktop, steps-track/inner are transparent pass-through containers */
+    .steps-track { display: contents; }
+    .steps-inner { display: contents; }
+    .step-body-label { display: none; }
+    .rstack-mobile { display: none; }
+
+    /* Desktop: steps children participate in parent grid directly */
+    @media (min-width: 769px) {
+      .steps-track { display: contents; }
+      .steps-inner { display: contents; }
+    }
+
     /* ─── MOBILE PANEL LAYOUTS ──────────────────────────────── */
     /* Hidden by default — only show on mobile */
     .panel-mobile { display: none; }
@@ -1259,6 +1423,9 @@
       </div>
     </div>
   </nav>
+
+  <!-- Mobile menu backdrop (blurs page content) -->
+  <div class="mob-backdrop" id="mob-backdrop"></div>
 
   <!-- Mobile menu overlay -->
   <div class="mob-menu" id="mob-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
@@ -1492,6 +1659,8 @@
   ─────────────────────────────────────────────────────────────── -->
   <section class="rstack">
     <div class="container">
+
+      <!-- Desktop 3-col grid -->
       <div class="rstack-grid">
 
         <!-- Left: scattered tools -->
@@ -1533,6 +1702,45 @@
         </div>
 
       </div>
+
+      <!-- Mobile compact comparison (only shown on mobile) -->
+      <div class="rstack-mobile">
+
+        <div class="rm-panel old">
+          <span class="rm-label bad">The old way</span>
+          <div class="rm-title">Your current "system."</div>
+          <div class="rm-chips">
+            <div class="rm-chip">📅 Google Calendar</div>
+            <div class="rm-chip">💸 Venmo / CashApp</div>
+            <div class="rm-chip">📝 Apple Notes</div>
+            <div class="rm-chip">📊 Google Sheets</div>
+            <div class="rm-chip">💬 iMessage</div>
+            <div class="rm-chip">🧾 Square Invoices</div>
+          </div>
+          <p class="rm-caption">6 apps. Zero integration. Daily friction.</p>
+        </div>
+
+        <div class="rm-divider">
+          <div class="rm-div-line"></div>
+          <div class="rm-div-icon">→</div>
+          <div class="rm-div-line"></div>
+        </div>
+
+        <div class="rm-panel new">
+          <span class="rm-label good">The MaidHub way</span>
+          <div class="rm-title">One app.<br>Everything.</div>
+          <ul class="rm-list">
+            <li><span class="rm-ck">✓</span>Client profiles &amp; service addresses</li>
+            <li><span class="rm-ck">✓</span>Job scheduling &amp; recurring rules</li>
+            <li><span class="rm-ck">✓</span>Invoicing &amp; payment tracking</li>
+            <li><span class="rm-ck">✓</span>Finances &amp; revenue overview</li>
+            <li><span class="rm-ck">✓</span>Multiple businesses, one login</li>
+          </ul>
+          <a href="/features" class="btn-pill" style="font-size:13px;padding:10px 20px;">See all features →</a>
+        </div>
+
+      </div>
+
     </div>
   </section>
 
@@ -2418,22 +2626,54 @@
         <span class="eyebrow reveal">Dead simple</span>
         <h2 class="s-title reveal d1">Up and running<br>in under 5 minutes.</h2>
       </div>
+      <!-- Mobile step indicator (hidden on desktop) -->
+      <div class="steps-indicator" id="steps-indicator">
+        <div class="step-ind-item active" data-step="0">
+          <div class="step-ind-num">1</div>
+          <div class="step-ind-line"></div>
+        </div>
+        <div class="step-ind-item" data-step="1">
+          <div class="step-ind-num">2</div>
+          <div class="step-ind-line"></div>
+        </div>
+        <div class="step-ind-item" data-step="2">
+          <div class="step-ind-num">3</div>
+        </div>
+      </div>
+
       <div class="steps">
-        <div class="step reveal">
-          <div class="step-n">1</div>
-          <div class="step-title">Add your clients</div>
-          <p class="step-desc">Import or add your existing clients — names, addresses, notes, entry instructions. Takes 2 minutes.</p>
+        <!-- Mobile slider track (display:contents on desktop — invisible wrapper) -->
+        <div class="steps-track" id="steps-track">
+          <div class="steps-inner" id="steps-inner">
+
+            <div class="step reveal">
+              <div class="step-n">1</div>
+              <span class="step-body-label">Step 1 of 3</span>
+              <div class="step-title">Add your clients</div>
+              <p class="step-desc">Import or add your existing clients — names, addresses, notes, entry instructions. Takes 2 minutes.</p>
+            </div>
+            <div class="step reveal d1">
+              <div class="step-n">2</div>
+              <span class="step-body-label">Step 2 of 3</span>
+              <div class="step-title">Schedule your jobs</div>
+              <p class="step-desc">Create one-time or recurring jobs. Set pricing, service type, and start time. One-time or recurring — it's all tracked automatically.</p>
+            </div>
+            <div class="step reveal d2">
+              <div class="step-n">3</div>
+              <span class="step-body-label">Step 3 of 3</span>
+              <div class="step-title">Track, invoice, repeat</div>
+              <p class="step-desc">Mark jobs complete, auto-generate invoices, track payment. Your business runs like clockwork.</p>
+            </div>
+
+          </div>
         </div>
-        <div class="step reveal d1">
-          <div class="step-n">2</div>
-          <div class="step-title">Schedule your jobs</div>
-          <p class="step-desc">Create one-time or recurring jobs. Set pricing, service type, and start time. One-time or recurring — it's all tracked automatically.</p>
-        </div>
-        <div class="step reveal d2">
-          <div class="step-n">3</div>
-          <div class="step-title">Track, invoice, repeat</div>
-          <p class="step-desc">Mark jobs complete, auto-generate invoices, track payment. Your business runs like clockwork.</p>
-        </div>
+      </div>
+
+      <!-- Mobile nav buttons (hidden on desktop) -->
+      <div class="steps-nav-btns" id="steps-nav-btns">
+        <button class="steps-nav-btn" id="steps-prev" disabled>←</button>
+        <span class="steps-counter" id="steps-counter">1 / 3</span>
+        <button class="steps-nav-btn" id="steps-next">→</button>
       </div>
     </div>
   </section>
@@ -2533,6 +2773,12 @@
             </div>
           </div>
         </div>
+      </div>
+      <!-- Dots indicator (shown only on mobile) -->
+      <div class="testi-dots" id="testi-dots">
+        <div class="testi-dot active"></div>
+        <div class="testi-dot"></div>
+        <div class="testi-dot"></div>
       </div>
     </div>
   </section>
@@ -2653,27 +2899,27 @@
       });
     });
 
-    // Mobile menu
+    // Mobile menu with blur backdrop
     const mobMenu = document.getElementById('mob-menu');
+    const mobBackdrop = document.getElementById('mob-backdrop');
     const hamburger = document.querySelector('.hamburger');
     const mobClose = document.getElementById('mob-menu-close');
     function openMobMenu() {
       mobMenu.classList.add('open');
+      mobBackdrop.classList.add('open');
       document.body.style.overflow = 'hidden';
       hamburger.setAttribute('aria-expanded', 'true');
     }
     function closeMobMenu() {
       mobMenu.classList.remove('open');
+      mobBackdrop.classList.remove('open');
       document.body.style.overflow = '';
       hamburger.setAttribute('aria-expanded', 'false');
     }
     if (hamburger) hamburger.addEventListener('click', openMobMenu);
     if (mobClose) mobClose.addEventListener('click', closeMobMenu);
-    // Close on backdrop click
-    mobMenu.addEventListener('click', e => { if (e.target === mobMenu) closeMobMenu(); });
-    // Close on escape
+    if (mobBackdrop) mobBackdrop.addEventListener('click', closeMobMenu);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobMenu(); });
-    // Close when a link is tapped
     mobMenu.querySelectorAll('a').forEach(a => {
       if (!a.href.includes('#')) a.addEventListener('click', closeMobMenu);
     });
@@ -2685,6 +2931,58 @@
         if (target) { e.preventDefault(); closeMobMenu(); target.scrollIntoView({ behavior: 'smooth' }); }
       });
     });
+
+    // Testimonials carousel dots sync (mobile only)
+    const testiGrid = document.querySelector('.testi-grid');
+    const testiDots = document.querySelectorAll('.testi-dot');
+    if (testiGrid && testiDots.length) {
+      testiGrid.addEventListener('scroll', () => {
+        const idx = Math.round(testiGrid.scrollLeft / testiGrid.clientWidth);
+        testiDots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }, { passive: true });
+      testiDots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+          testiGrid.scrollTo({ left: i * testiGrid.clientWidth, behavior: 'smooth' });
+        });
+      });
+    }
+
+    // Steps slider (mobile only)
+    (function() {
+      const inner = document.getElementById('steps-inner');
+      const indicator = document.getElementById('steps-indicator');
+      const navBtns = document.getElementById('steps-nav-btns');
+      const prevBtn = document.getElementById('steps-prev');
+      const nextBtn = document.getElementById('steps-next');
+      const counter = document.getElementById('steps-counter');
+      const indItems = document.querySelectorAll('.step-ind-item');
+      let current = 0;
+      const total = 3;
+
+      function isMobile() { return window.innerWidth <= 768; }
+
+      function updateSteps() {
+        if (!isMobile()) return;
+        if (inner) inner.style.transform = `translateX(-${current * 100}%)`;
+        if (counter) counter.textContent = `${current + 1} / ${total}`;
+        if (prevBtn) prevBtn.disabled = current === 0;
+        if (nextBtn) nextBtn.disabled = current === total - 1;
+        indItems.forEach((item, i) => {
+          item.classList.toggle('active', i === current);
+          item.classList.toggle('passed', i < current);
+        });
+      }
+
+      if (prevBtn) prevBtn.addEventListener('click', () => { if (current > 0) { current--; updateSteps(); } });
+      if (nextBtn) nextBtn.addEventListener('click', () => { if (current < total - 1) { current++; updateSteps(); } });
+      indItems.forEach((item, i) => {
+        item.addEventListener('click', () => { current = i; updateSteps(); });
+      });
+
+      // Init on load and resize
+      updateSteps();
+      window.addEventListener('resize', updateSteps, { passive: true });
+    })();
   </script>
 
 </body>
