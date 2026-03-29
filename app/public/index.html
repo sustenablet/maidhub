@@ -57,7 +57,7 @@
       --sh-lg:        0 28px 72px rgba(12,27,42,.18);
     }
 
-    html { scroll-behavior: smooth; background: #070E16; }
+    html { scroll-behavior: smooth; background: #070E16; overflow-x: hidden; }
 
     body {
       font-family: var(--font-b);
@@ -816,6 +816,17 @@
       /* --- Globals --- */
       .container { padding: 0 20px; }
       section { padding: 72px 0; }
+
+      /* Top fade — masks page content above the floating pill */
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 76px;
+        background: linear-gradient(to bottom, var(--cream) 52%, transparent);
+        z-index: 90;
+        pointer-events: none;
+      }
 
       /* --- Navigation — floating pill topbar --- */
       .nav-links { display: none; }
