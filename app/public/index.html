@@ -157,12 +157,11 @@
 
     /* hamburger + mobile nav right */
     .nav-mobile-right { display: none; align-items: center; gap: 10px; }
-    .nav-mob-cta { font-size: 12.5px !important; padding: 9px 16px !important; }
     .hamburger {
-      display: none; flex-direction: column; gap: 5px;
-      cursor: pointer; background: none; border: none; padding: 4px;
+      display: none; flex-direction: column; gap: 5.5px;
+      cursor: pointer; background: none; border: none; padding: 6px;
     }
-    .hamburger span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all .3s; }
+    .hamburger span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all .25s; }
 
     /* ─── HERO ────────────────────────────────────────────────── */
     .hero { padding: 170px 0 100px; position: relative; }
@@ -735,72 +734,82 @@
       .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
     }
 
-    /* ─── MOBILE MENU ─────────────────────────────────────────── */
-    /* Backdrop — blurs page content behind the menu */
-    .mob-backdrop {
-      position: fixed; inset: 0; z-index: 299;
-      background: rgba(12,27,42,.38);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      opacity: 0; pointer-events: none;
-      transition: opacity .3s ease;
-    }
-    .mob-backdrop.open { opacity: 1; pointer-events: auto; }
-
+    /* ─── MOBILE FULL-PAGE MENU ──────────────────────────────── */
     .mob-menu {
-      position: fixed; top: 0; right: 0; bottom: 0;
-      width: min(320px, 88vw);
-      z-index: 300;
-      background: rgba(246,243,236,.96);
-      backdrop-filter: blur(28px) saturate(1.6);
-      -webkit-backdrop-filter: blur(28px) saturate(1.6);
+      position: fixed; inset: 0; z-index: 300;
+      background-color: #EBF0F5;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='900'%3E%3Cg stroke='%230C1B2A' stroke-width='0.7' fill='none' opacity='0.055'%3E%3Cline x1='0' y1='200' x2='300' y2='0'/%3E%3Cline x1='0' y1='400' x2='600' y2='0'/%3E%3Cline x1='0' y1='600' x2='600' y2='200'/%3E%3Cline x1='0' y1='800' x2='600' y2='400'/%3E%3Cline x1='100' y1='900' x2='600' y2='600'/%3E%3Cline x1='300' y1='900' x2='600' y2='700'/%3E%3Cline x1='200' y1='0' x2='600' y2='500'/%3E%3Cline x1='400' y1='0' x2='600' y2='300'/%3E%3Cline x1='0' y1='150' x2='400' y2='900'/%3E%3Cline x1='0' y1='50' x2='200' y2='900'/%3E%3Cline x1='500' y1='0' x2='0' y2='700'/%3E%3Cline x1='300' y1='0' x2='0' y2='500'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: cover; background-position: center;
       display: flex; flex-direction: column;
-      padding: 0;
-      transform: translateX(100%);
-      transition: transform .32s cubic-bezier(.4,0,.2,1);
+      padding: 14px 14px calc(env(safe-area-inset-bottom) + 28px);
+      gap: 10px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s ease;
       overflow-y: auto;
-      border-left: 1px solid rgba(12,27,42,.08);
-      box-shadow: -24px 0 64px rgba(12,27,42,.18);
     }
-    .mob-menu.open { transform: translateX(0); }
-    .mob-menu-hd {
+    .mob-menu.open { opacity: 1; pointer-events: auto; }
+
+    /* Pill header row */
+    .mob-menu-pill-hd {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 22px;
-      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.62);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(12,27,42,.07);
+      border-radius: 100px;
+      padding: 11px 11px 11px 24px;
+      flex-shrink: 0;
     }
-    .mob-menu-close {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: rgba(12,27,42,.08); border: none; cursor: pointer;
+    .mob-menu-label {
+      font-family: var(--font-b); font-size: 16px;
+      font-weight: 600; color: var(--dark); letter-spacing: -.1px;
+    }
+    .mob-close-circle {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(92,107,122,.32);
+      border: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      color: var(--text); font-size: 18px; line-height: 1;
+      color: var(--dark); flex-shrink: 0; transition: background .2s;
     }
-    .mob-menu-body { padding: 8px 22px 44px; flex: 1; }
-    .mob-menu-links {
-      list-style: none; display: flex; flex-direction: column; gap: 0;
-      margin-bottom: 28px;
+    .mob-close-circle:hover { background: rgba(92,107,122,.48); }
+    .mob-close-circle svg { width: 14px; height: 14px; }
+
+    /* Nav links card */
+    .mob-menu-nav-card {
+      background: rgba(255,255,255,.48);
+      border: 1px solid rgba(12,27,42,.07);
+      border-radius: 22px; overflow: hidden; flex: 1;
     }
-    .mob-menu-links a {
-      font-family: var(--font-b); font-size: 17px; font-weight: 600;
-      color: var(--text); text-decoration: none; letter-spacing: -.2px;
+    .mob-menu-nav-link {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 15px 0;
-      border-bottom: 1px solid var(--border);
-      transition: color .2s;
+      padding: 22px 24px;
+      font-family: var(--font-b); font-size: 24px; font-weight: 700;
+      color: var(--dark); text-decoration: none;
+      border-bottom: 1px solid rgba(12,27,42,.06);
+      transition: background .15s;
     }
-    .mob-menu-links a::after { content: '→'; color: var(--muted); font-size: 14px; transition: transform .2s; }
-    .mob-menu-links a:hover { color: var(--teal); }
-    .mob-menu-links a:hover::after { transform: translateX(3px); }
-    .mob-menu-cta { display: flex; flex-direction: column; gap: 10px; }
-    .mob-menu-cta .btn-pill {
-      text-align: center; justify-content: center;
-      font-size: 14.5px; padding: 14px 22px; width: 100%;
+    .mob-menu-nav-link:last-child { border-bottom: none; }
+    .mob-menu-nav-link:active { background: rgba(12,27,42,.04); }
+    .mob-nav-icon { color: var(--muted); flex-shrink: 0; }
+
+    /* Action buttons */
+    .mob-menu-actions { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+    .mob-action-primary {
+      display: flex; align-items: center; justify-content: center;
+      padding: 17px; border-radius: 100px;
+      background: var(--dark); color: var(--cream-light);
+      font-family: var(--font-b); font-size: 15px; font-weight: 700;
+      text-decoration: none; letter-spacing: -.1px; transition: background .2s;
     }
-    .mob-menu-login {
-      text-align: center; font-family: var(--font-b); font-size: 14px;
-      font-weight: 600; color: var(--muted); text-decoration: none;
-      padding: 11px; display: block; transition: color .2s;
+    .mob-action-primary:hover { background: var(--dark-2); }
+    .mob-action-outline {
+      display: flex; align-items: center; justify-content: center;
+      padding: 15px; border-radius: 100px;
+      background: transparent; color: var(--dark);
+      font-family: var(--font-b); font-size: 15px; font-weight: 700;
+      text-decoration: none; letter-spacing: -.1px;
+      border: 1.5px solid rgba(12,27,42,.22); transition: all .2s;
     }
-    .mob-menu-login:hover { color: var(--text); }
+    .mob-action-outline:hover { border-color: var(--dark); background: rgba(12,27,42,.04); }
 
     /* ─── FULL MOBILE OVERHAUL (≤ 768px) ─────────────────────── */
     @media (max-width: 768px) {
@@ -808,14 +817,30 @@
       .container { padding: 0 20px; }
       section { padding: 72px 0; }
 
-      /* --- Navigation --- */
+      /* --- Navigation — floating pill topbar --- */
       .nav-links { display: none; }
       .nav-right { display: none; }
       .nav-mobile-right { display: flex; }
       .hamburger { display: flex; }
-      #nav { padding: 14px 0; }
-      #nav.scrolled { padding: 10px 0; }
-      .nav-inner { gap: 0; }
+      .nav-mob-cta { display: none !important; }
+      #nav {
+        top: 12px; left: 14px; right: 14px;
+        padding: 0;
+        border-radius: 100px;
+        background: rgba(246,243,236,.88) !important;
+        backdrop-filter: blur(20px) saturate(1.4);
+        -webkit-backdrop-filter: blur(20px) saturate(1.4);
+        border: 1px solid rgba(12,27,42,.09);
+        box-shadow: 0 4px 20px rgba(12,27,42,.09);
+      }
+      #nav.scrolled {
+        top: 12px; left: 14px; right: 14px;
+        padding: 0; border-radius: 100px;
+        background: rgba(246,243,236,.97) !important;
+        border-bottom-color: rgba(12,27,42,.09);
+      }
+      #nav .container { padding: 0; }
+      .nav-inner { gap: 0; padding: 10px 14px 10px 22px; }
 
       /* --- Hero --- */
       .hero { padding: 96px 0 64px; }
@@ -1415,8 +1440,7 @@
         </div>
 
         <div class="nav-mobile-right">
-          <a href="/signup" class="btn-pill nav-mob-cta">Get started →</a>
-          <button class="hamburger" aria-label="Open menu">
+          <button class="hamburger" aria-label="Open menu" aria-expanded="false">
             <span></span><span></span><span></span>
           </button>
         </div>
@@ -1424,26 +1448,47 @@
     </div>
   </nav>
 
-  <!-- Mobile menu backdrop (blurs page content) -->
-  <div class="mob-backdrop" id="mob-backdrop"></div>
-
-  <!-- Mobile menu overlay -->
+  <!-- Mobile full-page menu -->
   <div class="mob-menu" id="mob-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
-    <div class="mob-menu-hd">
-      <a href="/" class="nav-logo">MaidHub<span class="logo-mark"></span></a>
-      <button class="mob-menu-close" id="mob-menu-close" aria-label="Close menu">×</button>
+
+    <!-- Pill header -->
+    <div class="mob-menu-pill-hd">
+      <span class="mob-menu-label">Menu</span>
+      <button class="mob-close-circle" id="mob-menu-close" aria-label="Close menu">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/>
+        </svg>
+      </button>
     </div>
-    <div class="mob-menu-body">
-      <ul class="mob-menu-links">
-        <li><a href="/features">Features</a></li>
-        <li><a href="/how-it-works">How it works</a></li>
-        <li><a href="/pricing">Pricing</a></li>
-      </ul>
-      <div class="mob-menu-cta">
-        <a href="/signup" class="btn-pill">Start free trial →</a>
-        <a href="/login" class="mob-menu-login">Log in</a>
-      </div>
+
+    <!-- Nav links card -->
+    <div class="mob-menu-nav-card">
+      <a href="/features" class="mob-menu-nav-link">
+        Features
+        <svg class="mob-nav-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="16" x2="16" y2="4"/><polyline points="7,4 16,4 16,13"/>
+        </svg>
+      </a>
+      <a href="/how-it-works" class="mob-menu-nav-link">
+        How it works
+        <svg class="mob-nav-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="16" x2="16" y2="4"/><polyline points="7,4 16,4 16,13"/>
+        </svg>
+      </a>
+      <a href="/pricing" class="mob-menu-nav-link">
+        Pricing
+        <svg class="mob-nav-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="16" x2="16" y2="4"/><polyline points="7,4 16,4 16,13"/>
+        </svg>
+      </a>
     </div>
+
+    <!-- CTAs -->
+    <div class="mob-menu-actions">
+      <a href="/signup" class="mob-action-primary">Start free trial</a>
+      <a href="/login" class="mob-action-outline">Log in</a>
+    </div>
+
   </div>
 
 
@@ -2899,26 +2944,22 @@
       });
     });
 
-    // Mobile menu with blur backdrop
+    // Mobile full-page menu
     const mobMenu = document.getElementById('mob-menu');
-    const mobBackdrop = document.getElementById('mob-backdrop');
     const hamburger = document.querySelector('.hamburger');
     const mobClose = document.getElementById('mob-menu-close');
     function openMobMenu() {
       mobMenu.classList.add('open');
-      mobBackdrop.classList.add('open');
       document.body.style.overflow = 'hidden';
       hamburger.setAttribute('aria-expanded', 'true');
     }
     function closeMobMenu() {
       mobMenu.classList.remove('open');
-      mobBackdrop.classList.remove('open');
       document.body.style.overflow = '';
       hamburger.setAttribute('aria-expanded', 'false');
     }
     if (hamburger) hamburger.addEventListener('click', openMobMenu);
     if (mobClose) mobClose.addEventListener('click', closeMobMenu);
-    if (mobBackdrop) mobBackdrop.addEventListener('click', closeMobMenu);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMobMenu(); });
     mobMenu.querySelectorAll('a').forEach(a => {
       if (!a.href.includes('#')) a.addEventListener('click', closeMobMenu);
