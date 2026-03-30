@@ -40,7 +40,7 @@
       --sh-lg:        0 28px 72px rgba(12,27,42,.18);
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overscroll-behavior: none; }
 
     body {
       font-family: var(--font-b);
@@ -139,23 +139,36 @@
     }
     .hamburger span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all .3s; }
 
-    /* mobile nav drawer */
+    /* mobile menu backdrop */
+    .menu-backdrop {
+      display: none;
+      position: fixed; inset: 0; z-index: 998;
+      background: rgba(12,27,42,.08);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    .menu-backdrop.open { display: block; }
+
+    /* mobile nav */
     .mobile-nav {
       display: none;
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: var(--cream); z-index: 99;
+      position: fixed; inset: 0; z-index: 999;
+      background: var(--cream);
       flex-direction: column; align-items: center; justify-content: center; gap: 28px;
     }
     .mobile-nav.open { display: flex; }
     .mobile-nav a {
       font-family: var(--font-d); font-size: 32px; font-weight: 700;
-      color: var(--text); text-decoration: none;
+      color: var(--text); text-decoration: none; transition: opacity .2s;
     }
+    .mobile-nav a:hover { opacity: .6; }
+    .mobile-nav .btn-pill { font-size: 15.5px; margin-top: 8px; }
     .mobile-nav-close {
-      position: absolute; top: 22px; right: 28px;
+      position: absolute; top: 24px; right: 28px;
       background: none; border: none; cursor: pointer;
-      font-size: 28px; color: var(--text);
+      font-size: 28px; color: var(--text); line-height: 1;
     }
+    body.menu-open { overflow: hidden; touch-action: none; }
 
     /* ─── COMMON SECTION ──────────────────────────────────────── */
     .eyebrow {
@@ -737,13 +750,16 @@
     </div>
   </nav>
 
+  <!-- MENU BACKDROP -->
+  <div class="menu-backdrop" id="menuBackdrop"></div>
+
   <!-- MOBILE NAV -->
   <div class="mobile-nav" id="mobileNav">
     <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">✕</button>
     <a href="/features">Features</a>
     <a href="/how-it-works">How it works</a>
     <a href="/pricing">Pricing</a>
-    <a href="/signup" class="btn-pill lg" style="margin-top:16px;">Start free trial →</a>
+    <a href="/signup" class="btn-pill" style="margin-top:8px;">Start free trial →</a>
   </div>
 
 
@@ -1221,17 +1237,29 @@
   <script>
     /* ── Sticky nav scroll ───────────────────────────────────── */
     const nav = document.getElementById('nav');
-    window.addEventListener('scroll', () => {
-      nav.classList.toggle('scrolled', window.scrollY > 20);
-    }, { passive: true });
+    function updateNav() { nav.classList.toggle('scrolled', window.scrollY > 60); }
+    window.addEventListener('scroll', updateNav, { passive: true });
+    updateNav();
 
-    /* ── Mobile nav ─────────────────────────────────────────── */
+    /* ── Mobile menu ─────────────────────────────────────────── */
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     const mobileNav    = document.getElementById('mobileNav');
     const mobileClose  = document.getElementById('mobileNavClose');
+    const menuBackdrop = document.getElementById('menuBackdrop');
 
-    hamburgerBtn.addEventListener('click', () => mobileNav.classList.add('open'));
-    mobileClose.addEventListener('click',  () => mobileNav.classList.remove('open'));
+    function openMenu() {
+      mobileNav.classList.add('open');
+      menuBackdrop.classList.add('open');
+      document.body.classList.add('menu-open');
+    }
+    function closeMenu() {
+      mobileNav.classList.remove('open');
+      menuBackdrop.classList.remove('open');
+      document.body.classList.remove('menu-open');
+    }
+    hamburgerBtn.addEventListener('click', openMenu);
+    mobileClose.addEventListener('click', closeMenu);
+    menuBackdrop.addEventListener('click', closeMenu);
 
     /* ── Scroll reveal ──────────────────────────────────────── */
     const revealEls = document.querySelectorAll('.reveal');

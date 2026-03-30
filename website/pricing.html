@@ -40,7 +40,7 @@
       --sh-lg:        0 28px 72px rgba(12,27,42,.18);
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overscroll-behavior: none; }
 
     body {
       font-family: var(--font-b);
@@ -73,10 +73,10 @@
       transition: background .3s, border-color .3s, padding .3s;
     }
     #nav.scrolled {
-      background: rgba(7,14,22,.94);
+      background: rgba(246,243,236,.94);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(255,255,255,.07);
+      border-bottom: 1px solid var(--border);
       padding: 14px 0;
     }
     .nav-inner { display: flex; align-items: center; justify-content: space-between; }
@@ -86,7 +86,9 @@
       font-size: 21px; font-weight: 700;
       color: rgba(255,255,255,.9); text-decoration: none;
       display: flex; align-items: center; gap: 7px;
+      transition: color .3s;
     }
+    #nav.scrolled .nav-logo { color: var(--text); }
     .logo-mark {
       width: 9px; height: 9px;
       background: var(--lime);
@@ -95,27 +97,25 @@
       box-shadow: 0 0 0 3px rgba(197,242,68,.25);
     }
 
-    .nav-links { display: flex; align-items: center; gap: 8px; list-style: none; }
+    .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
     .nav-links a {
       font-size: 14px; font-weight: 500;
-      color: rgba(255,255,255,.45); text-decoration: none;
+      color: rgba(255,255,255,.6); text-decoration: none;
       transition: color .2s;
-      padding: 7px 14px; border-radius: 100px;
     }
-    .nav-links a:hover { color: rgba(255,255,255,.88); }
-    .nav-links a.active {
-      background: rgba(255,255,255,.1);
-      color: rgba(255,255,255,.88);
-    }
+    .nav-links a:hover { color: rgba(255,255,255,.9); }
+    #nav.scrolled .nav-links a { color: var(--muted); }
+    #nav.scrolled .nav-links a:hover { color: var(--text); }
 
     .nav-right { display: flex; align-items: center; gap: 14px; }
 
     .btn-ghost {
       font-family: var(--font-b); font-size: 14px; font-weight: 600;
       color: rgba(255,255,255,.6); background: none; border: none; cursor: pointer;
-      text-decoration: none; padding: 10px 4px; transition: opacity .2s;
+      text-decoration: none; padding: 10px 4px; transition: color .3s, opacity .2s;
     }
     .btn-ghost:hover { color: rgba(255,255,255,.9); }
+    #nav.scrolled .btn-ghost { color: var(--text); }
 
     .btn-pill {
       font-family: var(--font-b); font-size: 13.5px; font-weight: 700;
@@ -137,25 +137,39 @@
       display: none; flex-direction: column; gap: 5px;
       cursor: pointer; background: none; border: none; padding: 4px;
     }
-    .hamburger span { width: 22px; height: 2px; background: rgba(255,255,255,.7); border-radius: 2px; transition: all .3s; }
+    .hamburger span { width: 22px; height: 2px; background: rgba(255,255,255,.85); border-radius: 2px; transition: all .3s; }
+    #nav.scrolled .hamburger span { background: var(--text); }
+
+    /* mobile menu backdrop */
+    .menu-backdrop {
+      display: none;
+      position: fixed; inset: 0; z-index: 998;
+      background: rgba(12,27,42,.08);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    .menu-backdrop.open { display: block; }
 
     /* mobile nav */
     .mobile-nav {
       display: none;
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: var(--darkest); z-index: 99;
+      position: fixed; inset: 0; z-index: 999;
+      background: var(--cream);
       flex-direction: column; align-items: center; justify-content: center; gap: 28px;
     }
     .mobile-nav.open { display: flex; }
     .mobile-nav a {
       font-family: var(--font-d); font-size: 32px; font-weight: 700;
-      color: rgba(255,255,255,.88); text-decoration: none;
+      color: var(--text); text-decoration: none; transition: opacity .2s;
     }
+    .mobile-nav a:hover { opacity: .6; }
+    .mobile-nav .btn-pill { font-size: 15.5px; margin-top: 8px; }
     .mobile-nav-close {
-      position: absolute; top: 22px; right: 28px;
+      position: absolute; top: 24px; right: 28px;
       background: none; border: none; cursor: pointer;
-      font-size: 28px; color: rgba(255,255,255,.6);
+      font-size: 28px; color: var(--text); line-height: 1;
     }
+    body.menu-open { overflow: hidden; touch-action: none; }
 
     /* ─── COMMON SECTION ──────────────────────────────────────── */
     .eyebrow {
@@ -619,13 +633,16 @@
     </div>
   </nav>
 
+  <!-- MENU BACKDROP -->
+  <div class="menu-backdrop" id="menuBackdrop"></div>
+
   <!-- MOBILE NAV -->
   <div class="mobile-nav" id="mobileNav">
     <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">✕</button>
     <a href="/features">Features</a>
     <a href="/how-it-works">How it works</a>
     <a href="/pricing">Pricing</a>
-    <a href="/signup" class="btn-pill lg" style="margin-top:16px;">Start free trial →</a>
+    <a href="/signup" class="btn-pill" style="margin-top:8px;">Start free trial →</a>
   </div>
 
 
@@ -997,17 +1014,29 @@
   <script>
     /* ── Sticky nav scroll ───────────────────────────────────── */
     const nav = document.getElementById('nav');
-    window.addEventListener('scroll', () => {
-      nav.classList.toggle('scrolled', window.scrollY > 20);
-    }, { passive: true });
+    function updateNav() { nav.classList.toggle('scrolled', window.scrollY > 60); }
+    window.addEventListener('scroll', updateNav, { passive: true });
+    updateNav();
 
-    /* ── Mobile nav ─────────────────────────────────────────── */
+    /* ── Mobile menu ─────────────────────────────────────────── */
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     const mobileNav    = document.getElementById('mobileNav');
     const mobileClose  = document.getElementById('mobileNavClose');
+    const menuBackdrop = document.getElementById('menuBackdrop');
 
-    hamburgerBtn.addEventListener('click', () => mobileNav.classList.add('open'));
-    mobileClose.addEventListener('click',  () => mobileNav.classList.remove('open'));
+    function openMenu() {
+      mobileNav.classList.add('open');
+      menuBackdrop.classList.add('open');
+      document.body.classList.add('menu-open');
+    }
+    function closeMenu() {
+      mobileNav.classList.remove('open');
+      menuBackdrop.classList.remove('open');
+      document.body.classList.remove('menu-open');
+    }
+    hamburgerBtn.addEventListener('click', openMenu);
+    mobileClose.addEventListener('click', closeMenu);
+    menuBackdrop.addEventListener('click', closeMenu);
 
     /* ── Scroll reveal ──────────────────────────────────────── */
     const revealEls = document.querySelectorAll('.reveal');
