@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -26,6 +26,7 @@ import type { User } from "@supabase/supabase-js";
 import { useOrganization } from "@/contexts/organization-context";
 import type { Organization } from "@/contexts/organization-context";
 import { toast } from "sonner";
+import { useLocale } from "@/lib/i18n/locale-context";
 
 interface Profile {
   display_name: string | null;
@@ -34,20 +35,20 @@ interface Profile {
   trial_start_date: string;
 }
 
-const homeNav = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/clients", label: "Clients", icon: Users },
-  { href: "/dashboard/schedule", label: "Schedule", icon: CalendarDays },
+const homeNavConfig = [
+  { href: "/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
+  { href: "/dashboard/clients", labelKey: "nav.clients", icon: Users },
+  { href: "/dashboard/schedule", labelKey: "nav.schedule", icon: CalendarDays },
 ];
 
-const financeNav = [
-  { href: "/dashboard/finances", label: "Overview", icon: Wallet },
-  { href: "/dashboard/invoices", label: "Invoices", icon: Receipt },
+const financeNavConfig = [
+  { href: "/dashboard/finances", labelKey: "nav.overview", icon: Wallet },
+  { href: "/dashboard/invoices", labelKey: "nav.invoices", icon: Receipt },
 ];
 
-const activityNav = [
-  { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+const activityNavConfig = [
+  { href: "/dashboard/notifications", labelKey: "nav.notifications", icon: Bell },
+  { href: "/dashboard/settings", labelKey: "nav.settings", icon: Settings },
 ];
 
 function getInitials(name: string | null | undefined, email: string) {
@@ -132,6 +133,35 @@ function SidebarContent({
   profile: Profile | null;
   onNavClick?: () => void;
 }) {
+  const { t } = useLocale();
+  const homeNav = useMemo(
+    () =>
+      homeNavConfig.map((item) => ({
+        href: item.href,
+        label: t(item.labelKey),
+        icon: item.icon,
+      })),
+    [t]
+  );
+  const financeNav = useMemo(
+    () =>
+      financeNavConfig.map((item) => ({
+        href: item.href,
+        label: t(item.labelKey),
+        icon: item.icon,
+      })),
+    [t]
+  );
+  const activityNav = useMemo(
+    () =>
+      activityNavConfig.map((item) => ({
+        href: item.href,
+        label: t(item.labelKey),
+        icon: item.icon,
+      })),
+    [t]
+  );
+
   const daysLeft = profile?.trial_start_date ? getTrialDaysLeft(profile.trial_start_date) : 14;
   const isTrial = !profile?.subscription_status || profile?.subscription_status === "trialing";
 
@@ -147,19 +177,19 @@ function SidebarContent({
 
       {/* Nav */}
       <div className="flex-1 px-3 py-1 space-y-5 overflow-y-auto">
-        <NavSection label="Home">
+        <NavSection label={t("nav.sectionHome")}>
           {homeNav.map((item) => (
-            <NavItem key={item.href} {...item} onClick={onNavClick} />
+            <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} onClick={onNavClick} />
           ))}
         </NavSection>
-        <NavSection label="Finances">
+        <NavSection label={t("nav.sectionFinances")}>
           {financeNav.map((item) => (
-            <NavItem key={item.href} {...item} onClick={onNavClick} />
+            <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} onClick={onNavClick} />
           ))}
         </NavSection>
-        <NavSection label="Account">
+        <NavSection label={t("nav.sectionAccount")}>
           {activityNav.map((item) => (
-            <NavItem key={item.href} {...item} onClick={onNavClick} />
+            <NavItem key={item.href} href={item.href} label={item.label} icon={item.icon} onClick={onNavClick} />
           ))}
         </NavSection>
       </div>
@@ -168,8 +198,8 @@ function SidebarContent({
       {isTrial && (
         <div className="mx-3 mb-4 rounded-[4px] bg-[var(--mh-surface)] border border-[var(--mh-border)] p-3.5">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-semibold text-[var(--mh-text-faint)] uppercase tracking-[0.08em]">Free Trial</p>
-            <span className="text-[11px] font-medium text-[var(--mh-text-muted)] tabular-nums">{daysLeft}d left</span>
+            <p className="text-[10px] font-semibold text-[var(--mh-text-faint)] uppercase tracking-[0.08em]">{t("shell.trialBanner")}</p>
+            <span className="text-[11px] font-medium text-[var(--mh-text-muted)] tabular-nums">{daysLeft}{t("shell.daysLeft")}</span>
           </div>
           <div className="w-full h-[3px] rounded-full bg-[var(--mh-border)] mb-3">
             <div
@@ -181,7 +211,7 @@ function SidebarContent({
             href="/dashboard/upgrade"
             className="flex items-center justify-center gap-1.5 text-[11px] font-semibold bg-[#0071E3] text-white rounded-[4px] py-[7px] hover:bg-[#0077ED] transition-colors"
           >
-            Upgrade Plan
+            {t("shell.upgradePlan")}
             <ArrowUpRight className="h-3 w-3" strokeWidth={2} />
           </Link>
         </div>
@@ -192,6 +222,7 @@ function SidebarContent({
 
 // ── FAB quick-action sheet ──────────────────────────────────────
 function MobileFAB({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }) {
+  const { t } = useLocale();
   return (
     <button
       onClick={onClick}
@@ -202,7 +233,7 @@ function MobileFAB({ onClick, isOpen }: { onClick: () => void; isOpen: boolean }
         width: "52px",
         height: "52px",
       }}
-      aria-label="Quick actions"
+      aria-label={t("shell.quickActions")}
     >
       <div className={`transition-transform duration-200 ${isOpen ? "rotate-45" : "rotate-0"}`}>
         <Plus className="h-6 w-6 text-white" strokeWidth={2.5} />
@@ -218,11 +249,15 @@ function MobileFABSheet({
   open: boolean;
   onClose: () => void;
 }) {
-  const actions = [
-    { href: "/dashboard/invoices?action=new", label: "New Invoice", desc: "Create & send invoice", icon: Receipt, color: "#FF9F0A" },
-    { href: "/dashboard/clients?action=new", label: "New Client", desc: "Add a client", icon: Users, color: "#34C759" },
-    { href: "/dashboard/schedule?action=new", label: "New Job", desc: "Schedule a cleaning", icon: CalendarDays, color: "#0071E3" },
-  ];
+  const { t } = useLocale();
+  const actions = useMemo(
+    () => [
+      { href: "/dashboard/invoices?action=new", label: t("shell.fabNewInvoice"), desc: t("shell.fabNewInvoiceDesc"), icon: Receipt, color: "#FF9F0A" },
+      { href: "/dashboard/clients?action=new", label: t("shell.fabNewClient"), desc: t("shell.fabNewClientDesc"), icon: Users, color: "#34C759" },
+      { href: "/dashboard/schedule?action=new", label: t("shell.fabNewJob"), desc: t("shell.fabNewJobDesc"), icon: CalendarDays, color: "#0071E3" },
+    ],
+    [t]
+  );
 
   return (
     <>
@@ -269,16 +304,21 @@ function MobileFABSheet({
 }
 
 // ── Mobile bottom tab items ─────────────────────────────────────
-const mobileTabs = [
-  { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-  { href: "/dashboard/schedule", label: "Schedule", icon: CalendarDays },
-  { href: "/dashboard/clients", label: "Clients", icon: Users },
-  { href: "/dashboard/invoices", label: "Invoices", icon: Receipt },
-  { href: "/dashboard/finances", label: "Finances", icon: Wallet },
+const mobileTabsConfig = [
+  { href: "/dashboard", labelKey: "shell.mobileHome", icon: LayoutDashboard },
+  { href: "/dashboard/schedule", labelKey: "nav.schedule", icon: CalendarDays },
+  { href: "/dashboard/clients", labelKey: "nav.clients", icon: Users },
+  { href: "/dashboard/invoices", labelKey: "nav.invoices", icon: Receipt },
+  { href: "/dashboard/finances", labelKey: "nav.finances", icon: Wallet },
 ];
 
 function MobileBottomNav() {
   const pathname = usePathname();
+  const { t } = useLocale();
+  const mobileTabs = useMemo(
+    () => mobileTabsConfig.map((tab) => ({ ...tab, label: t(tab.labelKey) })),
+    [t]
+  );
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-50 md:hidden">
@@ -346,9 +386,13 @@ function MobileMoreSheet({
   switchOrg: (id: string) => void;
   onNewBusiness: () => void;
 }) {
-  const moreItems = [
-    { href: "/dashboard/settings", label: "Settings", icon: Settings, desc: "Account & preferences" },
-  ];
+  const { t } = useLocale();
+  const moreItems = useMemo(
+    () => [
+      { href: "/dashboard/settings", label: t("shell.moreSettings"), icon: Settings, desc: t("shell.moreSettingsDesc") },
+    ],
+    [t]
+  );
 
   return (
     <>
@@ -386,7 +430,7 @@ function MobileMoreSheet({
 
         {/* Org switcher */}
         <div className="px-3 pt-3 pb-2 border-b border-[var(--mh-divider)]">
-          <p className="px-3 pb-2 text-[10px] font-semibold text-[var(--mh-text-faint)] uppercase tracking-[0.08em]">Business</p>
+          <p className="px-3 pb-2 text-[10px] font-semibold text-[var(--mh-text-faint)] uppercase tracking-[0.08em]">{t("shell.business")}</p>
           {organizations.map((org) => (
             <button
               key={org.id}
@@ -397,7 +441,7 @@ function MobileMoreSheet({
                 <Building2 className="h-4 w-4 text-[#0071E3]" strokeWidth={1.7} />
               </div>
               <p className={`flex-1 text-left text-[14px] font-semibold ${org.id === currentOrg?.id ? "text-[var(--mh-text)]" : "text-[var(--mh-text-muted)]"}`}>
-                {org.name || "Unnamed Business"}
+                {org.name || t("shell.unnamedBusiness")}
               </p>
               {org.id === currentOrg?.id && (
                 <Check className="h-4 w-4 text-[#0071E3]" strokeWidth={2.5} />
@@ -411,7 +455,7 @@ function MobileMoreSheet({
             <div className="h-8 w-8 rounded-[8px] bg-[var(--mh-surface-raised)] flex items-center justify-center shrink-0">
               <Plus className="h-4 w-4 text-[var(--mh-text-muted)]" strokeWidth={1.7} />
             </div>
-            <p className="text-[14px] font-semibold text-[#0071E3]">New Business</p>
+            <p className="text-[14px] font-semibold text-[#0071E3]">{t("shell.newBusiness")}</p>
           </button>
         </div>
 
@@ -445,7 +489,7 @@ function MobileMoreSheet({
             <div className="h-9 w-9 rounded-[8px] bg-red-500/10 flex items-center justify-center shrink-0">
               <LogOut className="h-4 w-4 text-red-400" strokeWidth={1.7} />
             </div>
-            <p className="text-[14px] font-semibold text-red-400">Sign Out</p>
+            <p className="text-[14px] font-semibold text-red-400">{t("shell.signOut")}</p>
           </button>
         </div>
       </div>
@@ -546,6 +590,7 @@ export function DashboardShell({
   profile: Profile | null;
   children: React.ReactNode;
 }) {
+  const { t } = useLocale();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
@@ -616,7 +661,7 @@ export function DashboardShell({
 
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-[13px]">
-            <span className="text-[var(--mh-text-faint)]">Home</span>
+            <span className="text-[var(--mh-text-faint)]">{t("shell.home")}</span>
             <span className="text-[var(--mh-text-faint)]">/</span>
             <span className="text-[var(--mh-text)] font-semibold">{breadcrumb}</span>
           </div>
@@ -642,7 +687,7 @@ export function DashboardShell({
                 </div>
                 {/* Org switcher */}
                 <div className="py-0.5 border-b border-[var(--mh-border)]">
-                  <p className="px-3.5 pt-2 pb-1 text-[10px] font-semibold text-[var(--mh-text-faint)] uppercase tracking-[0.08em]">Business</p>
+                  <p className="px-3.5 pt-2 pb-1 text-[10px] font-semibold text-[var(--mh-text-faint)] uppercase tracking-[0.08em]">{t("shell.business")}</p>
                   {organizations.map((org) => (
                     <button
                       key={org.id}
@@ -655,7 +700,7 @@ export function DashboardShell({
                         ) : null}
                       </div>
                       <span className={org.id === currentOrg?.id ? "text-[var(--mh-text)] font-semibold" : "text-[var(--mh-text-muted)]"}>
-                        {org.name || "Unnamed Business"}
+                        {org.name || t("shell.unnamedBusiness")}
                       </span>
                     </button>
                   ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import {
@@ -28,12 +28,16 @@ import {
   Zap,
   Star,
   Pencil,
+  Languages,
 } from "lucide-react";
 import { SERVICE_TYPES, DEFAULT_SERVICE_PRICES } from "@/lib/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme, type Theme } from "@/components/theme-provider";
 import { useOrganization, type Organization } from "@/contexts/organization-context";
+import { useLocale } from "@/lib/i18n/locale-context";
+import type { AppLocale } from "@/lib/i18n/types";
+import { APP_LOCALES, parseAppLocale } from "@/lib/i18n/types";
 
 type SettingsTab = "profile" | "business" | "preferences" | "subscription" | "account" | "organizations";
 const DEFAULT_ADDITIONAL_COST_TYPES = [
@@ -47,15 +51,6 @@ const DEFAULT_ADDITIONAL_COST_TYPES = [
   "Pet Hair Removal",
   "Restocking Supplies",
   "Garage Cleaning",
-];
-
-const tabs: { id: SettingsTab; label: string; icon: React.ElementType; description: string }[] = [
-  { id: "profile", label: "Profile", icon: User, description: "Your personal info" },
-  { id: "business", label: "Business", icon: Building2, description: "Services & pricing" },
-  { id: "organizations", label: "Organizations", icon: Building2, description: "Manage your businesses" },
-  { id: "preferences", label: "Preferences", icon: Bell, description: "Appearance & notifications" },
-  { id: "subscription", label: "Subscription", icon: CreditCard, description: "Plan & billing" },
-  { id: "account", label: "Account", icon: Shield, description: "Security & data" },
 ];
 
 /* ─── Reusable components ────────────────────────────── */
@@ -199,7 +194,17 @@ function CardFooter({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SaveButton({ loading, onClick }: { loading: boolean; onClick?: () => void }) {
+function SaveButton({
+  loading,
+  onClick,
+  labelSave = "Save Changes",
+  labelSaving = "Saving...",
+}: {
+  loading: boolean;
+  onClick?: () => void;
+  labelSave?: string;
+  labelSaving?: string;
+}) {
   return (
     <button
       type="submit"
@@ -208,7 +213,7 @@ function SaveButton({ loading, onClick }: { loading: boolean; onClick?: () => vo
       className="flex items-center gap-2 px-5 py-2 bg-[#0071E3] hover:bg-[#0077ED]/90 text-white text-[13px] font-semibold rounded-[6px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-      {loading ? "Saving..." : "Save Changes"}
+      {loading ? labelSaving : labelSave}
     </button>
   );
 }
@@ -218,8 +223,21 @@ function SaveButton({ loading, onClick }: { loading: boolean; onClick?: () => vo
 export default function SettingsPage() {
   const supabase = createClient();
   const { theme, setTheme } = useTheme();
+  const { locale, setLocale, t } = useLocale();
   const { currentOrgId, organizations, currentOrg, switchOrg, refreshOrgs, createOrg } = useOrganization();
   const router = useRouter();
+
+  const tabs: { id: SettingsTab; label: string; icon: React.ElementType; description: string }[] = useMemo(
+    () => [
+      { id: "profile", label: t("settings.tabProfile"), icon: User, description: t("settings.tabDescProfile") },
+      { id: "business", label: t("settings.tabBusiness"), icon: Building2, description: t("settings.tabDescBusiness") },
+      { id: "organizations", label: t("settings.tabOrganizations"), icon: Building2, description: t("settings.tabDescOrganizations") },
+      { id: "preferences", label: t("settings.tabPreferences"), icon: Bell, description: t("settings.tabDescPreferences") },
+      { id: "subscription", label: t("settings.tabSubscription"), icon: CreditCard, description: t("settings.tabDescSubscription") },
+      { id: "account", label: t("settings.tabAccount"), icon: Shield, description: t("settings.tabDescAccount") },
+    ],
+    [t]
+  );
 
   // Org management state
   const [orgEditingId, setOrgEditingId] = useState<string | null>(null);
@@ -265,6 +283,7 @@ export default function SettingsPage() {
   const [notifNewClient, setNotifNewClient] = useState(false);
   const [notifWeeklySummary, setNotifWeeklySummary] = useState(true);
   const [notifSaving, setNotifSaving] = useState(false);
+  const [languageSaving, setLanguageSaving] = useState(false);
 
   // Account
   const [subscriptionStatus, setSubscriptionStatus] = useState("trialing");
@@ -301,6 +320,9 @@ export default function SettingsPage() {
         setTrialStart(data.trial_start_date || "");
 
         const settings = (data.settings || {}) as Record<string, unknown>;
+        if (typeof settings.locale === "string") {
+          setLocale(parseAppLocale(settings.locale));
+        }
         const notif = (settings.notifications || {}) as Record<string, unknown>;
 
         if (notif.job_reminder != null) setNotifJobReminder(!!notif.job_reminder);
@@ -540,6 +562,35 @@ export default function SettingsPage() {
     setNotifSaving(false);
   }
 
+  async function handleLocaleChange(next: AppLocale) {
+    if (next === locale) return;
+    setLanguageSaving(true);
+    setLocale(next);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      setLanguageSaving(false);
+      return;
+    }
+    const { data: userData } = await supabase.from("users").select("settings").eq("id", user.id).single();
+    const currentSettings = (userData?.settings || {}) as Record<string, unknown>;
+    const { error } = await supabase
+      .from("users")
+      .update({
+        settings: { ...currentSettings, locale: next },
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+    if (error) {
+      toast.error(t("toast.languageSaveError"));
+    } else {
+      toast.success(t("toast.languageSaved"));
+      router.refresh();
+    }
+    setLanguageSaving(false);
+  }
+
   async function handlePasswordChange() {
     if (!newPassword) {
       toast.error("Enter a new password");
@@ -638,8 +689,8 @@ export default function SettingsPage() {
     <div className="space-y-4">
       {/* Header */}
       <div>
-        <h1 className="text-[26px] md:text-[21px] font-bold md:font-semibold text-[var(--mh-text)] tracking-[-0.03em] md:tracking-[-0.02em]">Settings</h1>
-        <p className="hidden md:block text-[13px] text-[var(--mh-text-muted)] mt-0.5">Manage your profile, business, and account preferences</p>
+        <h1 className="text-[26px] md:text-[21px] font-bold md:font-semibold text-[var(--mh-text)] tracking-[-0.03em] md:tracking-[-0.02em]">{t("settings.pageTitle")}</h1>
+        <p className="hidden md:block text-[13px] text-[var(--mh-text-muted)] mt-0.5">{t("settings.pageSubtitle")}</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -1035,14 +1086,14 @@ export default function SettingsPage() {
             <>
               {/* Appearance */}
               <Card>
-                <CardHeader title="Appearance" description="Choose how MaidHub looks on this device." />
+                <CardHeader title={t("settings.prefAppearance")} description={t("settings.prefAppearanceDesc")} />
                 <CardBody className="space-y-3">
                   <div className="grid grid-cols-3 gap-3">
                     {(
                       [
-                        { value: "light" as Theme, label: "Light", icon: Sun },
-                        { value: "dark" as Theme, label: "Dark", icon: Moon },
-                        { value: "system" as Theme, label: "System", icon: Monitor },
+                        { value: "light" as Theme, label: t("settings.themeLight"), icon: Sun },
+                        { value: "dark" as Theme, label: t("settings.themeDark"), icon: Moon },
+                        { value: "system" as Theme, label: t("settings.themeSystem"), icon: Monitor },
                       ] as { value: Theme; label: string; icon: React.ElementType }[]
                     ).map(({ value, label, icon: Icon }) => {
                       const isSelected = theme === value;
@@ -1064,55 +1115,91 @@ export default function SettingsPage() {
                     })}
                   </div>
                   <p className="text-[11px] text-[var(--mh-text-subtle)]">
-                    Preference is saved to this browser only.
+                    {t("settings.themeBrowserNote")}
                   </p>
+                </CardBody>
+              </Card>
+
+              {/* Language */}
+              <Card>
+                <CardHeader title={t("settings.prefLanguage")} description={t("settings.prefLanguageDesc")} />
+                <CardBody className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[6px] bg-[var(--mh-surface-raised)] border border-[var(--mh-border)]">
+                      <Languages className="h-4 w-4 text-[var(--mh-text-muted)]" strokeWidth={1.8} />
+                    </div>
+                    <select
+                      value={locale}
+                      disabled={languageSaving}
+                      onChange={(e) => void handleLocaleChange(e.target.value as AppLocale)}
+                      aria-label={t("settings.prefLanguage")}
+                      className="flex-1 min-w-0 px-3 py-2.5 text-[13px] bg-[var(--mh-surface-sunken)] border border-[var(--mh-border)] rounded-[6px] outline-none transition-all focus:border-[#0071E3]/60 appearance-none cursor-pointer disabled:opacity-60"
+                    >
+                      {APP_LOCALES.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {languageSaving && (
+                    <p className="text-[11px] text-[var(--mh-text-muted)] flex items-center gap-2">
+                      <Loader2 className="h-3 w-3 animate-spin shrink-0" />
+                      {t("settings.saving")}
+                    </p>
+                  )}
                 </CardBody>
               </Card>
 
               {/* Email Notifications */}
               <Card>
-                <CardHeader title="Email Notifications" description="Choose which emails you receive. You can change these at any time." />
+                <CardHeader title={t("settings.prefEmailNotif")} description={t("settings.prefEmailNotifDesc")} />
                 <CardBody>
                   <NotifRow
-                    label="Job reminders"
-                    description="Get reminded about upcoming jobs the day before they're scheduled"
+                    label={t("settings.notifJobReminder")}
+                    description={t("settings.notifJobReminderDesc")}
                     enabled={notifJobReminder}
                     onChange={setNotifJobReminder}
                   />
                   <NotifRow
-                    label="Invoice reminders"
-                    description="Automatic reminder when an invoice is approaching its due date"
+                    label={t("settings.notifInvoiceReminder")}
+                    description={t("settings.notifInvoiceReminderDesc")}
                     enabled={notifInvoiceReminder}
                     onChange={setNotifInvoiceReminder}
                   />
                   <NotifRow
-                    label="Payment received"
-                    description="Get notified when a client pays an invoice"
+                    label={t("settings.notifPaymentReceived")}
+                    description={t("settings.notifPaymentReceivedDesc")}
                     enabled={notifPaymentReceived}
                     onChange={setNotifPaymentReceived}
                   />
                   <NotifRow
-                    label="New client added"
-                    description="Confirmation when a new client is added to your account"
+                    label={t("settings.notifNewClient")}
+                    description={t("settings.notifNewClientDesc")}
                     enabled={notifNewClient}
                     onChange={setNotifNewClient}
                   />
                   <NotifRow
-                    label="Weekly summary"
-                    description="A digest of your jobs, revenue, and activity from the past week"
+                    label={t("settings.notifWeeklySummary")}
+                    description={t("settings.notifWeeklySummaryDesc")}
                     enabled={notifWeeklySummary}
                     onChange={setNotifWeeklySummary}
                   />
                 </CardBody>
                 <CardFooter>
-                  <SaveButton loading={notifSaving} onClick={handleNotificationsSave} />
+                  <SaveButton
+                    loading={notifSaving}
+                    onClick={handleNotificationsSave}
+                    labelSave={t("settings.saveChanges")}
+                    labelSaving={t("settings.saving")}
+                  />
                 </CardFooter>
               </Card>
 
               <div className="bg-[var(--mh-surface-sunken)] rounded-[6px] border border-[var(--mh-border)] px-5 py-4">
                 <p className="text-[12px] text-[var(--mh-text-muted)] leading-relaxed">
-                  Email notifications are sent to <span className="font-semibold text-[var(--mh-text)]">{email}</span>.
-                  To change your email address, update it through your login provider.
+                  {t("settings.emailFooter")}{" "}
+                  <span className="font-semibold text-[var(--mh-text)]">{email}</span>. {t("settings.emailFooterHint")}
                 </p>
               </div>
             </>
