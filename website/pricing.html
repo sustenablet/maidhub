@@ -68,55 +68,73 @@
 
     /* ─── NAVIGATION ──────────────────────────────────────────── */
     #nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      padding: 22px 0;
-      transition: background .3s, border-color .3s, padding .3s;
+      position: fixed;
+      top: 20px; left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 48px);
+      max-width: 920px;
+      z-index: 1000;
+      animation: navReveal .5s cubic-bezier(.16,1,.3,1) .05s both;
     }
-    #nav.scrolled {
-      background: rgba(246,243,236,.94);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 0;
+    @keyframes navReveal {
+      from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
     }
-    .nav-inner { display: flex; align-items: center; justify-content: space-between; }
-
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(10,22,36,.9);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 100px;
+      padding: 8px 8px 8px 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.05);
+      transition: box-shadow .3s, background .3s;
+    }
+    #nav.scrolled .nav-inner {
+      background: rgba(8,18,30,.96);
+      box-shadow: 0 16px 48px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06);
+    }
     .nav-logo {
       font-family: var(--font-d);
-      font-size: 21px; font-weight: 700;
-      color: rgba(255,255,255,.9); text-decoration: none;
-      display: flex; align-items: center; gap: 7px;
-      transition: color .3s;
+      font-size: 19px; font-weight: 700;
+      color: rgba(255,255,255,.92); text-decoration: none;
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
     }
-    #nav.scrolled .nav-logo { color: var(--text); }
     .logo-mark {
-      width: 9px; height: 9px;
-      background: var(--lime);
-      border-radius: 50%;
-      display: inline-block;
-      box-shadow: 0 0 0 3px rgba(197,242,68,.25);
+      width: 7px; height: 7px;
+      background: var(--lime); border-radius: 50%;
+      box-shadow: 0 0 0 2.5px rgba(197,242,68,.22);
+      flex-shrink: 0; display: inline-block;
     }
-
-    .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+    .nav-links { display: flex; align-items: center; gap: 2px; list-style: none; }
     .nav-links a {
-      font-size: 14px; font-weight: 500;
-      color: rgba(255,255,255,.6); text-decoration: none;
-      transition: color .2s;
+      font-size: 13.5px; font-weight: 500;
+      color: rgba(255,255,255,.48); text-decoration: none;
+      padding: 7px 13px; border-radius: 100px;
+      transition: color .15s, background .15s; white-space: nowrap;
     }
-    .nav-links a:hover { color: rgba(255,255,255,.9); }
-    #nav.scrolled .nav-links a { color: var(--muted); }
-    #nav.scrolled .nav-links a:hover { color: var(--text); }
-
-    .nav-right { display: flex; align-items: center; gap: 14px; }
-
-    .btn-ghost {
-      font-family: var(--font-b); font-size: 14px; font-weight: 600;
-      color: rgba(255,255,255,.6); background: none; border: none; cursor: pointer;
-      text-decoration: none; padding: 10px 4px; transition: color .3s, opacity .2s;
+    .nav-links a:hover { color: rgba(255,255,255,.9); background: rgba(255,255,255,.07); }
+    .nav-links a.active { color: rgba(255,255,255,.82); }
+    .nav-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .btn-nav-ghost {
+      font-family: var(--font-b); font-size: 13.5px; font-weight: 600;
+      color: rgba(255,255,255,.5); text-decoration: none;
+      padding: 8px 14px; border-radius: 100px;
+      transition: color .15s, background .15s; white-space: nowrap;
     }
-    .btn-ghost:hover { color: rgba(255,255,255,.9); }
-    #nav.scrolled .btn-ghost { color: var(--text); }
-
+    .btn-nav-ghost:hover { color: rgba(255,255,255,.88); background: rgba(255,255,255,.07); }
+    .btn-nav-cta {
+      font-family: var(--font-b); font-size: 13px; font-weight: 700;
+      color: #0C1B2A; background: var(--lime); text-decoration: none;
+      padding: 9px 18px; border-radius: 100px;
+      display: inline-flex; align-items: center; gap: 5px;
+      transition: background .15s, transform .15s, box-shadow .15s;
+      white-space: nowrap; letter-spacing: -.1px;
+    }
+    .btn-nav-cta:hover {
+      background: #d0ff60; transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(197,242,68,.38);
+    }
     .btn-pill {
       font-family: var(--font-b); font-size: 13.5px; font-weight: 700;
       color: var(--dark); background: var(--lime);
@@ -126,50 +144,77 @@
       transition: all .2s; letter-spacing: -.1px;
     }
     .btn-pill:hover {
-      background: #D0FF60;
-      transform: translateY(-1px);
+      background: #D0FF60; transform: translateY(-1px);
       box-shadow: 0 8px 24px rgba(197,242,68,.45);
     }
     .btn-pill.lg { font-size: 15.5px; padding: 14px 30px; }
-
-    /* hamburger */
     .hamburger {
-      display: none; flex-direction: column; gap: 5px;
-      cursor: pointer; background: none; border: none; padding: 4px;
+      display: none; align-items: center; justify-content: center;
+      flex-direction: column; gap: 5px;
+      cursor: pointer; border: none;
+      background: rgba(255,255,255,.08);
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      transition: background .15s;
     }
-    .hamburger span { width: 22px; height: 2px; background: rgba(255,255,255,.85); border-radius: 2px; transition: all .3s; }
-    #nav.scrolled .hamburger span { background: var(--text); }
-
-    /* mobile menu backdrop */
+    .hamburger:hover { background: rgba(255,255,255,.14); }
+    .hamburger span {
+      width: 16px; height: 1.5px; background: rgba(255,255,255,.85);
+      border-radius: 2px; display: block;
+      transition: transform .3s cubic-bezier(.16,1,.3,1), opacity .2s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
     .menu-backdrop {
-      display: none;
       position: fixed; inset: 0; z-index: 998;
-      background: rgba(12,27,42,.08);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      background: rgba(4,9,18,.65);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      opacity: 0; pointer-events: none; transition: opacity .35s;
     }
-    .menu-backdrop.open { display: block; }
-
-    /* mobile nav */
+    .menu-backdrop.open { opacity: 1; pointer-events: all; }
     .mobile-nav {
-      display: none;
-      position: fixed; inset: 0; z-index: 999;
-      background: var(--cream);
-      flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+      background: #08172B;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      padding: 90px 36px 48px;
+      display: flex; flex-direction: column;
+      transform: translateY(-100%);
+      transition: transform .45s cubic-bezier(.16,1,.3,1);
     }
-    .mobile-nav.open { display: flex; }
-    .mobile-nav a {
-      font-family: var(--font-d); font-size: 32px; font-weight: 700;
-      color: var(--text); text-decoration: none; transition: opacity .2s;
+    .mobile-nav.open { transform: translateY(0); }
+    .mobile-nav-link {
+      font-family: var(--font-d); font-size: 38px; font-weight: 700;
+      color: rgba(255,255,255,.7); text-decoration: none;
+      padding: 14px 0; display: block;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      transition: color .2s, padding-left .3s cubic-bezier(.16,1,.3,1);
+      letter-spacing: -.6px; line-height: 1.15;
     }
-    .mobile-nav a:hover { opacity: .6; }
-    .mobile-nav .btn-pill { font-size: 15.5px; margin-top: 8px; }
+    .mobile-nav-link:hover { color: var(--lime); padding-left: 10px; }
+    .mobile-nav-cta {
+      margin-top: 36px; align-self: flex-start;
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--font-b); font-size: 15px; font-weight: 700;
+      color: #0C1B2A; background: var(--lime);
+      padding: 13px 26px; border-radius: 100px; text-decoration: none;
+      transition: background .2s, transform .15s; letter-spacing: -.1px;
+    }
+    .mobile-nav-cta:hover { background: #d0ff60; transform: translateY(-1px); }
     .mobile-nav-close {
-      position: absolute; top: 24px; right: 28px;
-      background: none; border: none; cursor: pointer;
-      font-size: 28px; color: var(--text); line-height: 1;
+      position: absolute; top: 20px; right: 20px;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(255,255,255,.07); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,.6); font-size: 18px; line-height: 1;
+      transition: background .15s;
     }
+    .mobile-nav-close:hover { background: rgba(255,255,255,.13); }
     body.menu-open { overflow: hidden; touch-action: none; }
+    @media (max-width: 768px) {
+      #nav { top: 12px; width: calc(100% - 28px); }
+      .nav-links, .nav-right .btn-nav-ghost { display: none; }
+      .hamburger { display: flex; }
+    }
 
     /* ─── COMMON SECTION ──────────────────────────────────────── */
     .eyebrow {
@@ -611,38 +656,30 @@
 
   <!-- NAVIGATION -->
   <nav id="nav">
-    <div class="container">
-      <div class="nav-inner">
-        <a href="/" class="nav-logo">MaidHub<span class="logo-mark"></span></a>
-
-        <ul class="nav-links">
-          <li><a href="/features">Features</a></li>
-          <li><a href="/how-it-works">How it works</a></li>
-          <li><a href="/pricing" class="active">Pricing</a></li>
-        </ul>
-
-        <div class="nav-right">
-          <a href="/login" class="btn-ghost">Log in</a>
-          <a href="/signup" class="btn-pill">Start free trial →</a>
-        </div>
-
-        <button class="hamburger" aria-label="Open menu" id="hamburgerBtn">
-          <span></span><span></span><span></span>
-        </button>
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">MaidHub <span class="logo-mark"></span></a>
+      <ul class="nav-links">
+        <li><a href="/features">Features</a></li>
+        <li><a href="/how-it-works">How it works</a></li>
+        <li><a href="/pricing" class="active">Pricing</a></li>
+      </ul>
+      <div class="nav-right">
+        <a href="/login" class="btn-nav-ghost">Log in</a>
+        <a href="/signup" class="btn-nav-cta">Start free →</a>
       </div>
+      <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </nav>
 
-  <!-- MENU BACKDROP -->
   <div class="menu-backdrop" id="menuBackdrop"></div>
-
-  <!-- MOBILE NAV -->
   <div class="mobile-nav" id="mobileNav">
     <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">✕</button>
-    <a href="/features">Features</a>
-    <a href="/how-it-works">How it works</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/signup" class="btn-pill" style="margin-top:8px;">Start free trial →</a>
+    <a href="/features" class="mobile-nav-link">Features</a>
+    <a href="/how-it-works" class="mobile-nav-link">How it works</a>
+    <a href="/pricing" class="mobile-nav-link">Pricing</a>
+    <a href="/signup" class="mobile-nav-cta">Start free trial →</a>
   </div>
 
 
@@ -1012,27 +1049,24 @@
 
 
   <script>
-    /* ── Sticky nav scroll ───────────────────────────────────── */
+    /* ── Nav ─────────────────────────────────────────────────── */
     const nav = document.getElementById('nav');
-    function updateNav() { nav.classList.toggle('scrolled', window.scrollY > 60); }
+    function updateNav() { nav.classList.toggle('scrolled', window.scrollY > 80); }
     window.addEventListener('scroll', updateNav, { passive: true });
     updateNav();
 
     /* ── Mobile menu ─────────────────────────────────────────── */
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const mobileNav    = document.getElementById('mobileNav');
-    const mobileClose  = document.getElementById('mobileNavClose');
-    const menuBackdrop = document.getElementById('menuBackdrop');
-
+    const hamburgerBtn   = document.getElementById('hamburgerBtn');
+    const mobileNav      = document.getElementById('mobileNav');
+    const mobileClose    = document.getElementById('mobileNavClose');
+    const menuBackdrop   = document.getElementById('menuBackdrop');
     function openMenu() {
-      mobileNav.classList.add('open');
-      menuBackdrop.classList.add('open');
-      document.body.classList.add('menu-open');
+      mobileNav.classList.add('open'); menuBackdrop.classList.add('open');
+      hamburgerBtn.classList.add('open'); document.body.classList.add('menu-open');
     }
     function closeMenu() {
-      mobileNav.classList.remove('open');
-      menuBackdrop.classList.remove('open');
-      document.body.classList.remove('menu-open');
+      mobileNav.classList.remove('open'); menuBackdrop.classList.remove('open');
+      hamburgerBtn.classList.remove('open'); document.body.classList.remove('menu-open');
     }
     hamburgerBtn.addEventListener('click', openMenu);
     mobileClose.addEventListener('click', closeMenu);
