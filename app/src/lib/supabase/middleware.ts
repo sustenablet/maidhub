@@ -4,10 +4,20 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Never auth-gate metadata files (PWA manifest must stay JSON; redirect breaks Add to Home Screen)
+  if (
+    pathname === "/manifest.json" ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
+    pathname.startsWith("/.well-known/")
+  ) {
+    return NextResponse.next({ request });
+  }
+
   const publicPaths = ["/login", "/signup", "/auth/callback", "/auth/confirm", "/forgot-password", "/reset-password"];
   const marketingPaths = [
     "/index.html", "/pricing.html", "/features.html", "/how-it-works.html", "/privacy.html", "/terms.html",
-    "/pricing", "/features", "/how-it-works", "/privacy", "/terms",
+    "/pricing", "/features", "/how-it-works", "/privacy", "/terms", "/contact",
   ];
   const isPublicPath = publicPaths.some((p) => pathname.startsWith(p));
   const isMarketingPath = marketingPaths.includes(pathname);
