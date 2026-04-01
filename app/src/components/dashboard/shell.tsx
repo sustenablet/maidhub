@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -168,12 +169,19 @@ function SidebarContent({
   return (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-4 py-[18px]">
-        <div className="flex h-[28px] w-[28px] items-center justify-center rounded-[4px] bg-[#0071E3]">
-          <span className="text-white font-bold text-[13px] leading-none tracking-tight">M</span>
-        </div>
-        <span className="text-[var(--mh-text)] font-bold text-[15px] tracking-[-0.03em]">MaidHub</span>
-      </div>
+      <Link
+        href="/dashboard"
+        className="flex items-center px-4 py-3 min-w-0 border-b border-transparent hover:opacity-95 transition-opacity"
+      >
+        <Image
+          src="/zentih-logo.png"
+          alt="Zentih"
+          width={612}
+          height={408}
+          priority
+          className="h-11 w-auto max-w-[min(176px,100%)] object-contain object-left"
+        />
+      </Link>
 
       {/* Nav */}
       <div className="flex-1 px-3 py-1 space-y-5 overflow-y-auto">

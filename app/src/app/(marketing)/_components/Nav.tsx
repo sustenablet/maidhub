@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -43,54 +44,42 @@ export default function Nav() {
         }}
       >
         <div
+          className="mkt-nav-inner"
           style={{
             maxWidth: 1200,
             margin: "0 auto",
             padding: "0 48px",
             display: "flex",
             alignItems: "center",
-            height: 68,
+            minHeight: 72,
             gap: 40,
           }}
         >
-          {/* Logo */}
+          {/* Logo — full wordmark, readable size */}
           <Link
             href="/"
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 8,
               textDecoration: "none",
               flexShrink: 0,
+              minWidth: 0,
             }}
           >
-            <div
+            <Image
+              src="/zentih-logo.png"
+              alt="Zentih"
+              width={612}
+              height={408}
+              priority
+              sizes="(max-width: 600px) 200px, 260px"
               style={{
-                width: 32,
-                height: 32,
-                background: "#0071E3",
-                borderRadius: 8,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                height: "clamp(38px, 10vw, 52px)",
+                width: "auto",
+                maxWidth: "min(260px, 58vw)",
+                objectFit: "contain",
               }}
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 2L13 5V11L8 14L3 11V5L8 2Z" fill="white" fillOpacity=".9"/>
-                <circle cx="8" cy="8" r="2.5" fill="white"/>
-              </svg>
-            </div>
-            <span
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: 18,
-                fontWeight: 700,
-                color: "#0C1B2A",
-                letterSpacing: "-.3px",
-              }}
-            >
-              MaidHub
-            </span>
+            />
           </Link>
 
           {/* Desktop nav links */}
@@ -239,7 +228,7 @@ export default function Nav() {
       <div
         style={{
           position: "fixed",
-          top: 68,
+          top: 72,
           left: 0,
           right: 0,
           zIndex: 199,
@@ -305,6 +294,7 @@ export default function Nav() {
 
       <style>{`
         @media (max-width: 900px) {
+          .mkt-nav-inner { padding: 0 20px !important; gap: 16px !important; }
           .mkt-nav-links, .mkt-nav-cta { display: none !important; }
           .mkt-hamburger { display: flex !important; }
         }

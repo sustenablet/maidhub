@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -18,26 +19,28 @@ export default function Footer() {
         >
           {/* Brand */}
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-              <div
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                marginBottom: 16,
+                background: "rgba(255,255,255,.96)",
+                padding: "10px 16px",
+                borderRadius: 10,
+              }}
+            >
+              <Image
+                src="/zentih-logo.png"
+                alt="Zentih"
+                width={612}
+                height={408}
                 style={{
-                  width: 30,
-                  height: 30,
-                  background: "#0071E3",
-                  borderRadius: 7,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  height: 42,
+                  width: "auto",
+                  maxWidth: 220,
+                  objectFit: "contain",
                 }}
-              >
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                  <path d="M8 2L13 5V11L8 14L3 11V5L8 2Z" fill="white" fillOpacity=".9"/>
-                  <circle cx="8" cy="8" r="2.5" fill="white"/>
-                </svg>
-              </div>
-              <span style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 700, color: "#fff" }}>
-                MaidHub
-              </span>
+              />
             </div>
             <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(255,255,255,.5)", maxWidth: 240 }}>
               The back-office OS for solo residential cleaners. Run your business like a pro.
